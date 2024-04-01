@@ -1,0 +1,26 @@
+{
+  "name": "expertshipping/spl",
+  "autoload": {
+    "psr-4": {
+      "ExpertShipping\\Spl\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "hachim-soutra",
+      "email": "hachimsoutra10@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.2|~8.0.0|~8.1.0|~8.2.0|~8.3.0",
+    "illuminate/support": "*"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "ExpertShipping\\Spl\\Providers\\PackageServiceProvider"
+      ],
+      "aliases": {}
+    }
+  }
+}
