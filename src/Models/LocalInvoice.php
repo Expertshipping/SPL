@@ -2,13 +2,13 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Services\TaxService;
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use ExpertShipping\Spl\Models\Traits\Filterable;
 use Illuminate\Support\Facades\View;
 use Laravel\Cashier\Cashier;
 use Symfony\Component\HttpFoundation\Response;

@@ -4,10 +4,10 @@ namespace ExpertShipping\Spl\Models;
 
 use App\Jobs\CalculateDistanceBetweenStoreAndClientForRetailShipments;
 use App\Models\ReferralPayout;
-use App\Traits\HasTrackingLink;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use App\LocalInvoice;
+use ExpertShipping\Spl\Models\Traits\HasTrackingLink;
 use Ramsey\Uuid\Uuid;
 
 class Shipment extends Model

@@ -2,8 +2,8 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Traits\SparkConfiguration\ManagesAppDetails;
-use App\Traits\SparkConfiguration\ManagesAppOptions;
+use ExpertShipping\Spl\Models\Traits\SparkConfiguration\ManagesAppDetails;
+use ExpertShipping\Spl\Models\Traits\SparkConfiguration\ManagesAppOptions;
 
 class Spark
 {

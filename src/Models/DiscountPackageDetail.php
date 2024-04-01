@@ -2,11 +2,9 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Jobs\ProcessPackageDetailCreated;
-use App\Traits\PackageDiscountablePayloadBuilder;
+use ExpertShipping\Spl\Models\Traits\PackageDiscountablePayloadBuilder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class DiscountPackageDetail extends Model
 {
