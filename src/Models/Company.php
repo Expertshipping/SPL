@@ -2,7 +2,6 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Enum\CompanyStatusEnum;
 use App\Enum\PlanSubscriptionStatusEnum;
 use App\Mailbox\MailboxConversation;
 use App\Mailbox\MailboxEmail;
@@ -14,6 +13,7 @@ use Ramsey\Uuid\Uuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use App\LocalInvoice;
+use ExpertShipping\Spl\Enum\CompanyStatusEnum;
 use Illuminate\Support\Str;
 
 class Company extends Model
@@ -695,5 +695,43 @@ class Company extends Model
     public function planSubscriptions(): HasMany
     {
         return $this->hasMany(PlanSubscription::class);
+    }
+
+    public function getStatusColorAttribute()
+    {
+        $statusColors = [
+            CompanyStatusEnum::ACTIVE->value => 'success',
+            CompanyStatusEnum::SUSPENDED->value => 'warning',
+        ];
+
+        return $statusColors[$this->status] ?? 'error';
+    }
+
+    public function getStatusTextAttribute()
+    {
+        $statusTexts = [
+            CompanyStatusEnum::ACTIVE->value => 'Active',
+            CompanyStatusEnum::SUSPENDED->value => 'Suspended',
+        ];
+
+        return $statusTexts[$this->status] ?? 'Refused';
+    }
+
+
+
+    public function scopeFilterBySearch($query, $term)
+    {
+        $query->where(function ($query) use ($term) {
+            $query->when($term, function ($query, $term) {
+                collect(str_getcsv($term, ' ', '"'))->filter()->each(function ($term) use ($query) {
+                    $term = $term . "%";
+                    $query->where('name', 'like', $term)
+                        ->orWhere('phone', 'like', $term)
+                        ->orWhereHas('users', function ($query) use ($term) {
+                            $query->where('name', 'like', '%' . $term . '%');
+                        });;
+                });
+            });
+        });
     }
 }
