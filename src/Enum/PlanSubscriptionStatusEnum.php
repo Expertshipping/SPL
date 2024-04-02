@@ -1,0 +1,21 @@
+<?php
+
+namespace ExpertShipping\Spl\Enum;
+
+enum PlanSubscriptionStatusEnum: string
+{
+        // SUBSCRIPTION ASSIGNED TO USER FROM ADMIN PANEL BUT NOT PAYED YET
+    case CREATED = 'CREATED';
+
+        // CURRENT USED SUBSCRIPTION
+    case IN_USE = 'IN_USE';
+
+        // SUBSCRIPTION PAYMENT DONE BUT NOT IN USE YET
+    case PURCHASED = 'PURCHASED';
+
+        // SUBSCRIPTION FINISHED DUE ARRIVAL END TIME
+    case FINISHED = 'FINISHED';
+
+        // SUBSCRIPTION CANCELED BY CUSTOMER
+    case CANCELED = 'CANCELED';
+}
