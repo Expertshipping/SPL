@@ -704,7 +704,7 @@ class Company extends Model
             CompanyStatusEnum::SUSPENDED->value => 'warning',
         ];
 
-        return $statusColors[$this->status] ?? 'error';
+        return $statusColors[$this->status?->value] ?? 'error';
     }
 
     public function getStatusTextAttribute()
@@ -714,7 +714,7 @@ class Company extends Model
             CompanyStatusEnum::SUSPENDED->value => 'Suspended',
         ];
 
-        return $statusTexts[$this->status] ?? 'Refused';
+        return $statusTexts[$this->status?->value] ?? 'Refused';
     }
 
 
