@@ -745,7 +745,7 @@ class Company extends Model
     {
         $query->when($discountPackage, function ($query, $discountPackage) {
             $query->whereHas('discountPackage', function ($query) use ($discountPackage) {
-                $query->where('name', $discountPackage);
+                $query->where('id', $discountPackage);
             });
         });
     }
