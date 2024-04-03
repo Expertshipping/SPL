@@ -2,7 +2,7 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Enum\PlanSubscriptionStatusEnum;
+use ExpertShipping\Spl\Enum\PlanSubscriptionStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

@@ -2,8 +2,8 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Enum\PlanPackageStatusEnum;
-use App\Enum\PlanPackageTypeEnum;
+use ExpertShipping\Spl\Enum\PlanPackageStatusEnum;
+use ExpertShipping\Spl\Enum\PlanPackageTypeEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

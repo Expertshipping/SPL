@@ -2,7 +2,6 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Enum\PlanSubscriptionStatusEnum;
 use App\Mailbox\MailboxConversation;
 use App\Mailbox\MailboxEmail;
 use App\Mailbox\MailboxFolder;
@@ -12,8 +11,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use App\LocalInvoice;
 use ExpertShipping\Spl\Enum\CompanyStatusEnum;
+use ExpertShipping\Spl\Enum\PlanSubscriptionStatusEnum;
+use ExpertShipping\Spl\Models\LocalInvoice as ModelsLocalInvoice;
 use Illuminate\Support\Str;
 
 class Company extends Model
@@ -215,7 +215,7 @@ class Company extends Model
 
     public function sales()
     {
-        return LocalInvoice::where('company_id', $this->id);
+        return ModelsLocalInvoice::where('company_id', $this->id);
     }
 
     public function monthlyTargets()

@@ -2,7 +2,7 @@
 
 namespace ExpertShipping\Spl\Models\Traits;
 
-use App\
+use ExpertShipping\Spl\Models\User;
 
 trait BeforePolicies
 {
