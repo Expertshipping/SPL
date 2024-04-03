@@ -712,6 +712,7 @@ class Company extends Model
         $statusTexts = [
             CompanyStatusEnum::ACTIVE->value => 'Active',
             CompanyStatusEnum::SUSPENDED->value => 'Suspended',
+            CompanyStatusEnum::PENDING->value => 'Waiting for validation',
         ];
 
         return $statusTexts[$this->status?->value] ?? 'Refused';
@@ -730,6 +731,28 @@ class Company extends Model
                         });;
                 });
             });
+        });
+    }
+
+    public function scopeFilterByBillingOption($query, $billingOption)
+    {
+        $query->when($billingOption, function ($query, $billingOption) {
+            $query->where('instant_payment', $billingOption);
+        });
+    }
+
+    public function scopeFilterByDiscountPackage($query, $discountPackage)
+    {
+        $query->when($discountPackage, function ($query, $discountPackage) {
+            $query->whereHas('discountPackage', function ($query) use ($discountPackage) {
+                $query->where('name', $discountPackage);
+            });
+        });
+    }
+    public function scopeFilterByStatus($query, $status)
+    {
+        $query->when($status, function ($query, $status) {
+            $query->where('status', $status);
         });
     }
 }
