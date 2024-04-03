@@ -717,8 +717,6 @@ class Company extends Model
         return $statusTexts[$this->status?->value] ?? 'Refused';
     }
 
-
-
     public function scopeFilterBySearch($query, $term)
     {
         $query->where(function ($query) use ($term) {
