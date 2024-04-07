@@ -755,4 +755,9 @@ class Company extends Model
             $query->where('status', $status);
         });
     }
+
+    public function unblockedRequest()
+    {
+        return $this->hasMany(unblockedRequest::class);
+    }
 }
