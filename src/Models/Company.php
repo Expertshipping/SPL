@@ -756,7 +756,7 @@ class Company extends Model
         });
     }
 
-    public function unblockedRequest()
+    public function unblockedRequests()
     {
         return $this->hasMany(unblockedRequest::class);
     }
