@@ -9,7 +9,6 @@ use App\Retail\AgentCommission;
 use App\Retail\AgentWarning;
 use App\Services\TimesheetService;
 use App\Services\UserIpAddress;
-use Carbon\Carbon;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Contracts\Translation\HasLocalePreference;
@@ -17,7 +16,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Validation\ValidationException;
@@ -33,7 +31,6 @@ use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Cashier\Billable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 
@@ -46,13 +43,10 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     protected $connection = 'mysql';
 
-    //    use Searchable;
-    // use HasRoles;
     use HasRoles;
     use InteractsWithMedia;
     use SoftDeletes;
     use HasApiTokens;
-    use Billable;
     use Notifiable;
 
 
