@@ -10,6 +10,8 @@ enum CompanyStatusEnum: string
     case SUSPENDED = 'SUSPENDED';
     case DECLINED = 'DECLINED';
     case BLOCKED = 'BLOCKED';
+    case SIGNUP = 'SIGNUP'; //INFO: (hs) user signup in second step
+    case EMAIL_VERIFICATION = 'EMAIL_VERIFICATION'; //INFO: (hs) user signup but email not verified
 
     public static function toSelectArray()
     {
