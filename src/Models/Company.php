@@ -713,6 +713,8 @@ class Company extends Model
             CompanyStatusEnum::ACTIVE->value => 'Active',
             CompanyStatusEnum::SUSPENDED->value => 'Suspended',
             CompanyStatusEnum::PENDING->value => 'Waiting for validation',
+            CompanyStatusEnum::SIGNUP->value => 'Signup',
+            CompanyStatusEnum::EMAIL_VERIFICATION->value => 'Email verification',
         ];
 
         return $statusTexts[$this->status?->value] ?? 'Refused';
