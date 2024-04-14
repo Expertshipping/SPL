@@ -11,13 +11,15 @@ class InviteCreatedUser extends Notification
 {
     use Queueable;
 
+    protected $activationUrl;
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($activationUrl)
     {
+        $this->activationUrl = $activationUrl;
         $this->queue = 'notifications';
     }
 
@@ -41,9 +43,9 @@ class InviteCreatedUser extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('Your manager invited your to activate your account.')
-                    ->action('Activate my Account', url("/activate-account/{$notifiable->activate_account_token}"))
-                    ->line('Thank you!');
+            ->line('Your manager invited your to activate your account.')
+            ->action('Activate my Account', $this->activationUrl ?: url("/activate-account/{$notifiable->activate_account_token}"))
+            ->line('Thank you!');
     }
 
     /**
