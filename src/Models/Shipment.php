@@ -15,8 +15,26 @@ class Shipment extends Model
     use HasTrackingLink;
     const DRAFT = 'draft';
     const CANCELLED = 'cancelled';
-    const BASE_PRICE_TYPES = ['BasePrice', 'Base Price', 'TransportationCharges', 'Transportation Charges', 'TotalBaseCharge', 'base', 'Freight Charge'];
+    const BASE_PRICE_TYPES = [
+        'BasePrice',
+        'Base Price',
+        'TransportationCharges',
+        'Transportation Charges',
+        'TotalBaseCharge',
+        'base',
+        'Freight Charge'
+    ];
     const START_DATE_WHEN_COMMENTS_ARE_REQUIRED = '2023-08-07';
+
+    const STATUSES = [
+        'in_progress' => 'Ready',
+        'cancelled' => 'Cancelled',
+        'delivered' => 'Delivered',
+        'in_transit' => 'In transit',
+        'pickedup' => 'Picked up',
+        'exception' => 'Exception',
+        'returned' => 'Returned',
+    ];
 
     public $fillable = [
         'user_id',
