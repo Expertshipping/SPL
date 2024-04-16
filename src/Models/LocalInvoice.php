@@ -12,7 +12,6 @@ use ExpertShipping\Spl\Models\Traits\Filterable;
 use Illuminate\Support\Facades\View;
 use Laravel\Cashier\Cashier;
 use Symfony\Component\HttpFoundation\Response;
-use Whitecube\NovaFlexibleContent\Value\FlexibleCast;
 use Illuminate\Support\Str;
 
 class LocalInvoice extends Model
@@ -27,7 +26,7 @@ class LocalInvoice extends Model
         'paid_at' => 'date',
         'refunded_at' => 'date',
         'canceled_at' => 'date',
-        'surcharge_details' => FlexibleCast::class,
+        'surcharge_details' => 'array',
         'metadata' => 'array',
         'old_data' => 'boolean',
         'payment_validated' => 'boolean',
@@ -348,7 +347,7 @@ class LocalInvoice extends Model
      */
     public function view(array $data)
     {
-        return View::make('invoices.local-invoice', array_merge($data, [
+        return View::make('spl::invoices.local-invoice', array_merge($data, [
             'invoice' => $this,
             'invoiceable' => $this->invoiceable_type === null ? null : $this->invoiceable,
             'owner' => $this->user,

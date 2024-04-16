@@ -18,5 +18,6 @@ final class PackageServiceProvider extends ServiceProvider
             return new SearchSelectService();
         });
         $this->app->bind('SearchSelect', SearchSelectFacade::class);
+        $this->loadViewsFrom(__DIR__.'/../Views', 'spl');
     }
 }
