@@ -3,7 +3,7 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Services\TaxService;
+use ExpertShipping\Spl\Models\Services\TaxService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;

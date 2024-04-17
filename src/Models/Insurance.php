@@ -2,11 +2,11 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Services\InsuranceService;
+use ExpertShipping\Spl\Models\Services\InsuranceService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
-use App\LocalInvoice;
+use ExpertShipping\Spl\Models\LocalInvoice;
 use Illuminate\Support\Str;
 
 class Insurance extends Model

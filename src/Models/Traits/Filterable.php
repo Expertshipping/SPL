@@ -2,7 +2,7 @@
 
 namespace ExpertShipping\Spl\Models\Traits;
 
-use App\Utilities\FilterBuilder;
+use ExpertShipping\Spl\Models\Utilities\FilterBuilder;
 
 trait Filterable
 {

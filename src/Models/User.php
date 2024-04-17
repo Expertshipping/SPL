@@ -2,13 +2,13 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\LocalInvoice as AppLocalInvoice;
-use App\Notifications\EmailConfirmation;
-use App\Notifications\PasswordReset;
-use App\Retail\AgentCommission;
-use App\Retail\AgentWarning;
-use App\Services\TimesheetService;
-use App\Services\UserIpAddress;
+use ExpertShipping\Spl\Models\LocalInvoice as AppLocalInvoice;
+use ExpertShipping\Spl\Models\Notifications\EmailConfirmation;
+use ExpertShipping\Spl\Models\Notifications\PasswordReset;
+use ExpertShipping\Spl\Models\Retail\AgentCommission;
+use ExpertShipping\Spl\Models\Retail\AgentWarning;
+use ExpertShipping\Spl\Models\Services\TimesheetService;
+use ExpertShipping\Spl\Models\Services\UserIpAddress;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Contracts\Translation\HasLocalePreference;

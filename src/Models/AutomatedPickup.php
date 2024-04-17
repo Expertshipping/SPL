@@ -2,7 +2,7 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Jobs\CreatePickupWithDeliveryService;
+use ExpertShipping\Spl\Models\Jobs\CreatePickupWithDeliveryService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;

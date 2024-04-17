@@ -2,8 +2,8 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Classes\RocketShipIt;
-use App\Mail\VoidPickUpMail;
+use ExpertShipping\Spl\Models\Classes\RocketShipIt;
+use ExpertShipping\Spl\Models\Mail\VoidPickUpMail;
 use Cartalyst\Sentinel\Laravel\Facades\Sentinel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Mail;

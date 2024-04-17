@@ -5,7 +5,7 @@ namespace ExpertShipping\Spl\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Services\TaxService;
+use ExpertShipping\Spl\Models\Services\TaxService;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use ExpertShipping\Spl\Models\Traits\Filterable;
