@@ -2,8 +2,8 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Nova\Actions\PartialRefund;
-use App\Services\InsuranceService;
+use ExpertShipping\Spl\Models\Nova\Actions\PartialRefund;
+use ExpertShipping\Spl\Models\Services\InsuranceService;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;

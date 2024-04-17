@@ -2,10 +2,10 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Mailbox\MailboxConversation;
-use App\Mailbox\MailboxEmail;
-use App\Mailbox\MailboxFolder;
-use App\Mailbox\Services\MailboxImapConnection;
+use ExpertShipping\Spl\Models\Mailbox\MailboxConversation;
+use ExpertShipping\Spl\Models\Mailbox\MailboxEmail;
+use ExpertShipping\Spl\Models\Mailbox\MailboxFolder;
+use ExpertShipping\Spl\Models\Mailbox\Services\MailboxImapConnection;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Ramsey\Uuid\Uuid;

@@ -3,7 +3,7 @@
 namespace ExpertShipping\Spl\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\LocalInvoice;
+use ExpertShipping\Spl\Models\LocalInvoice;
 use Ramsey\Uuid\Uuid;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;

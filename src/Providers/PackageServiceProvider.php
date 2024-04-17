@@ -10,6 +10,7 @@ final class PackageServiceProvider extends ServiceProvider
 {
     public function boot()
     {
+        $this->loadRoutesFrom(__DIR__.'/../Routes/api.php');
     }
 
     public function register()
@@ -17,6 +18,11 @@ final class PackageServiceProvider extends ServiceProvider
         $this->app->bind('SearchSelect', function () {
             return new SearchSelectService();
         });
+
         $this->app->bind('SearchSelect', SearchSelectFacade::class);
+
+        $this->loadViewsFrom(__DIR__.'/../Views', 'spl');
+
+        $this->mergeConfigFrom(__DIR__.'/../Config/spl.php', 'spl');
     }
 }

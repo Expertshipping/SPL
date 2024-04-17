@@ -2,7 +2,7 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Http\Requests\RatesRequest;
+use ExpertShipping\Spl\Models\Http\Requests\RatesRequest;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

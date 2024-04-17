@@ -2,11 +2,11 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Jobs\CalculateDistanceBetweenStoreAndClientForRetailShipments;
-use App\Models\ReferralPayout;
+use ExpertShipping\Spl\Models\Jobs\CalculateDistanceBetweenStoreAndClientForRetailShipments;
+use ExpertShipping\Spl\Models\Models\ReferralPayout;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
-use App\LocalInvoice;
+use ExpertShipping\Spl\Models\LocalInvoice;
 use ExpertShipping\Spl\Models\Traits\HasTrackingLink;
 use Ramsey\Uuid\Uuid;
 
