@@ -515,4 +515,8 @@ class Shipment extends Model
 
         return optional($countries->where('code', $this->to_country)->first())->sub_region;
     }
+
+    public function getService(){
+        return \ExpertShipping\Spl\Models\Service::where('code', $this->service_code)->first();
+    }
 }

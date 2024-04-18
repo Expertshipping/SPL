@@ -19,7 +19,8 @@
     "spatie/laravel-permission": "^5.5.0",
     "spatie/laravel-translatable": "^6.5",
     "laravel/cashier": "^14.0",
-    "barryvdh/laravel-dompdf": "^2.0.1"
+    "barryvdh/laravel-dompdf": "^2.0.1",
+    "spatie/browsershot": "dev-main"
   },
   "extra": {
     "laravel": {

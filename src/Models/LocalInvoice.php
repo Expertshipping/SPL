@@ -5,7 +5,7 @@ namespace ExpertShipping\Spl\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use ExpertShipping\Spl\Models\Services\TaxService;
+use ExpertShipping\Spl\Services\TaxService;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use ExpertShipping\Spl\Models\Traits\Filterable;
@@ -296,7 +296,7 @@ class LocalInvoice extends Model
      */
     public function downloadAs($filename, array $data)
     {
-        // return $this->view($data);
+        return $this->view($data);
         return new Response($this->pdf($data), 200, [
             'Content-Description' => 'File Transfer',
             'Content-Disposition' => 'attachment; filename="' . $filename . '.pdf"',
@@ -347,7 +347,7 @@ class LocalInvoice extends Model
      */
     public function view(array $data)
     {
-        return View::make('spl::invoices.local-invoice', array_merge($data, [
+        return View::make('spl::invoices.snapshot.page-one', array_merge($data, [
             'invoice' => $this,
             'invoiceable' => $this->invoiceable_type === null ? null : $this->invoiceable,
             'owner' => $this->user,
