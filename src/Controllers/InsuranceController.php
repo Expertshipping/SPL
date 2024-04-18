@@ -5,6 +5,7 @@ namespace ExpertShipping\Spl\Controllers;
 use ExpertShipping\Spl\Models\Insurance;
 use ExpertShipping\Spl\Models\User;
 use ExpertShipping\Spl\Notifications\SendClaimLink;
+use ExpertShipping\Spl\Services\InsuranceService;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Routing\Controller;
@@ -37,11 +38,11 @@ class InsuranceController extends Controller
         ], 201);
     }
 
-    public function destroy($id){
+    public function deleteClaim($id, InsuranceService $insuranceService){
 
         $insurance = Insurance::findOrFail($id);
 
-        if($this->insuranceService->voidTransactionForInsurance($insurance)){
+        if($insuranceService->voidTransactionForInsurance($insurance)){
             if($insurance->invoice){
                 $insurance->invoice->delete();
             }
