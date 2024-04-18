@@ -20,7 +20,7 @@
     "spatie/laravel-translatable": "^6.5",
     "laravel/cashier": "^14.0",
     "barryvdh/laravel-dompdf": "^2.0.1",
-    "spatie/browsershot": "dev-main"
+    "spatie/browsershot": "^4.0.2"
   },
   "extra": {
     "laravel": {
