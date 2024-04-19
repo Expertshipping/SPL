@@ -5,6 +5,7 @@ namespace ExpertShipping\Spl\Models;
 use ExpertShipping\Spl\Models\Http\Requests\RatesRequest;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
 class Quote extends Model
 {
@@ -24,7 +25,7 @@ class Quote extends Model
     ];
 
 
-    public static function createQuoteFromRateRequest(RatesRequest $request)
+    public static function createQuoteFromRateRequest(Request $request)
     {
         return self::create([
             'user_id'           => $request->user()->id,

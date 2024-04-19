@@ -143,14 +143,58 @@
             left: 0;
             right: 0;
             margin-top: -60px;
+            width: 100%;
         }
 
-        .page-1 .home-footer{
+        .page-1 .footer-1{
             position: fixed;
             bottom: 0;
             left: 0;
+            width: 100%;
         }
 
+        .page-3 .footer-3{
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+        }
+
+        .text-open-sans-6{
+            font-family: "Open Sans", sans-serif;
+            font-size: 6px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+        }
+
+        .text-open-sans-11{
+            font-family: "Open Sans", sans-serif;
+            font-size: 11px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+        }
+
+        .text-open-sans-8{
+            font-family: "Open Sans", sans-serif;
+            font-size: 8px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+        }
+
+        .text-secondary{
+            color: #8392AB;
+        }
+
+        .text-default{
+            color: #172B4D;
+        }
+
+        .text-uppercase{
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
@@ -158,7 +202,7 @@
     <table width="100%">
         <tr>
             <td>
-                <img src="{{ asset('domains/'. request()->getHost() .'/logo-color.png') }}" alt="" width="147px">
+                <img src="{{ public_path('domains/'. request()->getHost() .'/logo-color.png') }}" alt="" width="147px">
             </td>
             <td align="right">
                 <div class="invoice-number">
@@ -168,9 +212,6 @@
         </tr>
     </table>
 </div>
-@include('spl::invoices.snapshot.page-one')
-<div class="page-break"></div>
-@include('spl::invoices.snapshot.page-two')
-
+@yield('content')
 </body>
 </html>

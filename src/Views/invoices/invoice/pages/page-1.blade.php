@@ -37,7 +37,7 @@
                         </td>
                         <td align="right">
                             <div class="invoice-date-details">
-                                <strong>{{ $invoice->total }}</strong>
+                                <strong>{{ SplMoney::format($invoice->total_paid_amount) }}</strong>
                             </div>
                         </td>
                     </tr>
@@ -79,40 +79,38 @@
 
     <hr>
 
-    <table width="100%">
-        <tr>
-            <td width="130px">
-                <div class="billing-information-title">
-                    {{ __('Credit Card *****1234') }} :
-                </div>
-            </td>
-            <td>
-                <div class="billing-information-title">
-                    <strong>12.0$ USD</strong>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td width="130px">
-                <div class="billing-information-title">
-                    {{ __('Solde') }} :
-                </div>
-            </td>
-            <td>
-                <div class="billing-information-title">
-                    <strong>100.0$ USD</strong>
-                </div>
-            </td>
-        </tr>
-    </table>
-
-    <br>
+{{--    <table width="100%">--}}
+{{--        <tr>--}}
+{{--            <td width="130px">--}}
+{{--                <div class="billing-information-title">--}}
+{{--                    {{ __('Credit Card *****1234') }} :--}}
+{{--                </div>--}}
+{{--            </td>--}}
+{{--            <td>--}}
+{{--                <div class="billing-information-title">--}}
+{{--                    <strong>12.0$ USD</strong>--}}
+{{--                </div>--}}
+{{--            </td>--}}
+{{--        </tr>--}}
+{{--        <tr>--}}
+{{--            <td width="130px">--}}
+{{--                <div class="billing-information-title">--}}
+{{--                    {{ __('Solde') }} :--}}
+{{--                </div>--}}
+{{--            </td>--}}
+{{--            <td>--}}
+{{--                <div class="billing-information-title">--}}
+{{--                    <strong>100.0$ USD</strong>--}}
+{{--                </div>--}}
+{{--            </td>--}}
+{{--        </tr>--}}
+{{--    </table>--}}
+{{--    <br>--}}
 
     <table width="100%" class="table-1">
         <tr>
             <th><div class="text-white">{{ __('# of Shipments') }}</div></th>
             <th><div class="text-white">{{ __('Freight Charges') }}</div></th>
-            <th><div class="text-white">{{ __('Fuel Surcharge') }}</div></th>
             <th><div class="text-white">{{ __('Fuel Charges') }}</div></th>
             <th><div class="text-white">{{ __('Accessorials') }}</div></th>
             <th><div class="text-white">{{ __('Taxes') }}</div></th>
@@ -120,11 +118,10 @@
 
         <tr>
             <td>{{ $invoice->details->count() }}</td>
-            <td>{{ $invoice->details->count() }}</td>
-            <td>{{ $invoice->details->count() }}</td>
-            <td>{{ $invoice->details->count() }}</td>
-            <td>{{ $invoice->details->count() }}</td>
-            <td>{{ $invoice->details->count() }}</td>
+            <td>{{ SplMoney::format($invoice->total_freight_charges) }}</td>
+            <td>{{ SplMoney::format($invoice->total_fuel_charges) }}</td>
+            <td>N/A</td>
+            <td>{{ SplMoney::format($invoice->total_taxes_charges) }}</td>
         </tr>
     </table>
 
@@ -133,23 +130,23 @@
     <table width="100%">
         <tr>
             <td></td>
-            <td align="right" width="200px">
+            <td align="right" width="220px">
                 <table>
                     <tr>
-                        <td width="80px">
+                        <td width="100px">
                             <div class="billing-information-title">
                                 {{ __('Subtotal') }} :
                             </div>
                         </td>
                         <td align="right" width="120px">
                             <div class="billing-information-title text-right">
-                                <strong>{{ $invoice->total }}</strong>
+                                <strong>{{ SplMoney::format($detailsTaxes->preTax) }}</strong>
                             </div>
                         </td>
                     </tr>
 
                     <tr>
-                        <td width="80px">
+                        <td width="100px">
                             <div class="billing-information-title">
                                 {{ __('Tax Breakdown') }} :
                             </div>
@@ -158,79 +155,79 @@
                     </tr>
 
                     <tr>
-                        <td width="80px">
+                        <td width="100px">
                             <div class="billing-information-title">
                                 {{ __('Taxes') }} :
                             </div>
                         </td>
                         <td align="right" width="120px">
                             <div class="billing-information-title text-right">
-                                <strong>{{ $invoice->total }}</strong>
+                                <strong>{{ SplMoney::format($invoice->total - $detailsTaxes->preTax) }}</strong>
                             </div>
                         </td>
                     </tr>
 
                     <tr>
-                        <td width="80px">
+                        <td width="100px">
                             <div class="billing-information-title">
                                 {{ __('Total GST') }} :
                             </div>
                         </td>
                         <td align="right" width="120px">
                             <div class="billing-information-title text-right">
-                                <strong>{{ $invoice->total }}</strong>
+                                <strong>{{ SplMoney::format($detailsTaxes->taxes['GST']) }}</strong>
                             </div>
                         </td>
                     </tr>
 
                     <tr>
-                        <td width="80px">
-                            <div class="billing-information-title">
-                                {{ __('Total HST') }} :
-                            </div>
-                        </td>
-                        <td align="right" width="120px">
-                            <div class="billing-information-title text-right">
-                                <strong>{{ $invoice->total }}</strong>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td width="80px">
+                        <td width="100px">
                             <div class="billing-information-title">
                                 {{ __('Total PST') }} :
                             </div>
                         </td>
                         <td align="right" width="120px">
                             <div class="billing-information-title text-right">
-                                <strong>{{ $invoice->total }}</strong>
+                                <strong>{{ SplMoney::format($detailsTaxes->taxes['PST']) }}</strong>
                             </div>
                         </td>
                     </tr>
 
                     <tr>
-                        <td width="80px">
+                        <td width="100px">
                             <div class="billing-information-title">
                                 {{ __('Total QST') }} :
                             </div>
                         </td>
                         <td align="right" width="120px">
                             <div class="billing-information-title text-right">
-                                <strong>{{ $invoice->total }}</strong>
+                                <strong>{{ SplMoney::format($detailsTaxes->taxes['QST']) }}</strong>
                             </div>
                         </td>
                     </tr>
 
                     <tr>
-                        <td width="80px">
+                        <td width="100px">
+                            <div class="billing-information-title">
+                                {{ __('Total HST') }} :
+                            </div>
+                        </td>
+                        <td align="right" width="120px">
+                            <div class="billing-information-title text-right">
+                                <strong>{{ SplMoney::format($detailsTaxes->taxes['HST']) }}</strong>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td width="100px">
                             <div class="billing-information-title">
                                 {{ __('Paid Amount') }} :
                             </div>
                         </td>
                         <td align="right" width="120px">
                             <div class="billing-information-title text-right">
-                                <strong>{{ $invoice->total }}</strong>
+                                <strong>{{ SplMoney::format($invoice->total_paid_amount) }}</strong>
                             </div>
                         </td>
                     </tr>
@@ -244,17 +241,17 @@
     <table width="100%">
         <tr>
             <td></td>
-            <td align="right" width="200px">
+            <td align="right" width="220px">
                 <table>
                     <tr>
-                        <td width="80px">
+                        <td width="100px">
                             <div class="billing-information-title">
-                                {{ __('Subtotal') }} :
+                                {{ __('Total Amount Due') }} :
                             </div>
                         </td>
                         <td align="right" width="120px">
                             <div class="billing-information-title text-right">
-                                <strong>{{ $invoice->total }}</strong>
+                                <strong>{{ SplMoney::format($invoice->total) }}</strong>
                             </div>
                         </td>
                     </tr>
@@ -263,7 +260,7 @@
         </tr>
     </table>
 
-    <div class="home-footer">
+    <div class="footer-1">
         <hr>
 
         <div class="billing-information-title">

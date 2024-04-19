@@ -333,25 +333,17 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         $total = str_replace(',', '', $total);
         $total = str_replace(' ', '', $total);
 
-        if ($this->company->instant_payment) {
-            $invoice = null;
-        } else {
-            $invoice = $this->localInvoices()
-                ->whereDoesntHave('bulkInvoices')
-                ->whereNull('closed_at')
-                ->whereNull('paid_at')
-                ->whereDoesntHave('details', function ($query) {
-                    $query->whereNotNull('meta_data->payment_intent_id');
-                })
-                ->orderByDesc('id')
-                ->first();
-        }
+        $invoice = $this->localInvoices()
+            ->whereDoesntHave('bulkInvoices')
+            ->whereNull('closed_at')
+            ->orderByDesc('id')
+            ->first();
 
         if (!$invoice) {
             $invoice = $this->localInvoices()->create([
                 'total' => Money::normalizeAmount($total),
                 'company_id' => $this->company_id,
-                'closed_at' => $this->company->instant_payment ? now() : null,
+                'closed_at' => null,
             ]);
         }
 

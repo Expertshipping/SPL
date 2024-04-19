@@ -27,7 +27,9 @@
       "providers": [
         "ExpertShipping\\Spl\\Providers\\PackageServiceProvider"
       ],
-      "aliases": {}
+      "aliases": {
+        "SplMoney": "ExpertShipping\\Spl\\Facades\\SplMoney"
+      }
     }
   },
   "license": "MIT",

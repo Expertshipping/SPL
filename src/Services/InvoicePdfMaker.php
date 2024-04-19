@@ -7,6 +7,7 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 use ExpertShipping\Spl\Models\LocalInvoice;
 use Illuminate\Support\Facades\View;
+use Spatie\Browsershot\Browsershot;
 use Symfony\Component\HttpFoundation\Response;
 
 class InvoicePdfMaker
@@ -28,40 +29,24 @@ class InvoicePdfMaker
 
     protected function getFileName()
     {
-        return 'invoice-' . $this->invoice->id;
+        return 'invoice-' . $this->invoice->company->invoice_printing_option . '-'. $this->invoice->id;
     }
 
     protected function pdf()
     {
-//        if (!defined('DOMPDF_ENABLE_AUTOLOAD')) {
-//            define('DOMPDF_ENABLE_AUTOLOAD', false);
-//            define('DOMPDF_ENABLE_PHP', true);
-//        }
-//
-//        $options = new Options();
-//        $options->set('isRemoteEnabled', true);
-//        $pdf = new Dompdf($options);
-//
-//        $context = stream_context_create([
-//            'ssl' => [
-//                'verify_peer' => false,
-//                'verify_peer_name' => false,
-//                'allow_self_signed' => true
-//            ]
-//        ]);
-//
-//        $pdf->setHttpContext($context);
-//
-//        $pdf->setPaper('a4');
-//        $pdf->loadHtml($this->view()->render());
-//        $pdf->render();
-//
-//        return $pdf->output();
-
-        $pdf = Pdf::loadView('spl::invoices.snapshot.snapshot', [
+        $pdf = Pdf::loadView('spl::invoices.invoice.invoice', [
             'invoice' => $this->invoice,
+            'detailsTaxes' => $this->invoice->details_taxes,
         ]);
 
         return $pdf->download();
+    }
+
+    protected function view()
+    {
+        return View::make('spl::invoices.invoice.invoice', [
+            'invoice' => $this->invoice,
+            'detailsTaxes' => $this->invoice->details_taxes,
+        ]);
     }
 }

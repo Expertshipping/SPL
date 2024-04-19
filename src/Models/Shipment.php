@@ -6,7 +6,6 @@ use ExpertShipping\Spl\Models\Jobs\CalculateDistanceBetweenStoreAndClientForReta
 use ExpertShipping\Spl\Models\Models\ReferralPayout;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
-use ExpertShipping\Spl\Models\LocalInvoice;
 use ExpertShipping\Spl\Models\Traits\HasTrackingLink;
 use Ramsey\Uuid\Uuid;
 
@@ -34,6 +33,47 @@ class Shipment extends Model
         'pickedup' => 'Picked up',
         'exception' => 'Exception',
         'returned' => 'Returned',
+    ];
+
+    const FREIGHT_CHARGES = [
+        'BasePrice',
+        'Base Price',
+        'TransportationCharges',
+        'TotalBaseCharge',
+        'base',
+        'Transportation Charges',
+        'Freight Charge',
+    ];
+
+    const FUEL_CHARGES = [
+        'Surcharge-Fuel',
+        'fuel',
+        'Fuel Surcharge',
+        'fuel_surcharge',
+        'FUEL SURCHARGE',
+        'Fuel charge',
+    ];
+
+    const TAXES_CHARGES = [
+        'Tax-PSTQST',
+        'Tax-HST',
+        'Tax-GST',
+        'Tax-QST',
+        'Tax-PST',
+        'HST',
+        'GST',
+        'QST',
+        'PST',
+        'TaxCharges-HST',
+        'TaxCharges-GST',
+        'TaxCharges-QST',
+        'TaxCharges-PST',
+        'hst',
+        'gst',
+        'PEHST',
+        'pstqst',
+        'tax',
+        'PSTQST',
     ];
 
     public $fillable = [
@@ -518,5 +558,10 @@ class Shipment extends Model
 
     public function getService(){
         return \ExpertShipping\Spl\Models\Service::where('code', $this->service_code)->first();
+    }
+
+    public function getTrackingLinkAttribute()
+    {
+        return $this->trackingLink($this->tracking_number, optional($this->carrier)->tracking_link);
     }
 }

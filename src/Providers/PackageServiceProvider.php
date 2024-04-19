@@ -2,7 +2,7 @@
 
 namespace ExpertShipping\Spl\Providers;
 
-use ExpertShipping\Spl\Facades\SearchSelectFacade;
+use ExpertShipping\Spl\Helpers\Money;
 use ExpertShipping\Spl\Services\SearchSelectService;
 use Illuminate\Support\ServiceProvider;
 
@@ -19,7 +19,9 @@ final class PackageServiceProvider extends ServiceProvider
             return new SearchSelectService();
         });
 
-        $this->app->bind('SearchSelect', SearchSelectFacade::class);
+        $this->app->bind('SPL.money', function () {
+            return new Money();
+        });
 
         $this->loadViewsFrom(__DIR__.'/../Views', 'spl');
 
