@@ -45,10 +45,11 @@ class SendClaimLink extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
+        $url = env('ES_PLATFORM_URL', env('APP_URL'));
         return (new MailMessage)
                     ->subject(__('ExpertShipping Insurance Claim Link'))
                     ->line(__('To initiate your insurance claim, please click the button below:'))
-                    ->action(__('START'), url("/manage-insurance/{$this->insurance->token}/claim"))
+                    ->action(__('START'), "$url/manage-insurance/{$this->insurance->token}/claim")
                     ->line(__('Thank you for choosing Expert Sipping!'));
     }
 }

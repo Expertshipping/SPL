@@ -38,7 +38,8 @@ class InsuranceController extends Controller
         ], 201);
     }
 
-    public function deleteClaim($id, InsuranceService $insuranceService){
+    public function deleteClaim($id, InsuranceService $insuranceService)
+    {
 
         $insurance = Insurance::findOrFail($id);
 
