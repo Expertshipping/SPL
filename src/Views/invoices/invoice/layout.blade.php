@@ -202,7 +202,7 @@
     <table width="100%">
         <tr>
             <td>
-                <img src="{{ public_path('domains/'. request()->getHost() .'/logo-color.png') }}" alt="" width="147px">
+                <img src="{{ asset('domains/'. request()->getHost() .'/logo-color.png') }}" alt="" width="147px">
             </td>
             <td align="right">
                 <div class="invoice-number">
