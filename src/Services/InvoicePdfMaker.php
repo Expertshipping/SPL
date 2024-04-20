@@ -39,6 +39,16 @@ class InvoicePdfMaker
             'detailsTaxes' => $this->invoice->details_taxes,
         ]);
 
+        $context = stream_context_create([
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            ]
+        ]);
+
+        $pdf->setHttpContext($context);
+
         return $pdf->download();
     }
 
