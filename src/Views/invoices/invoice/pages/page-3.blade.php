@@ -1,5 +1,5 @@
 <div class="page-3">
-    @foreach($invoice->details as $detail)
+    @foreach($invoice->chargeable_details as $detail)
         @if($detail->invoiceable instanceof \App\Shipment)
             <table width="100%">
                 <tr>

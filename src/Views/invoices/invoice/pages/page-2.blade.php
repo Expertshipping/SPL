@@ -10,7 +10,7 @@
             <th><div class="text-white">{{ __('Service') }}</div></th>
         </tr>
 
-        @foreach($invoice->details as $detail)
+        @foreach($invoice->chargeable_details as $detail)
             @if($detail->invoiceable instanceof \App\Shipment)
                 <tr>
                     <td>{{ $detail->invoiceable->tracking_number }}</td>

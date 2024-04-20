@@ -671,21 +671,20 @@ class LocalInvoice extends Model
 
     public function getTotalPaidAmountAttribute()
     {
-        return $this->details
+        return $this->chargeable_details
             ->whereNotNull('meta_data->payment_date')
             ->sum('price');
     }
 
     public function getTotalDueAmountAttribute()
     {
-        return $this->details
+        return $this->chargeable_details
             ->whereNull('meta_data->payment_date')
             ->sum('price');
     }
 
     public function getTotalFreightChargesAttribute(){
-        return $this->details
-            ->where('pos', false)
+        return $this->chargeable_details
             ->where('invoiceable_type', 'App\\Shipment')
             ->sum(function($detail){
                 return collect($detail->invoiceable->rate_details)
@@ -695,8 +694,7 @@ class LocalInvoice extends Model
     }
 
     public function getTotalFuelChargesAttribute(){
-        return $this->details
-            ->where('pos', false)
+        return $this->chargeable_details
             ->where('invoiceable_type', 'App\\Shipment')
             ->sum(function($detail){
                 return collect($detail->invoiceable->rate_details)
@@ -707,8 +705,7 @@ class LocalInvoice extends Model
 
 
     public function getTotalTaxesChargesAttribute(){
-        return $this->details
-            ->where('pos', false)
+        return $this->chargeable_details
             ->where('invoiceable_type', 'App\\Shipment')
             ->sum(function($detail){
                 return collect($detail->invoiceable->rate_details)
@@ -728,8 +725,7 @@ class LocalInvoice extends Model
 
         $preTax = 0;
 
-        $this->details
-            ->where('pos', false)
+        $this->chargeable_details
             ->where('invoiceable_type', 'App\\Shipment')
             ->each(function($detail) use (&$preTax, &$taxes){
                 $shipment = $detail->invoiceable;
@@ -738,10 +734,10 @@ class LocalInvoice extends Model
                     $taxService = resolve(TaxService::class);
                     $t = $taxService->getTaxes($detail->price, $shipment->to_province, false);
 
-                    $taxes['HST'] += $t['taxes']['HST'];
-                    $taxes['PST'] += $t['taxes']['PST'];
-                    $taxes['QST'] += $t['taxes']['QST'];
-                    $taxes['GST'] += $t['taxes']['GST'];
+                    $taxes['HST'] += $t['taxes']['HST'] ?? 0;
+                    $taxes['PST'] += $t['taxes']['PST'] ?? 0;
+                    $taxes['QST'] += $t['taxes']['QST'] ?? 0;
+                    $taxes['GST'] += $t['taxes']['GST'] ?? 0;
                     $preTax += $t['preTax'];
                 }else{
                     $preTax += $detail->price;
@@ -753,6 +749,12 @@ class LocalInvoice extends Model
         $tx->preTax = $preTax;
 
         return $tx;
+    }
+
+    public function getChargeableDetailsAttribute(){
+        return $this->details
+            ->where('pos', false)
+            ->whereNull('canceled_at');
     }
 
 }

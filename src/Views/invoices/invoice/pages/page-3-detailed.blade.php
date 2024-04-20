@@ -1,5 +1,5 @@
 <div class="page-3">
-    @foreach($invoice->details as $key => $detail)
+    @foreach($invoice->chargeable_details as $key => $detail)
         @if($detail->invoiceable instanceof \App\Shipment)
             <table width="100%">
                 <tr>
@@ -263,7 +263,7 @@
                 </div>
             </div>
 
-            @if($key < count($invoice->details) - 1)
+            @if($key < count($invoice->chargeable_details) - 1)
                 <div class="page-break"></div>
             @endif
         @endif

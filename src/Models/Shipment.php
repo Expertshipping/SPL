@@ -522,6 +522,11 @@ class Shipment extends Model
         return $this->belongsTo(Shipment::class, 'aramex_bulk_id');
     }
 
+    public function aramexBulks()
+    {
+        return $this->hasMany(Shipment::class, 'aramex_bulk_id');
+    }
+
     public function addressCorrections()
     {
         return $this->hasMany(AddressCorrection::class, 'shipment_id');
