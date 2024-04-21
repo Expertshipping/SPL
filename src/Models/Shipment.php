@@ -569,4 +569,19 @@ class Shipment extends Model
     {
         return $this->trackingLink($this->tracking_number, optional($this->carrier)->tracking_link);
     }
+
+    public function notifications()
+    {
+        return $this->hasMany(ShipmentNotification::class);
+    }
+
+    public function sendNotification($data)
+    {
+        $type = $data['user']->is_admin ? 'admin' : 'client';
+        return ShipmentNotification::create([
+            'shipment_id' => $this->id,
+            'notification' => $data['notification'],
+            "{$type}_user_id" => $data['user']->id,
+        ]);
+    }
 }
