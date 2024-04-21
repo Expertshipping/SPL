@@ -37,6 +37,7 @@ class Comment extends JsonResource
             'humain_created_at' => $this->created_at->diffForHumans(),
             'user' => $this->whenLoaded('user'),
             'image' => optional($this->getFirstMedia('shipments-images'))->getUrl(),
+            'platform' => $this->platform,
         ];
     }
 }

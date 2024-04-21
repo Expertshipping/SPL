@@ -120,7 +120,8 @@ class Shipment extends JsonResource
             'invoice_detail' => $this->whenLoaded('saleDetail'),
             'pos_receipt' => $this->whenLoaded('receiptDetail'),
             'orders' => new OrderCollection($this->whenLoaded('orders')),
-            'pickup' => $this->whenLoaded('pickup'),
+            'company' => $this->whenLoaded('company'),
+            'notifications' => new ShipmentNotificationCollection($this->whenLoaded('notifications')),
         ];
     }
 
