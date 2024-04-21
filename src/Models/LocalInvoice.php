@@ -5,7 +5,7 @@ namespace ExpertShipping\Spl\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use ExpertShipping\Spl\Models\Services\TaxService;
+use ExpertShipping\Spl\Services\TaxService;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use ExpertShipping\Spl\Models\Traits\Filterable;
@@ -296,7 +296,7 @@ class LocalInvoice extends Model
      */
     public function downloadAs($filename, array $data)
     {
-        // return $this->view($data);
+        return $this->view($data);
         return new Response($this->pdf($data), 200, [
             'Content-Description' => 'File Transfer',
             'Content-Disposition' => 'attachment; filename="' . $filename . '.pdf"',
@@ -668,4 +668,93 @@ class LocalInvoice extends Model
 
         return "Sale";
     }
+
+    public function getTotalPaidAmountAttribute()
+    {
+        return $this->chargeable_details
+            ->whereNotNull('meta_data->payment_date')
+            ->sum('price');
+    }
+
+    public function getTotalDueAmountAttribute()
+    {
+        return $this->chargeable_details
+            ->whereNull('meta_data->payment_date')
+            ->sum('price');
+    }
+
+    public function getTotalFreightChargesAttribute(){
+        return $this->chargeable_details
+            ->where('invoiceable_type', 'App\\Shipment')
+            ->sum(function($detail){
+                return collect($detail->invoiceable->rate_details)
+                    ->whereIn('type', Shipment::FREIGHT_CHARGES)
+                    ->sum('amount');
+            });
+    }
+
+    public function getTotalFuelChargesAttribute(){
+        return $this->chargeable_details
+            ->where('invoiceable_type', 'App\\Shipment')
+            ->sum(function($detail){
+                return collect($detail->invoiceable->rate_details)
+                    ->whereIn('type', Shipment::FUEL_CHARGES)
+                    ->sum('amount');
+            });
+    }
+
+
+    public function getTotalTaxesChargesAttribute(){
+        return $this->chargeable_details
+            ->where('invoiceable_type', 'App\\Shipment')
+            ->sum(function($detail){
+                return collect($detail->invoiceable->rate_details)
+                    ->whereIn('type', Shipment::TAXES_CHARGES)
+                    ->sum('amount');
+            });
+    }
+
+
+    public function getDetailsTaxesAttribute(){
+        $taxes = [
+            'HST' => 0,
+            'PST' => 0,
+            'QST' => 0,
+            'GST' => 0,
+        ];
+
+        $preTax = 0;
+
+        $this->chargeable_details
+            ->where('invoiceable_type', 'App\\Shipment')
+            ->each(function($detail) use (&$preTax, &$taxes){
+                $shipment = $detail->invoiceable;
+
+                if ($shipment->to_country === 'CA' && $shipment->from_country === 'CA') {
+                    $taxService = resolve(TaxService::class);
+                    $t = $taxService->getTaxes($detail->price, $shipment->to_province, false);
+
+                    $taxes['HST'] += $t['taxes']['HST'] ?? 0;
+                    $taxes['PST'] += $t['taxes']['PST'] ?? 0;
+                    $taxes['QST'] += $t['taxes']['QST'] ?? 0;
+                    $taxes['GST'] += $t['taxes']['GST'] ?? 0;
+                    $preTax += $t['preTax'];
+                }else{
+                    $preTax += $detail->price;
+                }
+            });
+
+        $tx = new \stdClass();
+        $tx->taxes = $taxes;
+        $tx->preTax = $preTax;
+
+        return $tx;
+    }
+
+    public function getChargeableDetailsAttribute(){
+        return $this->details
+            ->where('pos', false)
+            ->whereNull('canceled_at');
+    }
+
 }

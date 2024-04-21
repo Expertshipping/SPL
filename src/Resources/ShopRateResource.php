@@ -2,14 +2,9 @@
 
 namespace ExpertShipping\Spl\Resources;
 
-use ExpertShipping\Spl\Models\Money;
 use ExpertShipping\Spl\Models\Service;
-use ExpertShipping\Spl\Models\Services\TaxService;
-use ExpertShipping\Spl\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
 
 class ShopRateResource extends JsonResource
 {

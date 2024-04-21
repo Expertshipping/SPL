@@ -14,20 +14,22 @@
   "require": {
     "barryvdh/laravel-dompdf": "^2.0.1",
     "illuminate/support": "*",
-    "laravel/cashier": "^14.0",
     "php": "^7.2|~8.0.0|~8.1.0|~8.2.0|~8.3.0",
     "spatie/laravel-ignition": "^2.0",
     "spatie/laravel-medialibrary": "^10.7.13",
     "spatie/laravel-permission": "^5.5.0",
     "spatie/laravel-translatable": "^6.5",
-    "stripe/stripe-php": "^10.21"
+    "laravel/cashier": "^14.0",
+    "spatie/browsershot": "^4.0.2"
   },
   "extra": {
     "laravel": {
       "providers": [
         "ExpertShipping\\Spl\\Providers\\PackageServiceProvider"
       ],
-      "aliases": {}
+      "aliases": {
+        "SplMoney": "ExpertShipping\\Spl\\Facades\\SplMoney"
+      }
     }
   },
   "license": "MIT",
