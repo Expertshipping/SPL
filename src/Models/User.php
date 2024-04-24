@@ -1051,7 +1051,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function getPhotoUrlAttribute($value)
     {
-        return empty($value) ? self::defaultPhoto() : url(self::AVATAR_PATH . '/' . $value);
+        return empty($value) ? self::defaultPhoto() : $value;
     }
 
     public static function defaultPhoto()
