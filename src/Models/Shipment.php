@@ -193,7 +193,10 @@ class Shipment extends Model
         'estimated_delivery_date',
         'picked_up_at',
         'delivered_at',
-        'freightcom_id'
+        'freightcom_id',
+
+        'failed_aramex_hub_label',
+        'failed_pickup',
     ];
 
     protected $casts = [
@@ -221,6 +224,9 @@ class Shipment extends Model
         'estimated_delivery_date' => 'datetime',
         'picked_up_at' => 'datetime',
         'delivered_at' => 'datetime',
+
+        'failed_aramex_hub_label' => 'boolean',
+        'failed_pickup' => 'boolean',
     ];
 
     public static function boot()

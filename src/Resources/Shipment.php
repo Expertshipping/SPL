@@ -122,6 +122,8 @@ class Shipment extends JsonResource
             'orders' => new OrderCollection($this->whenLoaded('orders')),
             'company' => $this->whenLoaded('company'),
             'notifications' => new ShipmentNotificationCollection($this->whenLoaded('notifications')),
+            'failed_aramex_hub_label' => $this->failed_aramex_hub_label,
+            'failed_pickup' => $this->failed_pickup,
         ];
     }
 

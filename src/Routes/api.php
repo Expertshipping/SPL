@@ -1,5 +1,6 @@
 <?php
 
+use ExpertShipping\Spl\Controllers\CustomsInvoiceController;
 use ExpertShipping\Spl\Controllers\InsuranceController;
 use ExpertShipping\Spl\Controllers\InvoiceController;
 use Illuminate\Support\Facades\Route;
@@ -14,5 +15,9 @@ Route::prefix('spl')->name('spl.')->group(function () {
 
     // invoices
     Route::get('invoice/{id}/download', [InvoiceController::class, 'download'])
+        ->name('invoice.download');
+
+    // customs invoice
+    Route::get('customs-invoice/{uuid}/download', [CustomsInvoiceController::class, 'download'])
         ->name('invoice.download');
 });
