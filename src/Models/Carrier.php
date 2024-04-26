@@ -70,6 +70,8 @@ class Carrier extends Model implements HasMedia
         'image_url'
     ];
 
+    protected $morphClass = 'carrier';
+
     public function user()
     {
         return $this->belongsToMany(User::class)->withPivot('rabais')->withTimestamps();

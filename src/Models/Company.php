@@ -18,7 +18,6 @@ use Illuminate\Support\Str;
 
 class Company extends Model
 {
-
     const ACCOUNT_TYPE_RETAIL = 'retail';
     const ACCOUNT_TYPE_BUSINESS = 'business';
     const ACCOUNT_TYPE_RETAIL_RESELLER = 'retail_reseller';
@@ -27,8 +26,7 @@ class Company extends Model
 
     protected $appends = ['reseller', 'valid_subscription'];
     protected $connection = 'mysql';
-
-    //    use Searchable;
+    protected $morphClass = 'company';
 
     public function toSearchableArray()
     {
@@ -761,5 +759,10 @@ class Company extends Model
     public function unblockedRequests()
     {
         return $this->hasMany(unblockedRequest::class);
+    }
+
+    public function notes()
+    {
+        return $this->morphMany(Note::class, 'noteable');
     }
 }
