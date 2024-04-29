@@ -109,4 +109,9 @@ class Order extends Model
 
         return $packages->toArray();
     }
+
+    public function integrationCustomer()
+    {
+        return $this->belongsTo(IntegrationCustomer::class, 'integration_customer_id');
+    }
 }
