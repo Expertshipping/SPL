@@ -2,7 +2,6 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use ExpertShipping\Spl\Models\Services\InsuranceService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
@@ -78,8 +77,8 @@ class Insurance extends Model
     public static function createFromShipment(Shipment $shipment, $tracking_number, $declaredValue)
     {
         $service = Service::where('code', $shipment->service_code)->firstOrfail();
-        $insuranceRate = app(InsuranceService::class)->getRate($declaredValue, $shipment->from_country, $shipment->to_country, $shipment->carrier->slug, $service->code);
-        $insuranCharge = app(InsuranceService::class)->getRate($declaredValue, $shipment->from_country, $shipment->to_country, $shipment->carrier->slug, $service->code, true);
+        $insuranceRate = app('insurance')->getRate($declaredValue, $shipment->from_country, $shipment->to_country, $shipment->carrier->slug, $service->code);
+        $insuranceCharge = app('insurance')->getRate($declaredValue, $shipment->from_country, $shipment->to_country, $shipment->carrier->slug, $service->code, true);
 
         if ($shipment->user->account_type === 'retail') {
             $rate = $insuranceRate['rate'] ?? 0;
@@ -103,7 +102,7 @@ class Insurance extends Model
             'price' => $insuranceRate['rate'] ?? 0,
             'company_id' => $shipment->user->company_id,
             'reseller_charged' => $insuranceRate['charge'] ?? 0,
-            'charge' => $insuranCharge['charge'] ?? 0,
+            'charge' => $insuranceCharge['charge'] ?? 0,
         ]);
     }
 

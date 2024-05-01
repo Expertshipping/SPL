@@ -334,6 +334,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         $total = str_replace(' ', '', $total);
 
         $invoice = $this->localInvoices()
+            ->whereNotNull('company_id')
             ->whereDoesntHave('bulkInvoices')
             ->whereNull('closed_at')
             ->orderByDesc('id')

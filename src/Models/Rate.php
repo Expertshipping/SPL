@@ -3,9 +3,7 @@
 namespace ExpertShipping\Spl\Models;
 
 use ExpertShipping\Spl\Models\Nova\Actions\PartialRefund;
-use ExpertShipping\Spl\Models\Services\InsuranceService;
 use Carbon\Carbon;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
@@ -66,15 +64,11 @@ class Rate
         $company = auth()->user()->company->load('services');
         $self = new static;
         $self->rates = collect($rates)->filter(function ($carrierRate) {
-            return
-                !is_null($carrierRate['data'])
-                && is_array($carrierRate['data'])
+            return is_array($carrierRate['data'])
                 && count($carrierRate['data']) > 0
-                && !is_null($carrierRate['data']['data'])
                 && is_array($carrierRate['data']['data'])
                 && count($carrierRate['data']['data']) > 0
-                && isset($carrierRate['data']['data']['rates'])
-                && !is_null($carrierRate['data']['data']['rates']);
+                && isset($carrierRate['data']['data']['rates']);
         })
             ->map(function ($carrier) use ($discountsServicesLocal, $company, &$self) {
                 $carrierRates = $carrier['data']['data']['rates'];
@@ -91,16 +85,14 @@ class Rate
                             && $testCompanyService;
                     })
                     ->map(function ($rate) use ($carrierName, $discountsServicesLocal, $account, &$self) {
-                        // $service = isset($rate['service_code']) ? 'service_code':'service_type';
                         $requestRate = isset($rate['total_charge']) ? $rate['total_charge']['amount'] : $rate['rate'];
 
                         $rate['carrier_rate'] = $requestRate;
                         $rate['rate'] = $requestRate;
                         // If it's a postmen request we add some data to the rate
-                        $rate["desc"] = isset($rate["desc"]) ? $rate["desc"] : $rate['service_name'];
-                        $rate["currency"] = isset($rate["currency"]) ? $rate["currency"] : $rate['total_charge']['currency'];
-                        // $rate["rate_detail"] = isset($rate["rate_detail"]) ? $rate["rate_detail"] : $rate['detailed_charges'];
-                        $rate["service_code"] = isset($rate["service_code"]) ? $rate["service_code"] : $rate['service_type'];
+                        $rate["desc"] = $rate["desc"] ?? $rate['service_name'];
+                        $rate["currency"] = $rate["currency"] ?? $rate['total_charge']['currency'];
+                        $rate["service_code"] = $rate["service_code"] ?? $rate['service_type'];
                         $rate["est_delivery_time"] =  $rate["est_delivery_time"] ?? $rate['delivery_date'] ?? '';
 
                         $rate['rate_detail'] = self::normalizeDetails($rate);
@@ -110,17 +102,17 @@ class Rate
                         $rate = static::getReturnLabelRate($rate);
 
                         if (!$rate) {
-                            $search = array_search(Str::lower($carrierName), array_column($self->errors, 'carrier'));
+                            $search = in_array(Str::lower($carrierName), array_column($self->errors, 'carrier'));
                             if ($search === false) {
-                                array_push($self->errors, [
+                                $self->errors[] = [
                                     'carrier' => Str::lower($carrierName),
                                     'error' => 'The maximum sum assured for this career is exceeded.'
-                                ]);
+                                ];
                             }
                             return $rate;
                         }
 
-                        $rate["package_type"] = isset($rate["package_type"]) ? $rate["package_type"] : "";
+                        $rate["package_type"] = $rate["package_type"] ?? "";
 
                         if (isset($rate['negotiated_rate']) && $carrierName === 'UPS') {
                             $coast = $rate['negotiated_rate'];
@@ -195,11 +187,11 @@ class Rate
         ];
     }
 
-    private static function getInsuranceRate($rate, $carrier)
+    public static function getInsuranceRate($rate, $carrier)
     {
         $insurance = Cache::get('insurance-' . auth()->id());
 
-        // All shipments with insured value less then 105$ with free insurance
+        // All shipments with insured value less than 105$ with free insurance
         if (!$insurance || $insurance <= 105) {
             return $rate;
         }
@@ -211,32 +203,32 @@ class Rate
         $calculated = true;
         if ($packagingType === "box") {
             $insuranceRate = $boxes->map(function ($box) use ($carrier, $rate, &$calculated) {
-                $rate = app(InsuranceService::class)->getRate($box['value'], request()->from['country'], request()->to['country'], Str::lower($carrier), $rate['service_code']);
-                if ($rate['message'] !== 'calculated') {
+                $r = app('insurance')->getRate($box['value'], request()->from['country'], request()->to['country'], Str::lower($carrier), $rate['service_code']);
+                if ($r['message'] !== 'calculated') {
                     $calculated = false;
                     return false;
                 }
                 return [
-                    'rate' => $rate['rate'],
+                    'rate' => $r['rate'],
                 ];
             })->sum('rate');
         }
 
         if ($packagingType === "pack") {
             $insuranceRate = $packs->map(function ($pack) use ($carrier, $rate, &$calculated) {
-                $rate = app(InsuranceService::class)->getRate($pack['value'], request()->from['country'], request()->to['country'], Str::lower($carrier), $rate['service_code']);
-                if ($rate['message'] !== 'calculated') {
+                $r = app('insurance')->getRate($pack['value'], request()->from['country'], request()->to['country'], Str::lower($carrier), $rate['service_code']);
+                if ($r['message'] !== 'calculated') {
                     $calculated = false;
                     return false;
                 }
                 return [
-                    'rate' => $rate['rate'],
+                    'rate' => $r['rate'],
                 ];
             })->sum('rate');
         }
 
         if ($packagingType === "envelope") {
-            $insuranceRate = app(InsuranceService::class)->getRate($insurance, request()->from['country'], request()->to['country'], Str::lower($carrier), $rate['service_code']);
+            $insuranceRate = app('insurance')->getRate($insurance, request()->from['country'], request()->to['country'], Str::lower($carrier), $rate['service_code']);
             if ($insuranceRate['message'] !== 'calculated') {
                 $calculated = false;
                 return false;
@@ -252,15 +244,29 @@ class Rate
         if (!isset($rate['rate_detail']) || !is_array($rate['rate_detail'])) {
             $rate['rate_detail'] = [];
         }
-
-        array_push($rate['rate_detail'], [
+        $rate['rate_detail'][] = [
             "amount" => round($insuranceRate, 2),
             "currency" => "CAD",
             "type" => __("INSURANCE CHARGES")
-        ]);
+        ];
+
+        if (!isset($rate['rateDetails']) || !is_array($rate['rateDetails'])) {
+            $rate['rateDetails'] = [];
+        }
+
+        $rate['rateDetails'][] = [
+            "amount" => round($insuranceRate, 2),
+            "currency" => "CAD",
+            "type" => __("INSURANCE CHARGES")
+        ];
+
         $rate['rate'] += $insuranceRate;
         if (isset($rate['negotiated_rate'])) {
             $rate['negotiated_rate'] += $insuranceRate;
+        }
+
+        if (isset($rate['expert_shipping_price'])) {
+            $rate['expert_shipping_price'] += $insuranceRate;
         }
         return $rate;
     }
@@ -277,11 +283,11 @@ class Rate
         }
 
         if (request('returnLabel')) {
-            array_push($rate['rate_detail'], [
+            $rate['rate_detail'][] = [
                 "amount" => round($rateValue, 2),
                 "currency" => "CAD",
                 "type" => "Return Label"
-            ]);
+            ];
             $rate['rate'] = round($rate['rate'] * 2, 2);
 
             if (isset($rate['negotiated_rate'])) {

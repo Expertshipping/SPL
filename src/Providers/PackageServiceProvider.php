@@ -3,6 +3,7 @@
 namespace ExpertShipping\Spl\Providers;
 
 use ExpertShipping\Spl\Helpers\Money;
+use ExpertShipping\Spl\Services\InsuranceService;
 use ExpertShipping\Spl\Services\SearchSelectService;
 use Illuminate\Support\ServiceProvider;
 
@@ -27,5 +28,11 @@ final class PackageServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../Views', 'spl');
 
         $this->mergeConfigFrom(__DIR__.'/../Config/spl.php', 'spl');
+
+
+
+        $this->app->singleton('insurance', function () {
+            return new InsuranceService();
+        });
     }
 }
