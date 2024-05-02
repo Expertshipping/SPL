@@ -70,7 +70,7 @@ class Carrier extends Model implements HasMedia
         'image_url'
     ];
 
-    protected $morphClass = 'carrier';
+    protected $morphClass = 'Carrier';
 
     public function user()
     {
