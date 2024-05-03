@@ -2,7 +2,6 @@
 
 namespace ExpertShipping\Spl\Resources;
 
-use ExpertShipping\Spl\Models\Carrier;
 use ExpertShipping\Spl\Models\File;
 use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -46,7 +45,7 @@ class Shipment extends JsonResource
             ) : null,
             'model' => class_basename($this),
             'status' => $this->type,
-            'status_display' => \App\Shipment::STATUSES[$this->type] ?? $this->type,
+            'status_display' => __(\App\Shipment::STATUSES[$this->type] ?? $this->type),
             'rate' => $this->rate,
             'from_name' => $this->from_name,
             'from_company' => $this->from_company,
@@ -124,6 +123,7 @@ class Shipment extends JsonResource
             'notifications' => new ShipmentNotificationCollection($this->whenLoaded('notifications')),
             'failed_aramex_hub_label' => $this->failed_aramex_hub_label,
             'failed_pickup' => $this->failed_pickup,
+            'activities' => ShipmentActivity::collection($this->whenLoaded('activities')),
         ];
     }
 

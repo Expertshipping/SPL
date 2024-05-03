@@ -20,7 +20,7 @@
 
                 <tr>
                     <td width="40%">
-                        <div class="text-open-sans-11 text-default text-uppercase">
+                        <div class="text-open-sans-9 text-default text-uppercase">
                             {{ $detail->invoiceable->from_name  }} <br>
                             {{ $detail->invoiceable->from_address_1  }} <br>
                             {{ $detail->invoiceable->from_city  }},
@@ -33,7 +33,7 @@
                     <td width="20%"></td>
 
                     <td width="40%">
-                        <div class="text-open-sans-11 text-default text-uppercase">
+                        <div class="text-open-sans-9 text-default text-uppercase">
                             {{ $detail->invoiceable->to_name  }} <br>
                             {{ $detail->invoiceable->to_address_1  }} <br>
                             {{ $detail->invoiceable->to_city  }},
@@ -243,7 +243,7 @@
                                         {{ $detail->invoiceable->package->meta_data[0]->weight ?? 'N/A' }}
                                         {{ $detail->invoiceable->package->weight_unit }}
                                     @else
-                                        {{ collect($detail->invoiceable->package->meta_data)->sum('weight') }}
+                                        {{ $detail->invoiceable->total_weight }}
                                         {{ $detail->invoiceable->package->weight_unit }}
                                     @endif
                                 </td>

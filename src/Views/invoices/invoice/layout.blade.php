@@ -168,6 +168,14 @@
             line-height: normal;
         }
 
+        .text-open-sans-9{
+            font-family: "Open Sans", sans-serif;
+            font-size: 9px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+        }
+
         .text-open-sans-11{
             font-family: "Open Sans", sans-serif;
             font-size: 11px;

@@ -582,7 +582,12 @@ class LocalInvoice extends Model
             ->whereNull('canceled_at')
             ->get();
 
-        $details->each(function ($detail) {
+        $totalPaid = 0;
+
+        $details->each(function ($detail) use (&$totalPaid) {
+            if(isset($detail->meta_data['payment_date'])){
+                $totalPaid += $detail->price;
+            }
             $detail->update([
                 'total_ht' => $detail->ht_discount,
                 'total_taxes' => $detail->sum_taxes,
@@ -595,6 +600,7 @@ class LocalInvoice extends Model
             'total_ht' => $details->sum('total_ht'),
             'total_taxes' => $details->sum('total_taxes'),
             'total_discount' => $details->sum('total_discount'),
+            'paid_at' => $totalPaid === $this->total ? now() : null,
         ]);
     }
 

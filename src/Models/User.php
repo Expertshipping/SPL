@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Validation\ValidationException;
+use Laravel\Cashier\Billable;
 use Laravel\Cashier\Exceptions\CustomerAlreadyCreated;
 use Ramsey\Uuid\Uuid;
 
@@ -48,6 +49,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
     use SoftDeletes;
     use HasApiTokens;
     use Notifiable;
+    use Billable;
 
 
     /**

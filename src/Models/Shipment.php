@@ -2,12 +2,14 @@
 
 namespace ExpertShipping\Spl\Models;
 
+use ExpertShipping\Spl\Helpers\Helper;
 use ExpertShipping\Spl\Models\Jobs\CalculateDistanceBetweenStoreAndClientForRetailShipments;
 use ExpertShipping\Spl\Models\Models\ReferralPayout;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use ExpertShipping\Spl\Models\Traits\HasTrackingLink;
 use Ramsey\Uuid\Uuid;
+use function Aws\map;
 
 class Shipment extends Model
 {
@@ -589,5 +591,33 @@ class Shipment extends Model
             'notification' => $data['notification'],
             "{$type}_user_id" => $data['user']->id,
         ]);
+    }
+
+    public function getTotalWeightDetailsAttribute()
+    {
+        $packageTotalWeight = collect($this->package->meta_data)->sum('weight');
+        $service = $this->getService();
+
+        $totalVolumetricWeight = 0;
+        foreach ($this->package->meta_data as $package) {
+            if(isset($package->weight) && isset($package->length) && isset($package->width) && isset($package->height)){
+                $totalVolumetricWeight += Helper::calculateVolumetricWeightByUnit(
+                    $package->length,
+                    $package->width,
+                    $package->height,
+                    $this->carrier->slug,
+                    $this->package->weight_unit,
+                    $service->transport_type,
+                );
+            }
+        }
+
+        return [
+            'weight' => $packageTotalWeight,
+            'volumetric_weight' => $totalVolumetricWeight,
+            'billed_weight' => max($packageTotalWeight, $totalVolumetricWeight),
+            'weight_unit' => $this->package->weight_unit,
+            'billed_method' => $packageTotalWeight < $totalVolumetricWeight ? 'Volumetric' : 'Actual Weight',
+        ];
     }
 }

@@ -117,7 +117,7 @@
         </tr>
 
         <tr>
-            <td>{{ $invoice->details->count() }}</td>
+            <td>{{ $invoice->chargeable_details->count() }}</td>
             <td>{{ SplMoney::format($invoice->total_freight_charges) }}</td>
             <td>{{ SplMoney::format($invoice->total_fuel_charges) }}</td>
             <td>N/A</td>
