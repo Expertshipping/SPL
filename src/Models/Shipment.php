@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use ExpertShipping\Spl\Models\Traits\HasTrackingLink;
 use Ramsey\Uuid\Uuid;
-use function Aws\map;
 
 class Shipment extends Model
 {
@@ -618,6 +617,26 @@ class Shipment extends Model
             'billed_weight' => max($packageTotalWeight, $totalVolumetricWeight),
             'weight_unit' => $this->package->weight_unit,
             'billed_method' => $packageTotalWeight < $totalVolumetricWeight ? 'Volumetric' : 'Actual Weight',
+        ];
+    }
+
+    public function generatePickupPayload($request){
+        return [
+            'pickup_date' => $request['pickup_date'] ?? now()->format('Y-m-d'),
+            'pickup_working_hours' => $request['pickup_working_hours'] ?? '09:00',
+            'pickup_closing_hours' => $request['pickup_closing_hours'] ?? '17:00',
+            'pickup_company' => $this->from_company,
+            'pickup_full_name' => $this->from_name,
+            'pickup_address' => $this->from_address_1,
+            'pickup_addr2' => $this->from_address_2,
+            'pickup_city' => $this->from_city,
+            'pickup_province' => $this->from_province,
+            'pickup_zipcode' => $this->from_zip_code,
+            'pickup_country' => $this->from_country,
+            'pickup_phone_number' => $request['pickup_phone'] ?? $this->from_phone,
+            'pickup_email' => $this->from_email,
+            'carrierAccounts' => request()->user()->carrierAccounts(),
+            'total_pieces' => count($this->package->meta_data) ?? 1,
         ];
     }
 }
