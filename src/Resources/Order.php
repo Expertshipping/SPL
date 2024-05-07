@@ -41,6 +41,7 @@ class Order extends JsonResource
             'user'              => $this->whenLoaded('user'),
             'products'          => $this->products,
             'shop_logo'         => $this->integration->platform->logo,
+            'shop_icon'         => $this->integration->platform->icon_path,
             'adequate_package'  => $this->adequate_package,
         ];
     }
