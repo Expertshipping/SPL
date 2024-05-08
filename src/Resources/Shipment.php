@@ -82,8 +82,7 @@ class Shipment extends JsonResource
             'service_code' => $this->service_code,
             'cpf_cnpj' => $this->cpf_cnpj,
             'return_label' => $this->return_label,
-            'original_shipment' => $this->when(
-                $this->returnLabel,
+            'original_shipment' => $this->whenLoaded('returnLabel',
                 new Shipment(optional($this->returnLabel)->load(['carrier','invoice']))
             ),
             'carrier' => new CarrierResource($this->whenLoaded('carrier')),
