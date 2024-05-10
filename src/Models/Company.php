@@ -24,7 +24,7 @@ class Company extends Model
     const ACCOUNT_TYPE_CONSUMER = 'consumer';
 
 
-    protected $appends = ['reseller', 'valid_subscription'];
+    protected $appends = ['reseller', 'valid_subscription', 'trial_subscription'];
     protected $connection = 'mysql';
     protected $morphClass = 'company';
 
@@ -533,6 +533,11 @@ class Company extends Model
     public function getValidSubscriptionAttribute()
     {
         return $this->planSubscriptions()->with(['plan_package', 'plan_package.plan'])->where("status", PlanSubscriptionStatusEnum::IN_USE->value)->first();
+    }
+
+    public function getTrialSubscriptionAttribute()
+    {
+        return count($this->planSubscriptions()->get()) == 0;
     }
 
     public static function timesheetQuery()
