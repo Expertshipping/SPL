@@ -265,4 +265,13 @@ class Helper
         return $amount;
     }
 
+    public static function inArrayWithoutCase($needle, $haystack) {
+        $needle = self::removeSpaceAndLowerCase($needle);
+        return in_array(strtolower($needle), array_map(self::removeSpaceAndLowerCase(...), $haystack));
+    }
+
+    public static function removeSpaceAndLowerCase($string) {
+        return strtolower(str_replace(' ', '', $string));
+    }
+
 }

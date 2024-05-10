@@ -3,9 +3,8 @@
 
 namespace ExpertShipping\Spl\Models;
 
+use ExpertShipping\Spl\Helpers\Helper;
 use ExpertShipping\Spl\Services\TaxService;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ManageRate
@@ -134,30 +133,28 @@ class ManageRate
         $this->depart = $shipmentCountries['depart'];
         $this->state = $state;
         $this->carrier = $carrier;
-        if ($discountService) {
-            $this->discountService = $discountService;
-        }
         $this->rateInfos = $rateInfos;
         $this->rateType = $rateType;
-
         $this->charge = $rate;
-        $totalWeight = collect($packages)->sum('weight');
-        $country = Str::upper($shipmentCountries['destination']);
 
-        if ($weightUnit !== env('WHITE_LABEL_WEIGHT_UNIT', 'LB')) {
-            if ($weightUnit === 'LB') {
-                $totalWeight = $totalWeight * 0.453592;
-            }
+        if($discountService){
+            $this->discountService = $discountService;
+            $totalWeight = collect($packages)->sum('weight');
+            $country = Str::upper($shipmentCountries['destination']);
 
-            if ($weightUnit === 'KG') {
-                $totalWeight = $totalWeight * 2.20462;
+            if ($weightUnit !== env('WHITE_LABEL_WEIGHT_UNIT', 'LB')) {
+                if ($weightUnit === 'LB') {
+                    $totalWeight = $totalWeight * 0.453592;
+                }
+
+                if ($weightUnit === 'KG') {
+                    $totalWeight = $totalWeight * 2.20462;
+                }
             }
+            $this->discountWeightIndex = $discountService->getIndexByWeight($totalWeight, $country) ?? 'all';
+            $this->companyService = $discountService;
+            $this->defineDiscountType($discountService);
         }
-
-        $this->discountWeightIndex = $discountService->getIndexByWeight($totalWeight, $country) ?? 'all';
-
-        $this->companyService = $discountService;
-        $this->defineDiscountType($discountService);
     }
 
     public function getRate($user = null)
@@ -321,7 +318,7 @@ class ManageRate
                     $amount = -1;
                     $link = $this->companyService->discount[$this->country][$this->discountWeightIndex];
                 } else {
-                    if (in_array($detail['type'], self::DISCOUNTABLE_DETAILS)) {
+                    if (Helper::inArrayWithoutCase($detail['type'], self::DISCOUNTABLE_DETAILS)) {
                         if ((float) $this->discountValue($this->companyService) < 0) {
                             $amount = $amount - $this->calculateDiscountValueForAmount($amount, abs($this->discountValue($this->companyService)), $this->discountType);
                         } else {
@@ -552,5 +549,39 @@ class ManageRate
             ->filter()
             ->filter($this->filterDetails())
             ->sum('amount');
+    }
+
+    public static function getInstance($fromCountry, $toCountry, $toState)
+    {
+        return new static(
+            0,
+            0,
+            'full_rate',
+            [],
+            [
+                'depart' => $fromCountry,
+                'destination' => $toCountry
+            ],
+            $toState,
+            null,
+            null,
+            true,
+            [],
+            null
+        );
+    }
+
+    public function recalculateTaxes($returnRates){
+        return $returnRates->map(function($rate){
+            $rateDetails = collect($rate->rateDetails)
+                ->filter($this->filterTaxes());
+            $taxes = $this->addTaxes($rateDetails, $this->depart, $this->destination);
+            $rate->rateDetails = $rateDetails->merge($taxes)
+                ->map($this->normalizeDetails())
+                ->map($this->mapDetails())
+                ->toArray();
+
+            return $rate;
+        });
     }
 }
