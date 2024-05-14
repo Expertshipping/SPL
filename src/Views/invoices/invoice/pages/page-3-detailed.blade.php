@@ -259,7 +259,7 @@
                 <hr>
 
                 <div class="text-open-sans-6">
-                    {{ __('If the carrier conducted an audit of the dimensions or weight of your shipment after they pick up your shipment, and they discover a discrepancy between the dimensions or weight that you originally entered into the Freightcom website upon booking and the carrier’s remeasurement, your Billed Charges for Freight may differ from the original quote. Please note that all charges are based on the greater of the dimensional weight or the actual weight. See the FAQ section on your Freightcom account for a definition of dimensional weight.') }}
+                    {{ __('If the carrier conducted an audit of the dimensions or weight of your shipment after they pick up your shipment, and they discover a discrepancy between the dimensions or weight that you originally entered into the Shippayless website upon booking and the carrier’s remeasurement, your Billed Charges for Freight may differ from the original quote. Please note that all charges are based on the greater of the dimensional weight or the actual weight. See the FAQ section on your Freightcom account for a definition of dimensional weight.') }}
                 </div>
             </div>
 

@@ -185,11 +185,14 @@
     <br>
     <strong><span>{{__('Signature', [], 'en')}}</span></strong>
     <br>
-    @if ($shipment->company->account_type==='business')
-        <img src="{{$signature}}" width="120" alt="">
-    @else
-        <p style="font-family: 'HandScript', sans-serif;">
-            {{$shipment->from_name}}
-        </p>
-    @endif
+    <p style="font-family: 'HandScript', sans-serif;">
+        {{$shipment->from_name}}
+    </p>
+{{--    @if ($shipment->company->account_type==='business')--}}
+{{--        <img src="{{$signature}}" width="120" alt="">--}}
+{{--    @else--}}
+{{--        <p style="font-family: 'HandScript', sans-serif;">--}}
+{{--            {{$shipment->from_name}}--}}
+{{--        </p>--}}
+{{--    @endif--}}
 </article>

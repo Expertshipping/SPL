@@ -19,8 +19,8 @@ class CustomsInvoiceController extends Controller
             ->with(['customInvoice', 'carrier', 'user'])
             ->firstOrFail();
 
-        $signature = asset('static/images/signature'. rand(1, 20) .'.png');
-        $pdf = PDF::loadView('spl::pdf.custom.custom-invoice', compact('shipment', 'signature'));
+//        $signature = asset('static/images/signature'. rand(1, 20) .'.png');
+        $pdf = PDF::loadView('spl::pdf.custom.custom-invoice', compact('shipment'));
 
         $context = stream_context_create([
             'ssl' => [
