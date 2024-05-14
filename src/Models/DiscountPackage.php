@@ -13,6 +13,7 @@ class DiscountPackage extends Model
         'default_b2c' => 'boolean',
         'default_fullrate_retail_reseller' => 'boolean',
         'default_b2b' => 'boolean',
+        'default_aramex_bulk' => 'boolean',
     ];
 
     function discountPackageDetails()
