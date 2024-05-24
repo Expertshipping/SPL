@@ -30,32 +30,7 @@ class AdminNotification extends Model
         'acknowledgment_content',
     ];
 
-    protected $fillable = [
-        'name',
-        'type',
-        'channels',
-        'email_subject',
-        'email_content',
-        'sms_content',
-        'app_notification_content',
-        'app_notification_title',
-        'web_notification_content',
-        'web_notification_url',
-        'web_notification_icon',
-        'scheduled_at',
-        'event',
-        'user_id',
-        'require_acknowledgment',
-        'acknowledgment_content',
-        'stores',
-        'agents',
-        'frequency',
-        'frequency_days',
-        'frequency_time',
-        'frequency_one_time_sent',
-        'notifiable_type',
-        'notifiable_id',
-    ];
+    protected $guarded = [];
 
     protected $casts = [
         'channels' => 'array',
