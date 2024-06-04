@@ -697,7 +697,7 @@ class Company extends Model
 
     public function planSubscriptions(): HasMany
     {
-        return $this->hasMany(PlanSubscription::class);
+        return $this->hasMany(PlanSubscription::class, 'company_id');
     }
 
     public function getStatusColorAttribute()
