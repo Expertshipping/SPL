@@ -770,4 +770,9 @@ class Company extends Model
     {
         return $this->morphMany(Note::class, 'noteable');
     }
+
+    public function platformCountry()
+    {
+        return $this->belongsTo(PlatformCountry::class);
+    }
 }

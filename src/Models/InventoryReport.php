@@ -118,6 +118,7 @@ class InventoryReport extends Model
 
     public static function carrierSupplies()
     {
+        // TODO: add platformCountry logic
         $carriers = Carrier::query()
             ->active()
             ->notLtl()

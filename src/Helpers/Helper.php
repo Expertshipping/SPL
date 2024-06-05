@@ -229,7 +229,7 @@ class Helper
     }
 
     public static function convertCurrency($amount, $fromCurrency){
-        $toCurrency = env('WHITE_LABEL_CURRENCY', 'CAD');
+        $toCurrency = request()->platformCountry?->currency ?? 'CAD';
         // $url = "https://api.exchangeratesapi.io/latest?base={$fromCurrency}&symbols={$toCurrency}";
         // $response = Http::
         //     withHeaders([

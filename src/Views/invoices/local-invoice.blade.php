@@ -352,7 +352,7 @@
     </div>
 
     {{-- <div style="text-align: right;margin-right:5px;right: 0;top: 90px;">
-        <span style="font-size:6x;">{{__('Amounts expressed in')}} {{env('WHITE_LABEL_CURRENCY')}}</span>
+        <span style="font-size:6x;">{{__('Amounts expressed in')}} {{request()->platformCountry?->currency}}</span>
     </div>
 
     <div style="width: 200px;display: block;background: #dddddd82;top: 20px;right: 0px;padding: 24px;font-size: 17px;margin: 0;font-weight:bold;text-transform: uppercase;box-shadow: -3px 3px 3px -1px #00000042;">
@@ -403,11 +403,11 @@
                         {{ $detail->quantity }}
                     </td>
                     <td>
-                        {{ $detail->price }} {{ env('WHITE_LABEL_CURRENCY') }}
+                        {{ $detail->price }} {{ request()->platformCountry?->currency }}
                     </td>
                     <td>
                         <strong>
-                            {{ ($detail->price*$detail->quantity) }} {{ env('WHITE_LABEL_CURRENCY') }}
+                            {{ ($detail->price*$detail->quantity) }} {{ request()->platformCountry?->currency }}
                         </strong>
                     </td>
                 </tr>
@@ -422,7 +422,7 @@
                     {{__('Subtotal')}} :
                 </div>
                 <div class="value float-right">
-                    {{ isset($invoice->taxes['taxes']) ? $invoice->taxes['preTax'] : $invoice->total }}  {{ env('WHITE_LABEL_CURRENCY') }}
+                    {{ isset($invoice->taxes['taxes']) ? $invoice->taxes['preTax'] : $invoice->total }}  {{ request()->platformCountry?->currency }}
                 </div>
             </div>
 
@@ -433,7 +433,7 @@
                             {{ $key }} :
                         </div>
                         <div class="value float-right">
-                            {{ $tax }} {{ env('WHITE_LABEL_CURRENCY') }}
+                            {{ $tax }} {{ request()->platformCountry?->currency }}
                         </div>
                     </div>
                 @endforeach
@@ -444,7 +444,7 @@
                     {{__('Total')}} :
                 </div>
                 <div class="value float-right">
-                    {{ $invoice->total }} {{ env('WHITE_LABEL_CURRENCY') }}
+                    {{ $invoice->total }} {{ request()->platformCountry?->currency }}
                 </div>
             </div>
         </div>

@@ -23,46 +23,13 @@ class Carrier extends Model implements HasMedia
         'volumetric_weight_airway_factor',
         'volumetric_weight_ground_factor',
         'tracking_link',
-        'full_rate_source',
-        'discount_rate_source',
-        'saturday_delivery',
-        'residential',
-        'signature_on_delivery',
-        'transit_time_source',
-        'weight_limit',
-
-        'has_fixed_ship_from_location',
-        'ship_from_addr1',
-        'ship_from_addr2',
-        'ship_from_addr3',
-        'ship_from_city',
-        'ship_from_state',
-        'ship_from_zip_code',
-        'ship_from_country',
-        'pickup_api_or_email',
-        'pickup_email_address',
-        'pickup_email_content',
-
-        'support_po_box',
-        'active_for_inventory',
-
-        'claim_email',
-        'claim_language',
-        'reseller_marge_details',
-        'has_ground_service',
 
         'carrier_logo',
         'carrier_color',
-        'special_handling_price',
         'is_ltl',
     ];
 
     public $casts = [
-        'has_fixed_ship_from_location' => 'boolean',
-        'support_po_box' => 'boolean',
-        'active_for_inventory' => 'boolean',
-        'reseller_marge_details' => 'array',
-        'has_ground_service' => 'boolean',
         'is_ltl' => 'boolean',
     ];
 
@@ -106,10 +73,7 @@ class Carrier extends Model implements HasMedia
     {
         return $this->getFirstMediaUrl('carriers-logo');
     }
-    public function scopeActiveForInventory($query)
-    {
-        return $query->where('active_for_inventory', true);
-    }
+
 
     public function zones()
     {
@@ -143,4 +107,48 @@ class Carrier extends Model implements HasMedia
     {
         return $this->hasMany(ShipmentTrackingStatusCode::class);
     }
+
+    public function platformCountries()
+    {
+        return $this->belongsToMany(PlatformCountry::class)
+            ->withPivot([
+                'carrier_id',
+                'platform_country_id',
+                'residential',
+                'saturday_delivery',
+                'signature_on_delivery',
+                'transit_time_source',
+                'weight_limit',
+                'full_rate_source',
+                'discount_rate_source',
+                'pickup_api_or_email',
+                'pickup_email_address',
+                'pickup_email_content',
+                'has_fixed_ship_from_location',
+                'ship_from_addr1',
+                'ship_from_addr2',
+                'ship_from_addr3',
+                'ship_from_city',
+                'ship_from_state',
+                'ship_from_zip_code',
+                'ship_from_country',
+                'support_po_box',
+                'active_for_inventory',
+                'claim_email',
+                'claim_language',
+                'reseller_marge_details',
+                'has_ground_service',
+                'special_handling_price',
+            ])
+            ->using(CarrierPlatformCountry::class);
+    }
+
+    public function getActivePlatformCountryAttribute()
+    {
+        return $this->platformCountries()
+            ->wherePivot('platform_country_id', request()->platformCountry->id)
+            ->first();
+    }
+
+
 }
