@@ -20,7 +20,10 @@ class Comment extends Model  implements HasMedia
         parent::boot();
 
         static::creating(function ($comment) {
-            $comment->user_id = auth()->user()->id;
+            $user = auth()->user();
+            if($user){
+                $comment->user_id = $user->id;
+            }
         });
     }
 
