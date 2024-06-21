@@ -12,7 +12,7 @@ class Comment extends Model  implements HasMedia
     use HasFactory, InteractsWithMedia;
 
     protected $fillable = [
-        'comment', 'user_id'
+        'comment', 'user_id', 'commentable_id', 'commentable_type', 'platform'
     ];
 
     public static function boot()
