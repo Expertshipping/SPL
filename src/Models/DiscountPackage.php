@@ -9,6 +9,8 @@ class DiscountPackage extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
     protected $casts = [
         'default_b2c' => 'boolean',
         'default_fullrate_retail_reseller' => 'boolean',
