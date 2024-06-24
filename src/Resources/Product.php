@@ -33,6 +33,7 @@ class Product extends JsonResource
             'image' => $this->resource->getFirstMediaUrl('products-images'),
             'managed_stock' => $this->managed_stock,
             'hide_from_pos' => $this->hide_from_pos,
+            'name_origin' => $this->getTranslations('name'),
         ];
     }
 }

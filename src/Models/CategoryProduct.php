@@ -134,10 +134,13 @@ class CategoryProduct extends Model implements HasMedia
         return [
             "id"            => $category->id,
             "name"          => $category->name,
+            "name_origin"   => $category->getTranslations('name'),
             "created_at"    => $category->created_at,
             "updated_at"    => $category->updated_at,
             "color"         => $category->color,
             "consommable"   => $category->consommable,
+            "inventoriable" => $category->inventoriable,
+            "inventory_report_page_number"   => $category->inventory_report_page_number,
             "products"      => (new ProductCollection($products))->collection,
             "childrens"     => $childrens,
         ];
