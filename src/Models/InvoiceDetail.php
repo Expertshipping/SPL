@@ -31,7 +31,6 @@ class InvoiceDetail extends Model
     ];
 
 
-    // protected $appends = ['total_discount'];
 
     protected $casts = [
         'taxes' => 'array',
@@ -71,7 +70,7 @@ class InvoiceDetail extends Model
             return "Insurance : " . $this->invoiceable->transaction_number;
         }
 
-        if ($this->invoiceable_type === Product::class) {
+        if ($this->invoiceable_type === "App\\Product") {
             if (!$this->invoiceable) {
                 return "Other services";
             }
