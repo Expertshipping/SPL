@@ -5,6 +5,7 @@ namespace ExpertShipping\Spl\Models;
 use ExpertShipping\Spl\Models\Traits\HasTrackingLink;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class DropOff extends Model
 {
@@ -67,5 +68,14 @@ class DropOff extends Model
             ->where('group_uuid', $this->group_uuid)
             ->with('carrier')
             ->get();
+    }
+
+    public function getToken(){
+        if($this->receipt_token){
+            return $this->receipt_token;
+        }
+        $token = Str::random(8);
+        $this->update(['receipt_token' => $token]);
+        return $token;
     }
 }
