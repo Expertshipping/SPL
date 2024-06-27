@@ -6,6 +6,7 @@ use ExpertShipping\Spl\Models\Retail\AgentCommission;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use ExpertShipping\Spl\Models\LocalInvoice;
 
 class InvoiceDetail extends Model
 {

@@ -844,15 +844,10 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
     public function getUserRoleAttribute()
     {
         $company = $this->loadMissing('companies')->companies->where('id', $this->company_id)->first();
-        if ($company) {
-            return $company->pivot->appRole->slug;
+        if (!$company) {
+            return null;
         }
-
-        if($this->company->user_id == $this->id){
-            return 'manager';
-        }
-
-        return 'manager';
+        return $company->pivot->appRole->slug;
     }
 
 

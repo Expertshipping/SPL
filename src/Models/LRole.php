@@ -8,6 +8,4 @@ use Illuminate\Database\Eloquent\Model;
 class LRole extends Model
 {
     use HasFactory;
-
-    protected $guarded = [];
 }
