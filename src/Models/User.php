@@ -81,7 +81,6 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
         'has_right_to_commission',
         'preferred_language',
-        'platform_country_id',
     ];
 
     protected $attributes = [
@@ -795,11 +794,6 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
             $carriersWithCompanyAccount = $this->company
                 ->carriers()
-                ->whereHas('carrier', function($q){
-                    $q->whereHas('platformCountries', function($q){
-                        $q->where('platform_country_id', request()->platformCountry?->id);
-                    });
-                })
                 ->with('carrier')
                 ->get()
                 ->pluck('carrier.slug')
@@ -1023,7 +1017,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
             return true;
         }
 
-        if ((request()->platformCountry?->code ?? 'CA') === 'MA') {
+        if (env('WHITE_LABEL_COUNTRY', 'CA') === 'MA') {
             return true;
         }
 
@@ -1352,10 +1346,5 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         }
 
         $this->updateDefaultPaymentMethod($paymentMethod);
-    }
-
-    public function platformCountry()
-    {
-        return $this->belongsTo(PlatformCountry::class);
     }
 }

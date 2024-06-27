@@ -49,7 +49,7 @@
                         </td>
                         <td align="right">
                             <div class="invoice-date-details">
-                                {{ \Illuminate\Support\Str::upper(__($invoice->status)) }}
+                                {{ $invoice->status }}
                             </div>
                         </td>
                     </tr>
@@ -79,6 +79,34 @@
 
     <hr>
 
+{{--    <table width="100%">--}}
+{{--        <tr>--}}
+{{--            <td width="130px">--}}
+{{--                <div class="billing-information-title">--}}
+{{--                    {{ __('Credit Card *****1234') }} :--}}
+{{--                </div>--}}
+{{--            </td>--}}
+{{--            <td>--}}
+{{--                <div class="billing-information-title">--}}
+{{--                    <strong>12.0$ USD</strong>--}}
+{{--                </div>--}}
+{{--            </td>--}}
+{{--        </tr>--}}
+{{--        <tr>--}}
+{{--            <td width="130px">--}}
+{{--                <div class="billing-information-title">--}}
+{{--                    {{ __('Solde') }} :--}}
+{{--                </div>--}}
+{{--            </td>--}}
+{{--            <td>--}}
+{{--                <div class="billing-information-title">--}}
+{{--                    <strong>100.0$ USD</strong>--}}
+{{--                </div>--}}
+{{--            </td>--}}
+{{--        </tr>--}}
+{{--    </table>--}}
+{{--    <br>--}}
+
     <table width="100%" class="table-1">
         <tr>
             <th><div class="text-white">{{ __('# of Shipments') }}</div></th>
@@ -107,24 +135,24 @@
                     <tr>
                         <td width="100px">
                             <div class="billing-information-title">
-                                {{ __('Invoice Total') }} :
+                                {{ __('Subtotal') }} :
                             </div>
                         </td>
                         <td align="right" width="120px">
                             <div class="billing-information-title text-right">
-                                <strong>{{ SplMoney::format($invoice->total) }}</strong>
+                                <strong>{{ SplMoney::format($detailsTaxes->preTax) }}</strong>
                             </div>
                         </td>
                     </tr>
 
-{{--                    <tr>--}}
-{{--                        <td width="100px">--}}
-{{--                            <div class="billing-information-title">--}}
-{{--                                {{ __('Tax Breakdown') }} :--}}
-{{--                            </div>--}}
-{{--                        </td>--}}
-{{--                        <td align="right" width="120px"></td>--}}
-{{--                    </tr>--}}
+                    <tr>
+                        <td width="100px">
+                            <div class="billing-information-title">
+                                {{ __('Tax Breakdown') }} :
+                            </div>
+                        </td>
+                        <td align="right" width="120px"></td>
+                    </tr>
 
                     <tr>
                         <td width="100px">
@@ -139,7 +167,6 @@
                         </td>
                     </tr>
 
-                    @if(request()->platformCountry->code === 'CA')
                     <tr>
                         <td width="100px">
                             <div class="billing-information-title">
@@ -191,7 +218,6 @@
                             </div>
                         </td>
                     </tr>
-                    @endif
 
                     <tr>
                         <td width="100px">
@@ -225,7 +251,7 @@
                         </td>
                         <td align="right" width="120px">
                             <div class="billing-information-title text-right">
-                                <strong>{{ SplMoney::format($invoice->total_due_amount) }}</strong>
+                                <strong>{{ SplMoney::format($invoice->total) }}</strong>
                             </div>
                         </td>
                     </tr>
@@ -243,7 +269,6 @@
 
         <hr>
 
-        @if(request()->platformCountry->code === 'CA')
         <table width="100%">
             <tr>
                 <td>
@@ -258,8 +283,8 @@
                 </td>
             </tr>
         </table>
+
         <hr>
-        @endif
 
         <div class="terms">
             <strong>{{ __('Terms & Conditions') }}</strong> <br>

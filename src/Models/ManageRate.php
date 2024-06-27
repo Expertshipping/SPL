@@ -142,7 +142,7 @@ class ManageRate
             $totalWeight = collect($packages)->sum('weight');
             $country = Str::upper($shipmentCountries['destination']);
 
-            if ($weightUnit !== (request()->platformCountry?->weight_unit ?? 'LB')) {
+            if ($weightUnit !== env('WHITE_LABEL_WEIGHT_UNIT', 'LB')) {
                 if ($weightUnit === 'LB') {
                     $totalWeight = $totalWeight * 0.453592;
                 }

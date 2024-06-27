@@ -30,23 +30,23 @@ class TaxService
         if($isPreTaxed){
             $preTaxPrice = $amount;
         }else{
-            if((request()->platformCountry?->code ?? 'CA')==='CA'){
+            if(env('WHITE_LABEL_COUNTRY')==='CA'){
                 $preTaxPrice = round($amount / (1 + ($this->tps($state) / 100) + ($this->tvp($state) / 100)), 2);
             }
 
-            if((request()->platformCountry?->code ?? 'CA')==='MA'){
+            if(env('WHITE_LABEL_COUNTRY')==='MA'){
                 $preTaxPrice = round($amount / (1 + (20 / 100)), 2);
             }
         }
 
-        if($toCountry !== (request()->platformCountry?->code ?? 'CA')){
+        if($toCountry !== env('WHITE_LABEL_COUNTRY')){
             return [
                 'taxes' => [],
                 'preTax' => $preTaxPrice,
             ];
         }
 
-        if((request()->platformCountry?->code ?? 'CA')==='CA'){
+        if(env('WHITE_LABEL_COUNTRY')==='CA'){
             $tpsAmount = $this->calcTps($state, $preTaxPrice);
             $tvpAmount = $this->calcTvp($state, $preTaxPrice);
 
@@ -67,7 +67,7 @@ class TaxService
             ];
         }
 
-        if((request()->platformCountry?->code ?? 'CA')==='MA'){
+        if(env('WHITE_LABEL_COUNTRY')==='MA'){
             $taxes = [];
             $taxes['TVA']= $preTaxPrice*0.2;
             return[

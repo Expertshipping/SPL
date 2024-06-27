@@ -102,18 +102,9 @@ class LocalInvoice extends Model
 
     private function isPaid()
     {
-        return (
-            !is_null($this->paid_at)
+        return !is_null($this->paid_at)
             && is_null($this->refunded_at)
-            && is_null($this->canceled_at)
-        ) || $this->unpaidDetails()->count() === 0;
-    }
-
-    private function unpaidDetails(){
-        return $this->chargeable_details
-                ->where(function($detail){
-                    return !isset($detail->meta_data['payment_date']);
-                });
+            && is_null($this->canceled_at);
     }
 
     private function isUnderValidation()
@@ -687,18 +678,14 @@ class LocalInvoice extends Model
     public function getTotalPaidAmountAttribute()
     {
         return $this->chargeable_details
-            ->where(function($detail){
-                return isset($detail->meta_data['payment_date']);
-            })
+            ->whereNotNull('meta_data->payment_date')
             ->sum('price');
     }
 
     public function getTotalDueAmountAttribute()
     {
         return $this->chargeable_details
-            ->where(function($detail){
-                return !isset($detail->meta_data['payment_date']);
-            })
+            ->whereNull('meta_data->payment_date')
             ->sum('price');
     }
 

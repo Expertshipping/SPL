@@ -5,7 +5,7 @@ class Money
 {
     const MONEYSYMBOLS = [
         'CAD' => '$', // Canadian Dollar
-        'MAD' => '', // Moroccan Dirham
+        'MAD' => 'د.م.', // Moroccan Dirham
         'USD' => '$', // US Dollar
         'EUR' => '€', // Euro
         'GBP' => '£', // British Pound
@@ -18,12 +18,8 @@ class Money
         'ZAR' => 'R', // South African Rand
         'BRL' => 'R$', // Brazilian Real,
     ];
-    public static function format($amount, $currency= null)
+    public static function format($amount, $currency="CAD")
     {
-        if(!$currency){
-            $currency = request()->platformCountry->currency ?? 'CAD';
-        }
-
         $amount = number_format(round($amount, 2), 2);
         $amount = str_replace(',','',$amount);
 

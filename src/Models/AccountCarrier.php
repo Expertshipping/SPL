@@ -19,8 +19,7 @@ class AccountCarrier extends Model
         'pickup',
         'name',
         'type',
-        'reseller_marge',
-        'platform_country_id',
+        'reseller_marge'
     ];
 
     protected $casts = [
@@ -45,10 +44,5 @@ class AccountCarrier extends Model
     public function carrierAccountUsers()
     {
         return $this->morphMany(CarrierAccountUsers::class, 'userable');
-    }
-
-    public function platformCountry()
-    {
-        return $this->belongsTo(PlatformCountry::class);
     }
 }

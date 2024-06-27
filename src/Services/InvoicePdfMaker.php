@@ -3,9 +3,11 @@
 namespace ExpertShipping\Spl\Services;
 
 use Barryvdh\DomPDF\Facade\Pdf;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use ExpertShipping\Spl\Models\LocalInvoice;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\View;
+use Spatie\Browsershot\Browsershot;
 use Symfony\Component\HttpFoundation\Response;
 
 class InvoicePdfMaker
@@ -14,7 +16,6 @@ class InvoicePdfMaker
 
     public function downloadAs(LocalInvoice $invoice)
     {
-        App::setLocale($invoice->company->local);
         $this->invoice = $invoice;
 //        return $this->view();
         return new Response($this->pdf(), 200, [

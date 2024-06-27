@@ -29,9 +29,4 @@ class DiscountPackage extends Model
             $discountPackage->discountPackageDetails()->delete();
         });
     }
-
-    public function platformCountry()
-    {
-        return $this->belongsTo(PlatformCountry::class);
-    }
 }

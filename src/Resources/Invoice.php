@@ -21,7 +21,7 @@ class Invoice extends JsonResource
             'date'              => $this->created_at->format("D F Y g:i"),
             'status'            => $this->status,
             'paid_at'           => $this->paid_at?->format("D F Y g:i"),
-            'currency'          => request()->platformCountry?->currency ?? 'CAD',
+            'currency'          => env('WHITE_LABEL_CURRENCY', 'CAD'),
             'company'           => new Company($this->whenLoaded('company')),
 
             'payment_gateway'   => $this->whenLoaded('paymentGateway'),

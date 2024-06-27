@@ -1,5 +1,6 @@
+
 <!doctype html>
-<html lang="{{$invoice->company->local}}">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -202,16 +203,6 @@
         .text-uppercase{
             text-transform: uppercase;
         }
-
-        .ar{
-            font-family: DejaVu Sans, sans-serif;
-            direction: rtl;
-        }
-
-        .logo{
-            max-height: 40px;
-            max-width: 147px;
-        }
     </style>
 </head>
 <body>
@@ -219,7 +210,7 @@
     <table width="100%">
         <tr>
             <td>
-                <img src="{{ asset('domains/'. request()->getHost() .'/logo-color.png') }}" alt="" class="logo">
+                <img src="{{ asset('domains/'. request()->getHost() .'/logo-color.png') }}" alt="" width="147px">
             </td>
             <td align="right">
                 <div class="invoice-number">
