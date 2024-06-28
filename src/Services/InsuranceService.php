@@ -2,21 +2,19 @@
 
 namespace ExpertShipping\Spl\Services;
 
+use App\Jobs\CancelShipment;
 use App\Notifications\CreateInsuranceTransactionFailed;
 use App\Notifications\ShipmentInsured;
-use ExpertShipping\Spl\Models\Claim;
 use ExpertShipping\Spl\Models\Insurance;
-use ExpertShipping\Spl\Models\Service;
 use ExpertShipping\Spl\Models\Shipment;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class InsuranceService
 {
-    private const EXPERT_SHIPPING_RATE_RETAIL = 2.5;
-    private const EXPERT_SHIPPING_RATE_BUSINESS = 2;
     private $http;
     private static $carriers = [
         'ups' => 1,
@@ -147,73 +145,6 @@ class InsuranceService
         "canpar_usa" => "USA",
         "canpar_international" => "International",
         'PPX' => 'PPE',
-    ];
-
-    private static $serviceLimit = [
-        '03' => 1000,
-        '14' => 5000,
-        '65' => 2500,
-        '59' => 5000,
-        '12' => 1000,
-        '54' => 5000,
-        '01' => 1000,
-        '02' => 5000,
-        '11' => 2500,
-        '08' => 2500,
-        '07' => 5000,
-        '13' => 1000,
-        'FEDEX_2_DAY' => 5000,
-        'FEDEX_EXPRESS_SAVER' => 1000,
-        'FEDEX_GROUND' => 1000,
-        'INTERNATIONAL_ECONOMY' => 2500,
-        'INTERNATIONAL_PRIORITY' => 5000,
-        'STANDARD_OVERNIGHT' => 5000,
-        'FEDEX_2_DAY_AM' => 5000,
-        'FIRST_OVERNIGHT' => 5000,
-        'GROUND_HOME_DELIVERY' => 1000,
-        'INTERNATIONAL_FIRST' => 5000,
-        'PRIORITY_OVERNIGHT' => 5000,
-        'L' => 5000,
-        'T' => 5000,
-        'K' => 5000,
-        'X' => 1000,
-        'U' => 5000,
-        'P' => 5000,
-        'M' => 5000,
-        'Y' => 5000,
-        'D' => 5000,
-        'canada-post_expedited_parcel' => 1000,
-        'canada-post_regular_parcel' => 500,
-        'canada-post_priority' => 5000,
-        'canada-post_xpresspost' => 2500,
-        'PurolatorExpress' => 5000,
-        'PurolatorExpress12PM' => 5000,
-        'PurolatorExpressBox9AM' => 5000,
-        'PurolatorExpressEnvelope10:30AM' => 1000,
-        'PurolatorExpressEnvelope9AM' => 1000,
-        'PurolatorExpressPack' => 5000,
-        'PurolatorExpressPack12PM' => 5000,
-        'PurolatorGround10:30AM' => 1000,
-        'PurolatorExpress10:30AM' => 5000,
-        'PurolatorExpress9AM' => 5000,
-        'PurolatorExpressBox10:30AM' => 5000,
-        'PurolatorExpressEnvelope' => 1000,
-        'PurolatorExpressEnvelope12PM' => 1000,
-        'PurolatorExpressPack10:30AM' => 5000,
-        'PurolatorExpressPack9AM' => 5000,
-        'PurolatorGround' => 1000,
-        'PurolatorGround9AM' => 1000,
-        'canpar_ground' => 1000,
-        'canpar_overnight' => 5000,
-        'canpar_select_pak' => 5000,
-        'canpar_select_letter' => 5000,
-        'canpar_select_usa' => 2500,
-        'canpar_usa_pack' => 2500,
-        'canpar_international' => 1000,
-        'canpar_overnight_letter' => 5000,
-        'canpar_select' => 2500,
-        'canpar_usa' => 2500,
-        'PPX' => 5000,
     ];
 
     private static $countries = [
@@ -1373,17 +1304,17 @@ class InsuranceService
 
     public function __construct()
     {
-        $this->http = Http::withBasicAuth(config('services.insurance.username'), config('services.insurance.password'))
-            ->baseUrl(config('services.insurance.base_uri'));
+        $this->http = Http::baseUrl(config('services.insurance.base_uri'));
     }
 
     public function getRate($insuredValue, $shipFromCountry, $shipToCountry, $carrier, $serviceCode, $cost = false)
     {
+        $service = \App\Service::where('code', $serviceCode)->first();
         $insuredValueInUSD = round(($insuredValue / 1.2), 0);
         $availableDestination = collect(static::$countries)->where('code', $shipToCountry)->first();
         if(!array_key_exists($serviceCode, static::$services)){
             return [
-                'message' => Service::where('code', $serviceCode)->first()->name .' '. __('is not supported'),
+                'message' => $service->name .' '. __('is not supported'),
                 'rate'  => false
             ];
         }
@@ -1395,16 +1326,16 @@ class InsuranceService
             ];
         }
 
-        if(!isset(static::$serviceLimit[$serviceCode])){
+        if(!$service->ecabrella_limit){
             return [
-                'message' => Service::where('code', $serviceCode)->first()->name . __(' is not a supported service'),
+                'message' => $service->name . ' ' . __('is not a supported service'),
                 'rate'  => false
             ];
         }
 
-        if(static::$serviceLimit[$serviceCode] <= $insuredValueInUSD){
+        if($service->ecabrella_limit <= $insuredValueInUSD){
             return [
-                'message' => __('The max supported value for this service is : ') . ($this->convertToCanadianDollar(static::$serviceLimit[$serviceCode]) - 1) . __(" american dollars"),
+                'message' => __('The max supported value for this service is : ') . ($this->convertToCanadianDollar($service->ecabrella_limit) - 1) . __(" american dollars"),
                 'rate'  => false
             ];
         }
@@ -1431,33 +1362,33 @@ class InsuranceService
             //     $rate = self::EXPERT_SHIPPING_RATE_BUSINESS;
             // }
 
-            // $calculatedRate = max($min, $insuranceRate) * $rate;
+            // $calulatedRate = max($min, $insuranceRate) * $rate;
 
             $min = 8;
-            $insuranceMargeRate = auth()->user()->company->account_type === "business" ? 0.02 : 0.04;
-            $calculatedRate = max($min, $insuredValue * $insuranceMargeRate);
-            $calculatedRate = round($calculatedRate, 2);
+            $calulatedRate = max($min, $insuredValue * 0.04);
+            $calulatedRate = round($calulatedRate, 2);
         }else{
-            $calculatedRate = max($min, $insuranceRate);
+            $calulatedRate = max($min, $insuranceRate);
         }
 
-        $charge = $calculatedRate;
+        $charge = $calulatedRate;
 
         if(auth()->user()->company->is_retail_reseller
             && isset(auth()->user()->company->theme_setting['insurance_rate'])
             && auth()->user()->company->theme_setting['insurance_rate']!=0
         ){
-            $calculatedRate += ($calculatedRate * auth()->user()->company->theme_setting['insurance_rate']) / 100;
+            $calulatedRate += ($calulatedRate * auth()->user()->company->theme_setting['insurance_rate']) / 100;
         }
+
 
         return [
             'message' => 'calculated',
-            'rate'  => round(($calculatedRate), 2),
+            'rate'  => round(($calulatedRate), 2),
             'charge'  => round(($charge), 2),
         ];
     }
 
-    public function createTransaction(Shipment $shipment)
+    public function createTransaction(\App\Shipment $shipment)
     {
         $params = [
             'userId' => config('services.insurance.user_id'),
@@ -1483,7 +1414,7 @@ class InsuranceService
         }
     }
 
-    public function createTransactionForInsurance(Insurance $insurance, $user = null)
+    public function createTransactionForInsurance(\App\Insurance $insurance, $user = null)
     {
         if(!$user){
             $this->user = auth()->user();
@@ -1492,43 +1423,84 @@ class InsuranceService
         }
 
         $params = [
-            'userId' => config('services.insurance.user_id'),
-            'carrier' => (string) static::$carriers[$insurance->carrier->slug],
-            'service' => static::$services[$insurance->service->code],
-            'declaredValue' => (string) round(($insurance->declared_value / 1.2), 0),
-            'shipFrom' => $insurance->ship_from,
-            'shipTo' => $insurance->ship_to,
-            'trackingNum' => $insurance->tracking_number,
-            'shipDate' => $insurance->ship_date->format('Y-m-d'),
+            "Carrier" => (string) static::$carriers[$insurance->carrier->slug],
+            "Service" => (string) static::$services[$insurance->service->code],
+            "DeclaredValue" => round(($insurance->declared_value / 1.2), 0),
+            "FromCountryCode" => $insurance->ship_from,
+            "ToCountryCode" => $insurance->ship_to,
+            "TrackingNum" => $insurance->tracking_number,
+            "ShipDate" => $insurance->ship_date->format('Y-m-d'),
         ];
 
-        $response = $this->http->get('TransactionService.svc/CreateTrans', $params);
-        if($response->status()===200 && $response->json()['CreateTransResult']['Result']==="Success"){
+        if($insurance->shipment){
+            $params['FromCountryCode'] = $insurance->shipment->from_country;
+            $params['FromName'] = $insurance->shipment->from_name;
+            $params['FromEmail'] = $insurance->shipment->from_email;
+            $params['FromPhone'] = $insurance->shipment->from_phone;
+            $params['FromAddress1'] = $insurance->shipment->from_address_1;
+            $params['FromAddress2'] = $insurance->shipment->from_address_2;
+            $params['FromCity'] = $insurance->shipment->from_city;
+            $params['FromState'] = $insurance->shipment->from_province;
+            $params['FromZip'] = $insurance->shipment->from_zip_code;
+
+
+            $params['ToCountryCode'] = $insurance->shipment->to_country;
+            $params['ToName'] = $insurance->shipment->to_name;
+            $params['ToEmail'] = $insurance->shipment->to_email;
+            $params['ToPhone'] = $insurance->shipment->to_phone;
+            $params['ToAddress1'] = $insurance->shipment->to_address_1;
+            $params['ToAddress2'] = $insurance->shipment->to_address_2;
+            $params['ToCity'] = $insurance->shipment->to_city;
+            $params['ToState'] = $insurance->shipment->to_province;
+            $params['ToZip'] = $insurance->shipment->to_zip_code;
+        }else{
+            $params['FromAddress1'] = $insurance->from['address'];
+            $params['FromCity'] = $insurance->from['city'];
+            $params['FromState'] = $insurance->from['state'];
+            $params['FromZip'] = $insurance->from['zip_code'];
+
+            $params['ToAddress1'] = $insurance->to['address'];
+            $params['ToCity'] = $insurance->to['city'];
+            $params['ToState'] = $insurance->to['state'];
+            $params['ToZip'] = $insurance->to['zip_code'];
+        }
+
+        if($params['TrackingNum'] === '1ZXXXXXXXXXXXXXXXX'){
+            $params['TrackingNum'] = $insurance->shipment->uuid ?? $insurance->tracking_number;
+        }
+
+        $response = $this->callApi('post', 'transactions', $params);
+        if($response->status()===200){
             $insurance->update([
-                'transaction_number' => $response->json()['CreateTransResult']['TransactionNum'],
-                'status' => 'completed'
+                'transaction_number' => $response->json()['transactionNum'],
+                'status' => 'completed',
+                'charge' => $response->json()['fee'] ?? null
             ]);
+
             return [
                 "succeeded" => true,
                 "message" => "success",
-                "transaction" => $response->json()['CreateTransResult']['TransactionNum']
+                "transaction" => $response->json()['transactionNum']
             ];
         }else{
+            if($insurance->shipment){
+                dispatch_sync(new CancelShipment($insurance->shipment->load('pickup.shipments')));
+                // $insurance->shipment->delete();
+                throw ValidationException::withMessages([
+                    'payment_failed' => "Insurance not created. response is : {$response->body()}"
+                ]);
+            }
             Log::critical("Insurance not created. response is : {$response->body()}");
-            (new AnonymousNotifiable)
-                ->route('mail', [config('mail.to.info'),...$this->user->company->managers->filter(fn($m) => $m->pivot->activate_notification)->pluck('email')->toArray()])
+            $emails = [config('mail.to.info'),...$this->user->company->managers->filter(fn($m) => $m->pivot->activate_notification)->pluck('email')->toArray()];
+            $emails = array_filter($emails);
+
+            (new AnonymousNotifiable())
+                ->route('mail', $emails)
                 ->notify(new CreateInsuranceTransactionFailed($response->body(), $insurance, $this->user));
         }
 
-        if($response->json()['CreateTransResult']['Result']==="Duplicated"){
-            $error = __("A transaction with the tracking number you have provided already exists");
-        }
-        else if($response->json()['CreateTransResult']['Result']==="OverLimit"){
-            $error = __('The max supported value for this service is : ') .  ($this->convertToCanadianDollar(static::$serviceLimit[$insurance->service->code])-1) . __(" american dollars");
-        }
-        else{
-            $error = __("Your transaction cannot be completed!");
-        }
+        $error = $response->json()['message'] ?? $response->body();
+
         return [
             "succeeded" => false,
             "message" => $error,
@@ -1537,13 +1509,15 @@ class InsuranceService
 
     public function voidTransaction(Shipment $shipment)
     {
-        $params = [
-            'userId' => config('services.insurance.user_id'),
-            'trackingNum' => $shipment->tracking_number,
-        ];
+        $tackingNum = $shipment->tracking_number;
 
-        $response = $this->http->get('TransactionService.svc/VoidTrans', $params);
-        if($response->status()===200 && $response->json()['VoidTransResult']['Result']==="Success"){
+        if($tackingNum === '1ZXXXXXXXXXXXXXXXX'){
+            $tackingNum = $shipment->uuid;
+        }
+
+        $response = $this->callApi('post', "transactions/void/$tackingNum");
+
+        if($response->status()===200){
             $shipment->update([
                 'insurance_transaction_voided' => true
             ]);
@@ -1552,12 +1526,15 @@ class InsuranceService
 
     public function voidTransactionForInsurance(Insurance $insurance)
     {
-        $params = [
-            'userId' => config('services.insurance.user_id'),
-            'trackingNum' => $insurance->tracking_number,
-        ];
-        $response = $this->http->get('TransactionService.svc/VoidTrans', $params);
-        if($response->status()===200 && $response->json()['VoidTransResult']['Result']==="Success"){
+        $tackingNum = $insurance->tracking_number;
+
+        if($tackingNum === '1ZXXXXXXXXXXXXXXXX'){
+            $tackingNum = $insurance->shipment->uuid;
+        }
+
+        $response = $this->callApi('post', "transactions/void/$tackingNum");
+
+        if($response->status()===200){
             $insurance->update([
                 'status' => 'voided'
             ]);
@@ -1567,152 +1544,112 @@ class InsuranceService
         return false;
     }
 
-    public function createClaim(Claim $claim)
+    public function createClaim(\App\Claim $claim)
     {
-        if($claim->claimable_type === Shipment::class){
-            $shipment = $claim->claimable;
-            $sender = [
-                'Name'=> $shipment->from_name,
-                'Phone'=> $shipment->from_phone,
-                'Email'=> $shipment->from_email,
-                'Address1'=> $shipment->from_address_1,
-                'Address2'=> $shipment->from_address_2,
-                'City'=> $shipment->from_city,
-                'State'=> $shipment->from_state ?? 'N/A',
-                'PostalCode'=> $shipment->from_zip_code,
-                'CountryCode'=> $shipment->from_country,
-                'IsResidential'=> false,
+        $senderData = $claim->meta_data['sender'];
+        $sender = [
+            'Name'=> $senderData['Name'],
+            'Phone'=> $senderData['Phone'],
+            'Email'=> $senderData['Email'],
+            'Address1'=> $senderData['Address1'],
+            'Address2'=> $senderData['Address2'],
+            'City'=> $senderData['City'],
+            'State'=> $senderData['State']??'N/A',
+            'PostalCode'=> $senderData['PostalCode'],
+            'CountryCode'=> $senderData['CountryCode'],
+            'IsResidential'=> $senderData['IsResidential'],
+        ];
+
+        $recipientData = $claim->meta_data['recipient'];
+        $recipient = [
+            'Name'=> $recipientData['Name'],
+            'Phone'=> $recipientData['Phone'],
+            'Email'=> $recipientData['Email'],
+            'Address1'=> $recipientData['Address1'],
+            'Address2'=> $recipientData['Address2'],
+            'City'=> $recipientData['City'],
+            'State'=> $recipientData['State']??'N/A',
+            'PostalCode'=> $recipientData['PostalCode'],
+            'CountryCode'=> $recipientData['CountryCode'],
+            'IsResidential'=> true,
+        ];
+
+        $claimFiles = $claim->media->map(function($file){
+            //Case copy of label for dropoff insurances
+            if($file->collection_name==="evidences_3"){
+                $fileType = 6;
+            }else{
+                $fileType = static::$fileTypes[$file->collection_name]??1;
+            }
+            return [
+                'FileType' => $fileType,
+                'FileUrl' => $file->getUrl(),
+                'FileName' => $file->file_name
             ];
+        })->toArray();
 
-            $recipient = [
-                'Name'=> $shipment->to_name,
-                'Phone'=> $shipment->to_phone,
-                'Email'=> $shipment->to_email,
-                'Address1'=> $shipment->to_address_1,
-                'Address2'=> $shipment->to_address_2,
-                'City'=> $shipment->to_city,
-                'State'=> $shipment->to_state ?? 'N/A',
-                'PostalCode'=> $shipment->to_zip_code,
-                'CountryCode'=> $shipment->to_country,
-                'IsResidential'=> $shipment->residential,
-            ];
-
-            // $claimFiles = $claim->media->map(function($file){
-            //     //Case copy of label for dropoff insurances
-            //     if($file->collection_name==="evidences_3"){
-            //         $fileType = 6;
-            //     }else{
-            //         $fileType = static::$fileTypes[$file->collection_name]??1;
-            //     }
-            //     return [
-            //         'FileType' => $fileType,
-            //         'Url' => $file->getUrl(),
-            //         'Name' => $file->file_name
-            //     ];
-            // })->toArray();
-
+        if($claim->claimable && $claim->claimable->shipment){
             array_push($claimFiles, [
                 'FileType' => 6,
-                'Url' => $shipment->label_url,
-                'Name' => "Copy of Label"
+                'FileUrl' => $claim->claimable->shipment->label_url,
+                'FileName' => "Copy of Label"
             ]);
-
-            // $hasSalvage = $claim->meta_data['claimType']=="2"?$claim->meta_data['hasSalvage']:false;
-            // $refundGiven = $claim->meta_data['replacementSent']?$claim->meta_data['refundGiven']:false;
-
-            $params = [
-                'UserId' => config('services.insurance.user_id'),
-                'TrackingNum' => $shipment->tracking_number,
-                'DiscoveredDate'=> $claim->meta_data['claim_details']['discoveredDate'],
-                'ClaimType'=> $claim->meta_data['claim_details']['claim_details']['claimType'],
-                'ClaimAmount'=> round(($claim->meta_data['claim_details']['claimAmount'] / 1.2), 0),
-                'LossType'=> $claim->meta_data['claim_details']['lossType'],
-                'Contents'=> $claim->meta_data['claim_details']['contents'],
-                'Sender'=> $sender,
-                'Recipient'=> $recipient,
-                'ClaimFiles'=> $claimFiles,
-            ];
-        }else{
-            $senderData = $claim->meta_data['sender'];
-            $sender = [
-                'Name'=> $senderData['Name'],
-                'Phone'=> $senderData['Phone'],
-                'Email'=> $senderData['Email'],
-                'Address1'=> $senderData['Address1'],
-                'Address2'=> $senderData['Address2'],
-                'City'=> $senderData['City'],
-                'State'=> $senderData['State']??'N/A',
-                'PostalCode'=> $senderData['PostalCode'],
-                'CountryCode'=> $senderData['CountryCode'],
-                'IsResidential'=> $senderData['IsResidential'],
-            ];
-
-            $recipientData = $claim->meta_data['recipient'];
-            $recipient = [
-                'Name'=> $recipientData['Name'],
-                'Phone'=> $recipientData['Phone'],
-                'Email'=> $recipientData['Email'],
-                'Address1'=> $recipientData['Address1'],
-                'Address2'=> $recipientData['Address2'],
-                'City'=> $recipientData['City'],
-                'State'=> $recipientData['State']??'N/A',
-                'PostalCode'=> $recipientData['PostalCode'],
-                'CountryCode'=> $recipientData['CountryCode'],
-                'IsResidential'=> true,
-            ];
-
-            $claimFiles = $claim->media->map(function($file){
-                //Case copy of label for dropoff insurances
-                if($file->collection_name==="evidences_3"){
-                    $fileType = 6;
-                }else{
-                    $fileType = static::$fileTypes[$file->collection_name]??1;
-                }
-                return [
-                    'FileType' => $fileType,
-                    'Url' => $file->getUrl(),
-                    'Name' => $file->file_name
-                ];
-            })->toArray();
-
-            if($claim->claimable && $claim->claimable->shipment){
-                array_push($claimFiles, [
-                    'FileType' => 6,
-                    'Url' => $claim->claimable->shipment->label_url,
-                    'Name' => "Copy of Label"
-                ]);
-            }
-
-            // $hasSalvage = $claim->meta_data['claimType']=="2"?$claim->meta_data['hasSalvage']:false;
-            // $refundGiven = $claim->meta_data['replacementSent']?$claim->meta_data['refundGiven']:false;
-
-            $params = [
-                'UserId' => config('services.insurance.user_id'),
-                'TrackingNum' => $claim->meta_data['trackingNum'],
-                'DiscoveredDate'=> $claim->meta_data['discoveredDate'],
-                // 'CarrierClaimNum'=> '1234',
-                // 'Description'=> $claim->meta_data['contents'],
-                'ClaimType'=> $claim->meta_data['claimType'],
-                'ClaimAmount'=> round(($claim->meta_data['claimAmount'] / 1.2), 0),
-                // 'HasSignature'=> $claim->meta_data['hasSignature'],
-                'LossType'=> $claim->meta_data['lossType'],
-                // 'HasSalvage'=> $hasSalvage,
-                'Contents'=> $claim->meta_data['contents'],
-                // 'ReplacementSent'=> $claim->meta_data['replacementSent'],
-                // 'RefundGiven'=> $refundGiven,
-                // 'ShippingCharge'=> $claim->meta_data['shippingCharge'],
-                // 'ClientNum'=> $claim->meta_data['clientNum'],
-                'Sender'=> $sender,
-                'Recipient'=> $recipient,
-                'ClaimFiles'=> $claimFiles,
-            ];
         }
 
-        $response = $this->http->post('ClaimService.svc/CreateClaim', $params);
+        $hasSalvage = $claim->meta_data['claimType']=="2"?$claim->meta_data['hasSalvage']:false;
+        $refundGiven = $claim->meta_data['replacementSent']?$claim->meta_data['refundGiven']:false;
+
+        $params = [
+            'TrackingNum' => $claim->meta_data['trackingNum'],
+            'DiscoveredDate' => $claim->meta_data['discoveredDate'],
+            'ClaimType' => $claim->meta_data['claimType'],
+            'ClaimAmount' => round(($claim->meta_data['claimAmount'] / 1.2), 0),
+            'LossType' => $claim->meta_data['lossType'],
+            'HasSalvage' => $hasSalvage,
+            'Contents' => $claim->meta_data['contents'],
+            'ReplacementSent' => $claim->meta_data['replacementSent'],
+            'RefundGiven' => $refundGiven,
+            'ShippingCharge' => $claim->meta_data['shippingCharge'],
+            // "ClientNum" : "A100",
+            'Sender' => $sender,
+            'Recipient' => $recipient,
+            'ClaimFiles'=> $claimFiles,
+            // "OuterPackaging" : 1,
+            // "DoubleBoxed" : false
+        ];
+
+        $response = $this->callApi('post', 'claims', $params);
         return $response->json();
     }
 
     protected function convertToCanadianDollar($amount){
         return $amount*1.2;
+    }
+
+    private function callApi($method, $uri, $params = [])
+    {
+        $response = $this->http
+            ->withHeaders([
+                'Authorization' => 'Bearer ' . Cache::get('cabrella_access_token')
+            ])
+            ->{$method}($uri, $params);
+
+        if($response->status()===401){
+            $this->getAccessToken();
+            $response = $this->http->{$method}($uri, $params);
+        }
+
+        return $response;
+    }
+
+    private function getAccessToken()
+    {
+        $response = $this->http
+            ->withBasicAuth(config('services.insurance.username'), config('services.insurance.password'))
+            ->get('token/ApiToken');
+
+        $accessToken = $response->json()['access_token'] ?? null;
+
+        Cache::put('cabrella_access_token', $accessToken, now()->addHours(2));
     }
 }
