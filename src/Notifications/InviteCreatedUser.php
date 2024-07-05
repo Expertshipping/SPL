@@ -43,9 +43,15 @@ class InviteCreatedUser extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->line('Your manager invited your to activate your account.')
-            ->action('Activate my Account', $this->activationUrl ?: url("/activate-account/{$notifiable->activate_account_token}"))
-            ->line('Thank you!');
+            ->subject(__('Final Step to Set Up Your Password on Shippayless'))
+            ->greeting(__('Hi :name,', ['name' => $notifiable->name]))
+            ->line(__('Welcome to Shippayless!'))
+            ->line(__('We are thrilled to have you join our platform. To complete your account setup, there\'s just one simple step left: setting up your password.'))
+            ->action(__('Please follow this link to configure your password'), $this->activationUrl ?: url("/activate-account/{$notifiable->activate_account_token}"))
+            ->line(__('If you encounter any issues or have any questions, feel free to contact us at support@shippayless.com. We are here to help.'))
+            ->line(__('Thank you for your trust and welcome to the Shippayless community.'))
+            ->salutation(__('Best regards,'))
+            ->salutation(__('The Shippayless Team'));
     }
 
     /**
