@@ -68,7 +68,8 @@ class Company extends Model
         'legal_details'                 => 'array',
         'mailbox_alias'                 => 'array',
         'status'                        =>  CompanyStatusEnum::class,
-        'update_form'                   =>  'array'
+        'update_form'                   =>  'array',
+        'opening_days'                  =>  'array',
     ];
 
     public static function boot()
