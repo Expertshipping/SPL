@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('company_id');
             $table->string('day');
+            $table->date('day_date');
             $table->time('start_time');
             $table->time('end_time');
             $table->timestamps();
