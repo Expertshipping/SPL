@@ -19,7 +19,7 @@ return new class extends Migration
             $table->time('start_time');
             $table->time('end_time');
             $table->date('start_on');
-            $table->date('end_od');
+            $table->date('end_on');
             $table->string('notes');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('company_id');
