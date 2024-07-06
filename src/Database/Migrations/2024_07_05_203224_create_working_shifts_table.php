@@ -14,12 +14,15 @@ return new class extends Migration
         Schema::create('working_shifts', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->nullable()->index();
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('company_id');
             $table->string('day');
-            $table->date('day_date');
+            $table->integer('hours_number');
             $table->time('start_time');
             $table->time('end_time');
+            $table->date('start_on');
+            $table->date('end_od');
+            $table->string('notes');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('company_id');
             $table->timestamps();
         });
     }
@@ -29,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('notes');
+        Schema::dropIfExists('working_shifts');
     }
 };
