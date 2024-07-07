@@ -34,7 +34,7 @@ class CategoryProduct extends Model implements HasMedia
 
     public function getTitleAttribute()
     {
-        if ($this->parent_id) {
+        if ($this->parent) {
             return $this->parent->name . " >> " . $this->name;
         } else {
             return $this->name;
