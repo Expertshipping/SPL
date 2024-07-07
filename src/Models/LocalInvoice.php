@@ -595,12 +595,14 @@ class LocalInvoice extends Model
             ]);
         });
 
+        $total = $details->sum('total_ht') + $details->sum('total_taxes');
+
         $this->update([
-            'total' => $details->sum('total_ht') + $details->sum('total_taxes'),
+            'total' => $total,
             'total_ht' => $details->sum('total_ht'),
             'total_taxes' => $details->sum('total_taxes'),
             'total_discount' => $details->sum('total_discount'),
-            'paid_at' => $totalPaid === $this->total ? now() : null,
+            'paid_at' => $totalPaid === $total ? now() : null,
         ]);
     }
 
