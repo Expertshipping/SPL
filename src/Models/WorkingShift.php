@@ -10,6 +10,12 @@ class WorkingShift extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'days' => 'array',
+        'start_on' => 'date',
+        'end_on' => 'date',
+    ];
+
     public static function boot()
     {
         parent::boot();
@@ -20,12 +26,7 @@ class WorkingShift extends Model
 
     public function agent()
     {
-        return $this->belongsTo(Agent::class);
-    }
-
-    public function company()
-    {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(Agent::class, 'user_id');
     }
 
 }

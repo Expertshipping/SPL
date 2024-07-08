@@ -13,16 +13,13 @@ return new class extends Migration
     {
         Schema::create('working_shifts', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->nullable()->index();
-            $table->string('day');
-            $table->integer('hours_number');
-            $table->time('start_time');
-            $table->time('end_time');
+            $table->uuid()->index();
+            $table->json('days');
+            $table->integer('weekly_hours');
             $table->date('start_on');
             $table->date('end_on');
             $table->string('notes');
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('company_id');
             $table->timestamps();
         });
     }
