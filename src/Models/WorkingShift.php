@@ -8,6 +8,8 @@ use Ramsey\Uuid\Uuid;
 class WorkingShift extends Model
 {
 
+    protected $table = 'working_shifts';
+
     protected $guarded = [];
 
     protected $casts = [
@@ -24,9 +26,9 @@ class WorkingShift extends Model
         });
     }
 
-    public function agent()
+    public function user()
     {
-        return $this->belongsTo(Agent::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
 }
