@@ -24,7 +24,6 @@ class Company extends Model
     const ACCOUNT_TYPE_CONSUMER = 'consumer';
 
 
-    protected $appends = ['reseller', 'valid_subscription', 'trial_subscription'];
     protected $connection = 'mysql';
     protected $morphClass = 'company';
 

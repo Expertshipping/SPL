@@ -144,7 +144,7 @@ class Shipment extends JsonResource
             ->map(function($file){
                 return [
                     'name' => $file->name,
-                    'url' => $file->type==="url"?$file->url:$file->getMedia('attachment')[0]->getUrl(),
+                    'url' => $file->type === "url" ? $file->url : (isset($file->getMedia('attachment')[0]) ? $file->getMedia('attachment')[0]->getUrl() : null),
                 ];
             })->toArray();
     }

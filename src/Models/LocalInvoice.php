@@ -470,10 +470,8 @@ class LocalInvoice extends Model
 
     public function getDiscountReasonAttribute()
     {
-        return $this->details()
-            ->whereHas('discount')
-            ->with('discount')
-            ->get()
+        return $this->details
+            ->whereNotNull('discount_id')
             ->map(function ($detail) {
                 return [
                     'name' => $detail->discount->name,

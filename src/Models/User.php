@@ -126,8 +126,6 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         'dashboard_order' => 'array'
     ];
 
-    protected $appends = ['full_name', 'last_login'];
-
     public static $packs = [
         'blue' => [
             'color' => '',
