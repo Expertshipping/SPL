@@ -34,4 +34,11 @@ class CarrierInvoice extends Model
     {
         return $this->hasMany(Shipment::class);
     }
+
+    public function calculateTotal()
+    {
+        $this->update([
+            'total' => $this->trackings->sum('pivot.net_charge') + $this->trackings->sum('pivot.net_surcharge')
+        ]);
+    }
 }
