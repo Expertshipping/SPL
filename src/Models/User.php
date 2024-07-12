@@ -392,7 +392,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
      */
     public function sendPasswordResetNotification($token)
     {
-        $this->notify(new PasswordReset($token));
+        $this->notify(new \App\Notifications\PasswordReset($token));
     }
 
     /**
