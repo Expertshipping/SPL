@@ -50,6 +50,10 @@
     @include('spl::pdf.custom.page')
     <div class="page-break"></div>
     @include('spl::pdf.custom.page')
+    @if($shipment->company->account_type == 'retail')
+        <p style="page-break-before: always"></p>
+        @include('pdf.shipping-agreement')
+    @endif
 </body>
 
 </html>
