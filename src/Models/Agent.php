@@ -40,4 +40,10 @@ class Agent extends User
         return $this->hasMany(InvoiceRetail::class, 'user_id', 'id')
             ->orderBy('id', 'desc');
     }
+
+    public function workingShifts()
+    {
+        return $this->hasMany(WorkingShift::class, 'user_id', 'id')
+            ->orderBy('id', 'desc');
+    }
 }

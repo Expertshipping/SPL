@@ -36,12 +36,14 @@ class CashRegisterSession extends Model
         'calculated_total_refunds',
 
         'manager_validation_amount',
+        'cash_details',
     ];
 
 
     protected $casts = [
         'manager_validation' => 'boolean',
         'closed_at' => 'datetime',
+        'cash_details' => 'array'
     ];
 
     public function invoices()

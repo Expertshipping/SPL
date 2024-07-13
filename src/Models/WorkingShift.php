@@ -8,7 +8,15 @@ use Ramsey\Uuid\Uuid;
 class WorkingShift extends Model
 {
 
+    protected $table = 'working_shifts';
+
     protected $guarded = [];
+
+    protected $casts = [
+        'days' => 'array',
+        'start_on' => 'date',
+        'end_on' => 'date',
+    ];
 
     public static function boot()
     {
@@ -18,14 +26,9 @@ class WorkingShift extends Model
         });
     }
 
-    public function agent()
+    public function user()
     {
-        return $this->belongsTo(Agent::class);
-    }
-
-    public function company()
-    {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
 }

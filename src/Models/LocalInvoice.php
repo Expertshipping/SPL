@@ -388,6 +388,11 @@ class LocalInvoice extends Model
         return $this->hasMany(InvoiceDetail::class, 'invoice_id');
     }
 
+    public function posDetails()
+    {
+        return $this->hasMany(InvoiceDetail::class, 'invoice_id')->where('pos', true);
+    }
+
     public function getChangeDueAttribute()
     {
         $details = collect($this->metadata['payment_details']);
@@ -470,10 +475,8 @@ class LocalInvoice extends Model
 
     public function getDiscountReasonAttribute()
     {
-        return $this->details()
-            ->whereHas('discount')
-            ->with('discount')
-            ->get()
+        return $this->details
+            ->whereNotNull('discount_id')
             ->map(function ($detail) {
                 return [
                     'name' => $detail->discount->name,
