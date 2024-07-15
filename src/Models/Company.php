@@ -345,10 +345,10 @@ class Company extends Model
         $accountCarrier = null;
         if ($companyCarrier) {
             $selectedAccount = [
-                'id' => $companyCarrier->pivot->id,
+                'id' => $companyCarrier->id,
                 'type' => CompanyCarrier::class,
                 'carrier' => Str::upper($companyCarrier->slug),
-                'api_credentials' => $companyCarrier->pivot->options
+                'api_credentials' => $companyCarrier->options
             ];
         } else {
             $accountCarrier = AccountCarrier::whereHas('carrier', function ($q) use ($carrierSlug) {
