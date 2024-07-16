@@ -639,4 +639,11 @@ class Shipment extends Model
             'total_pieces' => count($this->package->meta_data) ?? 1,
         ];
     }
+
+    public function scopeNotImport($query)
+    {
+        return $query->whereHas('company', function ($query) {
+            $query->whereColumn('country', 'shipments.from_country');
+        });
+    }
 }
