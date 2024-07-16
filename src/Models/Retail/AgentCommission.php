@@ -58,7 +58,7 @@ class AgentCommission extends Model
 
     public function getNameAttribute()
     {
-        if ($this->commissionable_type == Insurance::class) {
+        if (in_array($this->commissionable_type, [Insurance::class, 'App\Insurance'])) {
             if($this->commissionable->shipment) {
                 return __("Insurance Shipment");
             }
@@ -66,12 +66,12 @@ class AgentCommission extends Model
             return __('Insurance Drop-off');
         }
 
-        if($this->commissionable_type == Product::class) {
+        if(in_array($this->commissionable_type, [Product::class, 'App\Product'])) {
             $product = $this->commissionable()->withTrashed()->first();
             return $product->name ?? __('Product');
         }
 
-        if($this->commissionable_type == Shipment::class) {
+        if(in_array($this->commissionable_type, [Shipment::class, 'App\Shipment'])) {
             return __('Shipment');
         }
 
@@ -83,10 +83,10 @@ class AgentCommission extends Model
         $payPeriod = PayPeriodsService::getPayPeriodsByDate($this->created_at->year, $this->created_at);
 
         return $this->agent
-            ->agentWarnings
-            ->where('created_at', '>=', $payPeriod['start'])
-            ->where('created_at', '<=', $payPeriod['end'])
-            ->count() > 0;
+                ->agentWarnings
+                ->where('created_at', '>=', $payPeriod['start'])
+                ->where('created_at', '<=', $payPeriod['end'])
+                ->count() > 0;
     }
 
     public function commission(){
@@ -118,5 +118,14 @@ class AgentCommission extends Model
     public function getDisplayStatusAttribute()
     {
         return __(self::DISPLAY_STATUSES[$this->status] ?? 'Unknown');
+    }
+
+    public function refund()
+    {
+        $this->replicate()->fill([
+            'status' => self::STATUS_PENDING_PAYMENT,
+            'commission_amount' => -$this->commission_amount,
+            'paid_amount' => -$this->paid_amount,
+        ])->save();
     }
 }
