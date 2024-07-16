@@ -337,6 +337,9 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
             ->whereNotNull('company_id')
             ->whereDoesntHave('bulkInvoices')
             ->whereNull('closed_at')
+            ->whereDoesntHave('details', function ($query) {
+                $query->whereNull('meta_data->payment_details');
+            })
             ->orderByDesc('id')
             ->first();
 
@@ -1078,10 +1081,10 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         return ($todoList = $this->company->halfTimeTodoList()) &&
 
             $this->timesheets()
-            ->whereDate('scheduled_start_date', today())
-            ->whereTime('scheduled_end_date', '>=', now()->subMinutes(30)->format("H:i"))
-            ->whereTime('scheduled_end_date', '<=', now()->addMinutes(30)->format("H:i"))
-            ->exists() &&
+                ->whereDate('scheduled_start_date', today())
+                ->whereTime('scheduled_end_date', '>=', now()->subMinutes(30)->format("H:i"))
+                ->whereTime('scheduled_end_date', '<=', now()->addMinutes(30)->format("H:i"))
+                ->exists() &&
 
             !$this->hasTodoResponse($todoList->id, true);
     }
