@@ -581,7 +581,21 @@ class ManageRate
                 ->map($this->mapDetails())
                 ->toArray();
 
+            $totalDetails = collect($rate->rateDetails)->sum('amount');
+            $rate->carrier_price = $this->formatPrice($totalDetails);
+            $rate->expert_shipping_price = $this->formatPrice($totalDetails);
+
             return $rate;
         });
+    }
+
+    private function formatPrice($price)
+    {
+        if(is_int($price)){
+            $price = sprintf("%.2f", $price);
+        }
+
+        $price = floatval(str_replace(",", "", $price));
+        return number_format($price, 2);
     }
 }
