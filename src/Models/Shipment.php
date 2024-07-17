@@ -198,6 +198,7 @@ class Shipment extends Model
 
         'failed_aramex_hub_label',
         'failed_pickup',
+        'retail_reseller_rate_details',
     ];
 
     protected $casts = [
@@ -228,6 +229,7 @@ class Shipment extends Model
 
         'failed_aramex_hub_label' => 'boolean',
         'failed_pickup' => 'boolean',
+        'retail_reseller_rate_details' => 'array',
     ];
 
     public static function boot()

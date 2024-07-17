@@ -34,9 +34,12 @@ class InvoicePdfMaker
 
     protected function pdf()
     {
+        $attribute = $this->invoice->company->is_retail_reseller ? 'retail_reseller_rate_details' : 'rate_details';
+
         $pdf = Pdf::loadView('spl::invoices.invoice.invoice', [
             'invoice' => $this->invoice,
             'detailsTaxes' => $this->invoice->details_taxes,
+            'rateDetailsAttribute' => $attribute,
         ]);
 
         $context = stream_context_create([
@@ -54,9 +57,12 @@ class InvoicePdfMaker
 
     protected function view()
     {
+        $attribute = $this->invoice->company->is_retail_reseller ? 'retail_reseller_rate_details' : 'rate_details';
+
         return View::make('spl::invoices.invoice.invoice', [
             'invoice' => $this->invoice,
             'detailsTaxes' => $this->invoice->details_taxes,
+            'rateDetailsAttribute' => $attribute,
         ]);
     }
 }

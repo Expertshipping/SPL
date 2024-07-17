@@ -695,20 +695,22 @@ class LocalInvoice extends Model
     }
 
     public function getTotalFreightChargesAttribute(){
+        $attribute = $this->company->is_retail_reseller ? 'retail_reseller_rate_details' : 'rate_details';
         return $this->chargeable_details
             ->where('invoiceable_type', 'App\\Shipment')
-            ->sum(function($detail){
-                return collect($detail->invoiceable->rate_details)
+            ->sum(function($detail) use ($attribute){
+                return collect($detail->invoiceable->{$attribute})
                     ->whereIn('type', Shipment::FREIGHT_CHARGES)
                     ->sum('amount');
             });
     }
 
     public function getTotalFuelChargesAttribute(){
+        $attribute = $this->company->is_retail_reseller ? 'retail_reseller_rate_details' : 'rate_details';
         return $this->chargeable_details
             ->where('invoiceable_type', 'App\\Shipment')
-            ->sum(function($detail){
-                return collect($detail->invoiceable->rate_details)
+            ->sum(function($detail) use ($attribute){
+                return collect($detail->invoiceable->{$attribute})
                     ->whereIn('type', Shipment::FUEL_CHARGES)
                     ->sum('amount');
             });
@@ -716,10 +718,11 @@ class LocalInvoice extends Model
 
 
     public function getTotalTaxesChargesAttribute(){
+        $attribute = $this->company->is_retail_reseller ? 'retail_reseller_rate_details' : 'rate_details';
         return $this->chargeable_details
             ->where('invoiceable_type', 'App\\Shipment')
-            ->sum(function($detail){
-                return collect($detail->invoiceable->rate_details)
+            ->sum(function($detail) use ($attribute){
+                return collect($detail->invoiceable->{$attribute})
                     ->whereIn('type', Shipment::TAXES_CHARGES)
                     ->sum('amount');
             });

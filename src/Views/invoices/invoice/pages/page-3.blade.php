@@ -141,8 +141,9 @@
                     <td width="10%"></td>
 
                     <td width="45%">
+                        @if(isset($detail->invoiceable->{$rateDetailsAttribute}))
                         <table width="100%">
-                            @foreach($detail->invoiceable->rate_details as $rateDetail)
+                            @foreach($detail->invoiceable->{$rateDetailsAttribute} as $rateDetail)
                                 <tr>
                                     <td class="text-open-sans-8 text-default">
                                         {{ $rateDetail['type'] }}
@@ -154,8 +155,8 @@
                                 </tr>
                             @endforeach
                         </table>
-
                         <hr>
+                        @endif
 
                         <table width="100%">
                             <tr>
