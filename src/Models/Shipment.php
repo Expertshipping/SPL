@@ -642,10 +642,19 @@ class Shipment extends Model
         ];
     }
 
-    public function scopeNotImport($query)
+    public function scopeExportShipments($query)
     {
         return $query->whereHas('company', function ($query) {
-            $query->whereColumn('country', 'shipments.from_country');
+            $query->whereColumn('shipments.from_country', 'companies.country')
+                ->whereColumn('shipments.to_country', '!=', 'companies.country');
+        });
+    }
+
+    public function scopeImportShipments($query)
+    {
+        return $query->whereHas('company', function ($query) {
+            $query->whereColumn('shipments.to_country', 'companies.country')
+                ->whereColumn('shipments.from_country', '!=', 'companies.country');
         });
     }
 }

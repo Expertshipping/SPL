@@ -1212,7 +1212,8 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
             ->whereDoesntHave('comments', function ($q) {
                 $q->where('comment', 'Image');
             })
-            ->whereHas('receiptDetail');
+            ->whereHas('receiptDetail')
+            ->exportShipments();
     }
 
     public function getToken()
