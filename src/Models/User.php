@@ -1343,4 +1343,9 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
         $this->updateDefaultPaymentMethod($paymentMethod);
     }
+
+    public function workingShifts()
+    {
+        return $this->hasMany(WorkingShift::class);
+    }
 }
