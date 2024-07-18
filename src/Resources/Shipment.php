@@ -121,7 +121,7 @@ class Shipment extends JsonResource
             'failed_aramex_hub_label' => $this->failed_aramex_hub_label,
             'failed_pickup' => $this->failed_pickup,
             'activities' => ShipmentActivity::collection($this->whenLoaded('activities')),
-            'aramex_bulks' => $this->whenLoaded('aramexBulks'),
+            'aramex_bulks' => Shipment::collection($this->whenLoaded('aramexBulks')),
         ];
     }
 
