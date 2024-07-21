@@ -732,7 +732,7 @@ class Company extends Model
                     $query->where('name', 'like', $term)
                         ->orWhere('phone', 'like', $term)
                         ->orWhereHas('users', function ($query) use ($term) {
-                            $query->where('name', 'like', '%' . $term . '%');
+                            $query->where('name', 'like', '%' . $term . '%')->where('email', 'like', '%' . $term . '%')->where('phone', 'like', $term . '%');
                         });
                 });
             });
