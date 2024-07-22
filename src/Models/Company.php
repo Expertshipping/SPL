@@ -726,15 +726,16 @@ class Company extends Model
     public function scopeFilterBySearch($query, $term)
     {
         $query->where(function ($query) use ($term) {
-            $query->when($term, function ($query, $term) {
-                collect(str_getcsv($term, ' ', '"'))->filter()->each(function ($term) use ($query) {
-                    $term = $term . "%";
-                    $query->where('name', 'like', $term)
-                        ->orWhere('phone', 'like', $term)
-                        ->orWhereHas('users', function ($query) use ($term) {
-                            $query->where('name', 'like', '%' . $term . '%')->where('email', 'like', '%' . $term . '%')->where('phone', 'like', $term . '%');
-                        });
-                });
+            $term = str_replace(' ', '', $term);
+            $term = "%" . $term . "%";
+            $query->where(function ($query) use ($term) {
+                $query->whereRaw("REPLACE(name, ' ', '') LIKE ?", [$term])
+                    ->orWhereRaw("REPLACE(phone, ' ', '') LIKE ?", [$term])
+                    ->orWhereHas('users', function ($query) use ($term) {
+                        $query->whereRaw("REPLACE(name, ' ', '') LIKE ?", [$term])
+                            ->orWhereRaw("REPLACE(email, ' ', '') LIKE ?", [$term])
+                            ->orWhereRaw("REPLACE(phone, ' ', '') LIKE ?", [$term]);
+                    });
             });
         });
     }
