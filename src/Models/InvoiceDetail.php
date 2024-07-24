@@ -60,14 +60,14 @@ class InvoiceDetail extends Model
 
     public function getProductNameAttribute()
     {
-        if ($this->invoiceable_type === Shipment::class) {
+        if ($this->invoiceable_type === 'App\\Shipment') {
             if (!$this->invoiceable) {
                 return "Shipment " . $this->meta_data['carrier'];
             }
             return "Tracking " . ($this->invoiceable->carrier->name ?? '-') . " : " . ($this->invoiceable->tracking_number ?? '-');
         }
 
-        if ($this->invoiceable_type === Insurance::class) {
+        if ($this->invoiceable_type === 'App\\Insurance') {
             return "Insurance : " . $this->invoiceable->transaction_number;
         }
 
@@ -78,22 +78,22 @@ class InvoiceDetail extends Model
             return $this->invoiceable->name ?? '-';
         }
 
-        if ($this->invoiceable_type === Refund::class) {
+        if ($this->invoiceable_type === 'App\\Refund') {
             if (!$this->invoiceable) {
                 return "Refund";
             }
             $refundedProducts = collect();
             foreach ($this->invoiceable->details as $detail) {
                 if ($refundedProduct = $detail['invoiceable_type']::find($detail['invoiceable_id'])) {
-                    if ($detail['invoiceable_type'] === Shipment::class) {
+                    if ($detail['invoiceable_type'] === 'App\\Shipment') {
                         $refundedProducts->push("Refund Tracking : {$refundedProduct->tracking_number}");
                     }
 
-                    if ($detail['invoiceable_type'] === Insurance::class) {
+                    if ($detail['invoiceable_type'] === 'App\\Insurance') {
                         $refundedProducts->push("Refund Insurance : {$refundedProduct->transaction_number}");
                     }
 
-                    if ($detail['invoiceable_type'] === Product::class) {
+                    if ($detail['invoiceable_type'] === 'App\\Product') {
                         $refundedProducts->push("Refund " . ($refundedProduct->name ?? '-'));
                     }
                 }
@@ -103,7 +103,7 @@ class InvoiceDetail extends Model
         }
 
 
-        if ($this->invoiceable_type === CorrectionRefund::class) {
+        if ($this->invoiceable_type === 'App\\CorrectionRefund') {
             if (!$this->invoiceable) {
                 return "Correction Refund";
             }
