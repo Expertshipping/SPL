@@ -21,6 +21,7 @@ class ShipmentActivity extends JsonResource
             'id'                => $this->id,
             'shipment_id'       => $this->shipment_id,
             'status'            => $this->status,
+            'status_display'    => __(\ExpertShipping\Spl\Models\Shipment::STATUSES[$this->status] ?? $this->status),
             'status_code'       => $this->status_code,
             'description'       => $this->description,
             'time'              => $this->time,
