@@ -34,6 +34,7 @@ class Product extends JsonResource
             'managed_stock' => $this->managed_stock,
             'hide_from_pos' => $this->hide_from_pos,
             'name_origin' => $this->getTranslations('name'),
+            'company_id' => $this->company_id,
         ];
     }
 }

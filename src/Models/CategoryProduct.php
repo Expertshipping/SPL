@@ -76,10 +76,6 @@ class CategoryProduct extends Model implements HasMedia
             ->whereNull('parent_id')
             ->with('products', function ($q) {
                 $q->where('consommable', false);
-                $q->when(auth()->user()->company->is_retail_reseller, function ($query) {
-                    $query->where('company_id', auth()->user()->company_id);
-                });
-
                 $q->whereNotIn('id', auth()->user()->company->hiddenProducts->pluck('id'));
                 $q->where(function ($query) {
                     $query->where('company_id', auth()->user()->company_id)
@@ -94,11 +90,6 @@ class CategoryProduct extends Model implements HasMedia
             ->with([
                 'childrens.products' => function ($q) {
                     $q->where('consommable', false);
-                    // $q->where('hide_from_pos', false);
-                    $q->when(auth()->user()->company->is_retail_reseller, function ($query) {
-                        $query->where('company_id', auth()->user()->company_id);
-                    });
-
                     $q->whereNotIn('id', auth()->user()->company->hiddenProducts->pluck('id'));
                     $q->where(function ($query) {
                         $query->where('company_id', auth()->user()->company_id)
@@ -143,6 +134,7 @@ class CategoryProduct extends Model implements HasMedia
             "inventory_report_page_number"   => $category->inventory_report_page_number,
             "products"      => (new ProductCollection($products))->collection,
             "childrens"     => $childrens,
+            "company_id"    => $category->company_id,
         ];
     }
 
