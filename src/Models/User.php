@@ -81,6 +81,8 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
         'has_right_to_commission',
         'preferred_language',
+
+        'hide_from_timesheet'
     ];
 
     protected $attributes = [
@@ -123,7 +125,8 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         'availability' => 'array',
         'is_spark_user' => 'boolean',
         'hidden_at' => 'datetime',
-        'dashboard_order' => 'array'
+        'dashboard_order' => 'array',
+        'hide_from_timesheet' => 'boolean',
     ];
 
     public static $packs = [
