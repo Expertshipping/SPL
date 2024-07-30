@@ -40,14 +40,17 @@ class Pickup extends Model
         'meta_data',
         'total_weight',
         'destination_country',
-        'auto_created'
+        'auto_created',
+
+        'is_manual_pickup',
     ];
 
     protected $casts = [
         'canceled_at' => 'date',
         'pickup_date' => 'date',
         'meta_data' => 'array',
-        'auto_created' => 'boolean'
+        'auto_created' => 'boolean',
+        'is_manual_pickup' => 'boolean',
     ];
 
     protected $with = ['carrier'];
