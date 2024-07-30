@@ -27,6 +27,7 @@ class DropOff extends Model
         'signature_name',
         'origin',
         'receipt_token',
+        'group_uuid',
     ];
 
     public function agent()
