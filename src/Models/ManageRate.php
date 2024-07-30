@@ -142,6 +142,10 @@ class ManageRate
             $totalWeight = collect($packages)->sum('weight');
             $country = Str::upper($shipmentCountries['destination']);
 
+            if($zoneId = $this->getCarrierZoneFromCountryCode($country, $discountService->service->carrier)){
+                    $country = $zoneId;
+            }
+            
             if ($weightUnit !== env('WHITE_LABEL_WEIGHT_UNIT', 'LB')) {
                 if ($weightUnit === 'LB') {
                     $totalWeight = $totalWeight * 0.453592;
@@ -153,6 +157,7 @@ class ManageRate
             }
             $this->discountWeightIndex = $discountService->getIndexByWeight($totalWeight, $country) ?? 'all';
             $this->companyService = $discountService;
+            // define discount type (dollar or percentage) and also define discount package detail (zone or country or world)
             $this->defineDiscountType($discountService);
         }
     }
@@ -518,8 +523,14 @@ class ManageRate
         $packagingType = request()->get('packagingType');
 
         $destination = Str::upper($this->destination);
+        $zone = null;
+        if($zoneId = $this->getCarrierZoneFromCountryCode($destination, $companyServiceDiscount->service->carrier)){
+            $zone = $zoneId;
+        }
         if (isset($companyServiceDiscount->discount[$destination])) {
             $this->country = Str::upper($destination);
+        } else if ($zone && isset($companyServiceDiscount->discount[$zone])) {
+            $this->country = Str::upper($zone);
         } else {
             $this->country = 'world';
         }
@@ -597,5 +608,18 @@ class ManageRate
 
         $price = floatval(str_replace(",", "", $price));
         return number_format($price, 2);
+    }
+
+    private function getCarrierZoneFromCountryCode($countryCode, $carrier): ?string
+    {
+        $country = Country::where('code', $countryCode)->first();
+        if($country){
+            if($zone = $carrier->zones()->whereHas('countries', function($q) use ($country){
+                $q->where('countries.id', $country->id);
+            })->first()){
+                return "{$zone->id}";
+            }
+        }
+        return null;
     }
 }
