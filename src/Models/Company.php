@@ -69,6 +69,7 @@ class Company extends Model
         'status'                        =>  CompanyStatusEnum::class,
         'update_form'                   =>  'array',
         'opening_days'                  =>  'array',
+        'carrier_events_prices'         =>  'array',
     ];
 
     public static function boot()
@@ -125,11 +126,11 @@ class Company extends Model
         $user = $user ?: auth()->user();
 
         return $user->localInvoices()
-            ->whereNull('paid_at')
-            ->whereNull('refunded_at')
-            ->whereDate('created_at', '<', $dateLimit)
-            ->whereNull('canceled_at')
-            ->count() > 0;
+                ->whereNull('paid_at')
+                ->whereNull('refunded_at')
+                ->whereDate('created_at', '<', $dateLimit)
+                ->whereNull('canceled_at')
+                ->count() > 0;
     }
 
     public function isReachedLimit($rate, $user = null)
