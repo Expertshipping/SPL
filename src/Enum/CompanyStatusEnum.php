@@ -42,6 +42,6 @@ enum CompanyStatusEnum: string
             ['value' => self::TEMPORARILY_CLOSED, 'label' => __('Temporarily Closed')],
             ['value' => self::NOT_INTERESTED, 'label' => __('Not Interested')],
             ['value' => self::BLOCKED, 'label' => __('Blocked')],
-        ])->pluck('name', 'id');
+        ]);
     }
 }
