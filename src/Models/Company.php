@@ -126,11 +126,11 @@ class Company extends Model
         $user = $user ?: auth()->user();
 
         return $user->localInvoices()
-                ->whereNull('paid_at')
-                ->whereNull('refunded_at')
-                ->whereDate('created_at', '<', $dateLimit)
-                ->whereNull('canceled_at')
-                ->count() > 0;
+            ->whereNull('paid_at')
+            ->whereNull('refunded_at')
+            ->whereDate('created_at', '<', $dateLimit)
+            ->whereNull('canceled_at')
+            ->count() > 0;
     }
 
     public function isReachedLimit($rate, $user = null)
@@ -342,7 +342,7 @@ class Company extends Model
 
     public function getCarrierAccount($carrierSlug, $action)
     {
-        $companyCarrier = $this->carriers()->whereHas('carrier', fn ($q) => $q->where('slug', $carrierSlug))->first();
+        $companyCarrier = $this->carriers()->whereHas('carrier', fn($q) => $q->where('slug', $carrierSlug))->first();
         $accountCarrier = null;
         if ($companyCarrier) {
             $selectedAccount = [
@@ -730,13 +730,8 @@ class Company extends Model
             $term = str_replace(' ', '', $term);
             $term = "%" . $term . "%";
             $query->where(function ($query) use ($term) {
-                $query->whereRaw("REPLACE(name, ' ', '') LIKE ?", [$term])
-                    ->orWhereRaw("REPLACE(phone, ' ', '') LIKE ?", [$term])
-                    ->orWhereHas('users', function ($query) use ($term) {
-                        $query->whereRaw("REPLACE(name, ' ', '') LIKE ?", [$term])
-                            ->orWhereRaw("REPLACE(email, ' ', '') LIKE ?", [$term])
-                            ->orWhereRaw("REPLACE(phone, ' ', '') LIKE ?", [$term]);
-                    });
+                $query->where("name", 'LIKE', $term)
+                    ->orWhere("phone", 'LIKE', $term);
             });
         });
     }
