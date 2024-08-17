@@ -767,4 +767,14 @@ class Company extends Model
     {
         return $this->morphMany(Note::class, 'noteable');
     }
+
+    public function scopeFilterByDateCommunication($query, $dates)
+    {
+        $dates = $dates ? explode(",", $dates) : [];
+        $query->when($dates && count($dates) == 2, function ($query) use ($dates) {
+            $query->whereHas('communicationHistories', function ($query) use ($dates) {
+                $query->whereBetween('created_at', $dates);
+            });
+        });
+    }
 }
