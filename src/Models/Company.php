@@ -126,11 +126,11 @@ class Company extends Model
         $user = $user ?: auth()->user();
 
         return $user->localInvoices()
-            ->whereNull('paid_at')
-            ->whereNull('refunded_at')
-            ->whereDate('created_at', '<', $dateLimit)
-            ->whereNull('canceled_at')
-            ->count() > 0;
+                ->whereNull('paid_at')
+                ->whereNull('refunded_at')
+                ->whereDate('created_at', '<', $dateLimit)
+                ->whereNull('canceled_at')
+                ->count() > 0;
     }
 
     public function isReachedLimit($rate, $user = null)
@@ -533,7 +533,10 @@ class Company extends Model
 
     public function getValidSubscriptionAttribute()
     {
-        return $this->planSubscriptions()->with(['plan_package', 'plan_package.plan'])->where("status", PlanSubscriptionStatusEnum::IN_USE->value)->first();
+        return $this->planSubscriptions
+            ->where("status", PlanSubscriptionStatusEnum::IN_USE)
+            ->first()
+            ?->loadMissing(['plan_package', 'plan_package.plan']);
     }
 
     public function getTrialSubscriptionAttribute()
