@@ -28,7 +28,7 @@ class InvoiceController extends Controller
 
         $invoice = LocalInvoice::query()
             ->where('id', $id)
-            ->with('details.invoiceable.service')
+//            ->with('details.invoiceable.service')
             ->firstOrFail();
 
         return app(InvoicePdfMaker::class)->downloadAs($invoice);
