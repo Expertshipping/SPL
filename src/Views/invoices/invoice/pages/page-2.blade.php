@@ -22,6 +22,18 @@
                     <td>{{ $detail->invoiceable->getService()->name }}</td>
                 </tr>
             @endif
+
+            @if($detail->invoiceable instanceof \App\ShipmentSurcharge)
+                <tr>
+                    <td>{{ $detail->invoiceable->shipment->tracking_number }}</td>
+                    <td></td>
+                    <td>{{ $detail->invoiceable->date }}</td>
+                    <td>{{ SplMoney::format($detail->total) }}</td>
+                    <td></td>
+                    <td>{{ \App\Shipment::STATUSES[$detail->invoiceable->shipment->type] ?? 'N/A' }}</td>
+                    <td>Surcharge : {{ $detail->invoiceable->name }} : {{ $detail->invoiceable->description }}</td>
+                </tr>
+            @endif
         @endforeach
 
         <tr>
