@@ -123,6 +123,7 @@ class Shipment extends JsonResource
             'failed_pickup' => $this->failed_pickup,
             'activities' => ShipmentActivity::collection($this->whenLoaded('activities')),
             'aramex_bulks' => Shipment::collection($this->whenLoaded('aramexBulks')),
+            'surcharges' => $this->whenLoaded('shipmentSurcharges'),
         ];
     }
 
