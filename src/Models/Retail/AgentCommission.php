@@ -41,6 +41,10 @@ class AgentCommission extends Model
         'commission_id',
     ];
 
+    protected $casts = [
+        'paid_at' => 'datetime',
+    ];
+
     public function commissionable()
     {
         return $this->morphTo();
