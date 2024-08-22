@@ -21,10 +21,6 @@ class Commissionable extends Model
         'commission_value_palier_2',
     ];
 
-    public function commissionable(){
-        return $this->morphTo();
-    }
-
     public function getNameAttribute(){
         $productName = '-';
         if($this->commissionable_type == Product::class){
@@ -56,5 +52,13 @@ class Commissionable extends Model
         }
 
         return $productName;
+    }
+
+    public function commissionable(){
+        return $this->morphTo();
+    }
+
+    public function agentCommissions(){
+        return $this->hasMany(AgentCommission::class, 'commission_id');
     }
 }
