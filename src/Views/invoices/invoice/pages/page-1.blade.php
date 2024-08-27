@@ -49,7 +49,7 @@
                         </td>
                         <td align="right">
                             <div class="invoice-date-details">
-                                {{ $invoice->status }}
+                                {{ str()->headline(__($invoice->status)) }}
                             </div>
                         </td>
                     </tr>

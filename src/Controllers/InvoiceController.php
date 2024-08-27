@@ -12,24 +12,8 @@ class InvoiceController extends Controller
 
     public function download(Request $request, $id)
     {
-        // TODO: add auth middleware
-        //        if($request->user()->is_admin){
-        //            $invoice = LocalInvoice::where('id', $id)
-        //                ->with('bulkInvoices')
-        //                ->firstOrFail();
-        //        }else{
-        //            $invoice = $request->user()
-        //                ->company
-        //                ->localInvoices()
-        //                ->where('id', $id)
-        //                ->with('bulkInvoices')
-        //                ->firstOrFail();
-        //        }
-
-        $invoice = LocalInvoice::query()
-            ->where('id', $id)
-//            ->with('details.invoiceable.service')
-            ->firstOrFail();
+        $id = decrypt($id);
+        $invoice = LocalInvoice::findOrFail($id);
 
         return app(InvoicePdfMaker::class)->downloadAs($invoice);
     }

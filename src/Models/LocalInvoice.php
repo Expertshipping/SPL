@@ -682,9 +682,15 @@ class LocalInvoice extends Model
 
     public function getTotalPaidAmountAttribute()
     {
-        return $this->chargeable_details
+        $total = $this->chargeable_details
             ->whereNotNull('meta_data->payment_date')
             ->sum('price');
+
+        if($total === 0 && $this->paid_at){
+            $total = $this->total;
+        }
+
+        return $total;
     }
 
     public function getTotalDueAmountAttribute()
@@ -768,7 +774,13 @@ class LocalInvoice extends Model
     public function getChargeableDetailsAttribute(){
         return $this->details
             ->where('pos', false)
+            ->where('invoiceable_type', 'App\\Shipment')
             ->whereNull('canceled_at');
+    }
+
+    public function getTokenAttribute()
+    {
+        return encrypt($this->id);
     }
 
 }
