@@ -778,7 +778,7 @@ class LocalInvoice extends Model
             ->whereNull('canceled_at');
     }
 
-    public function getTokenAttribute()
+    public function getTokenIdAttribute()
     {
         return encrypt($this->id);
     }
