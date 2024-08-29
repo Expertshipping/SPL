@@ -58,32 +58,32 @@ class ChargeUserAndAddDetailToInvoice
                     }
                 }
                 elseif($company->instant_payment || request()->payment === 'pay-now'){
-                        $chargeable = $chargeable->fresh();
-                        $description = 'Payment for ' . get_class($chargeable) . ' '.$chargeable->id;
-                        if(get_class($chargeable) === 'App\Shipment'){
-                            $description = "Shipment {$chargeable->tracking_number}";
-                        }
-
-                        $paymentIntent = (new \ExpertShipping\Spl\Jobs\ChargeUser(
-                            $user,
-                            $charge,
-                            env('WHITE_LABEL_CURRENCY', 'CAD'),
-                            $description,
-                        ))->handle();
-
-                        $paymentDetail['stripe'] = $charge;
-
-                        $detail->update([
-                            'meta_data' => [
-                                ...($detail->meta_data ?? []),
-                                'payment_details' => $paymentDetail,
-                                'payment_intent_id' => $paymentIntent?->id,
-                                'payment_transaction_number' => $paymentIntent?->id,
-                                'payment_method' => 'Credit card',
-                                'payment_date' => now()->toDateTimeString(),
-                            ]
-                        ]);
+                    $chargeable = $chargeable->fresh();
+                    $description = 'Payment for ' . get_class($chargeable) . ' '.$chargeable->id;
+                    if(get_class($chargeable) === 'App\Shipment'){
+                        $description = "Shipment {$chargeable->tracking_number}";
                     }
+
+                    $paymentIntent = (new \ExpertShipping\Spl\Jobs\ChargeUser(
+                        $user,
+                        $charge,
+                        env('WHITE_LABEL_CURRENCY', 'CAD'),
+                        $description,
+                    ))->handle();
+
+                    $paymentDetail['stripe'] = $charge;
+
+                    $detail->update([
+                        'meta_data' => [
+                            ...($detail->meta_data ?? []),
+                            'payment_details' => $paymentDetail,
+                            'payment_intent_id' => $paymentIntent?->id,
+                            'payment_transaction_number' => $paymentIntent?->id,
+                            'payment_method' => 'Credit card',
+                            'payment_date' => now()->toDateTimeString(),
+                        ]
+                    ]);
+                }
             } catch (\Exception $e) {
                 if(get_class($chargeable) === 'App\Shipment'){
                     $chargeable->update([

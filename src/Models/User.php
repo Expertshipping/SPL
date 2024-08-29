@@ -315,7 +315,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         if ($charge) {
             $total = $charge;
         } else {
-            if (get_class($relation) === Insurance::class) {
+            if (get_class($relation) === 'App\Insurance') {
                 if ($relation->company->is_retail_reseller) {
                     $total = $relation->reseller_charged;
                 } else {
@@ -323,7 +323,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
                 }
             }
 
-            if (get_class($relation) === Shipment::class) {
+            if (get_class($relation) === 'App\Shipment') {
                 if ($relation->company->is_retail_reseller && is_numeric($relation->reseller_charged)) {
                     $total = $relation->reseller_charged;
                 } else {

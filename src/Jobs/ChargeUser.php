@@ -41,7 +41,7 @@ class ChargeUser implements ShouldQueue
     {
         $user = $this->user;
 
-        if($user->company && $user->company->instant_payment || request('payment') === 'pay-now'){
+        if(($user->company && $user->company->instant_payment) || request('payment') === 'pay-now'){
             if (is_null($user->defaultPaymentMethod()->asStripePaymentMethod())) {
                 throw new \Exception("Payment method doesn't exists");
             }

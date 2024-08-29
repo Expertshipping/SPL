@@ -713,6 +713,7 @@ class LocalInvoice extends Model
             ->where('pos', 0)
             ->whereNull('canceled_at')
             ->where('invoiceable_type', 'App\\Shipment')
+            ->get()
             ->sum(function($detail) use ($attribute){
                 return collect($detail->invoiceable->{$attribute})
                     ->whereIn('type', Shipment::FREIGHT_CHARGES)
@@ -727,6 +728,7 @@ class LocalInvoice extends Model
             ->where('pos', 0)
             ->whereNull('canceled_at')
             ->where('invoiceable_type', 'App\\Shipment')
+            ->get()
             ->sum(function($detail) use ($attribute){
                 return collect($detail->invoiceable->{$attribute})
                     ->whereIn('type', Shipment::FUEL_CHARGES)
@@ -742,6 +744,7 @@ class LocalInvoice extends Model
             ->where('pos', 0)
             ->whereNull('canceled_at')
             ->where('invoiceable_type', 'App\\Shipment')
+            ->get()
             ->sum(function($detail) use ($attribute){
                 return collect($detail->invoiceable->{$attribute})
                     ->whereIn('type', Shipment::TAXES_CHARGES)
@@ -749,6 +752,30 @@ class LocalInvoice extends Model
             });
     }
 
+
+    public function getTotalOtherChargesAttribute(){
+        $attribute = $this->company->is_retail_reseller ? 'retail_reseller_rate_details' : 'rate_details';
+        $allCharges = InvoiceDetail::query()
+            ->where('invoice_id', $this->id)
+            ->where('pos', 0)
+            ->whereNull('canceled_at')
+            ->where('invoiceable_type', 'App\\Shipment')
+            ->get()
+            ->sum(function($detail) use ($attribute){
+                return collect($detail->invoiceable->{$attribute})->sum('amount');
+            });
+
+        return $allCharges - $this->total_freight_charges - $this->total_fuel_charges - $this->total_taxes_charges;
+    }
+
+    public function getTotalSurchargesAttribute(){
+        return InvoiceDetail::query()
+            ->where('invoice_id', $this->id)
+            ->where('pos', 0)
+            ->whereNull('canceled_at')
+            ->where('invoiceable_type', 'App\\ShipmentSurcharge')
+            ->sum('price');
+    }
 
     public function getDetailsTaxesAttribute(){
         $taxes = [
@@ -764,7 +791,6 @@ class LocalInvoice extends Model
             ->where('invoice_id', $this->id)
             ->where('pos', 0)
             ->whereNull('canceled_at')
-            ->where('invoiceable_type', 'App\\Shipment')
             ->each(function($detail) use (&$preTax, &$taxes){
                 $shipment = $detail->invoiceable;
 
