@@ -309,14 +309,14 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         ]);
     }
 
-    public function createInvoiceForUser(Model $relation, $charge = null)
+    public function createInvoiceForUser(Model $relation, $charge = null, $companyId = null)
     {
         $total = 0;
         if ($charge) {
             $total = $charge;
         } else {
             if (get_class($relation) === Insurance::class) {
-                if ($relation->user->company->is_retail_reseller) {
+                if ($relation->company->is_retail_reseller) {
                     $total = $relation->reseller_charged;
                 } else {
                     $total = $relation->price;
@@ -324,7 +324,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
             }
 
             if (get_class($relation) === Shipment::class) {
-                if ($relation->user->company->is_retail_reseller && is_numeric($relation->reseller_charged)) {
+                if ($relation->company->is_retail_reseller && is_numeric($relation->reseller_charged)) {
                     $total = $relation->reseller_charged;
                 } else {
                     $total = $relation->rate;
@@ -349,7 +349,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         if (!$invoice) {
             $invoice = $this->localInvoices()->create([
                 'total' => Money::normalizeAmount($total),
-                'company_id' => $this->company_id,
+                'company_id' => $companyId ?? $this->company_id,
                 'closed_at' => null,
             ]);
         }

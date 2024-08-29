@@ -32,7 +32,7 @@
                     <tr>
                         <td align="right" align="right">
                             <div class="invoice-date-title">
-                                {{ __('Amount Paid') }} :
+                                {{ __('Paid Amount') }} :
                             </div>
                         </td>
                         <td align="right">
