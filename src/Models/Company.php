@@ -730,7 +730,6 @@ class Company extends Model
     public function scopeFilterBySearch($query, $term)
     {
         $query->where(function ($query) use ($term) {
-            $term = str_replace(' ', '', $term);
             $term = "%" . $term . "%";
             $query->where(function ($query) use ($term) {
                 $query->where("name", 'LIKE', $term)

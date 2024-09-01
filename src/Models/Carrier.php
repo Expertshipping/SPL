@@ -145,4 +145,9 @@ class Carrier extends Model implements HasMedia
     {
         return $this->hasMany(ShipmentTrackingStatusCode::class);
     }
+
+    public function companies()
+    {
+        return $this->hasMany(CompanyCarrier::class);
+    }
 }
