@@ -1184,7 +1184,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function getTrainingNameAttribute()
     {
-        $totalHours = TimesheetService::getTotalHoursForUserAllTime(null, $this->id);
+        $totalHours = \App\Services\TimesheetService::getTotalHoursForUserAllTime(null, $this->id);
         if ($totalHours <= 80) {
             return $this->name . " (In Training)";
         }
@@ -1240,7 +1240,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function agentCommissions()
     {
-        return $this->hasMany(AgentCommission::class);
+        return $this->hasMany(AgentCommission::class, 'user_id');
     }
 
     public function giveCommission($commissionAmount, $commissionType, $commissionValue, $detail, $status = 'pending', $commissionable)
