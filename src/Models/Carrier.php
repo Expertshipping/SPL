@@ -152,4 +152,9 @@ class Carrier extends Model implements HasMedia
     {
         return $this->hasMany(CompanyCarrier::class);
     }
+
+    public function carrierInvoices()
+    {
+        return $this->hasMany(CarrierInvoice::class);
+    }
 }
