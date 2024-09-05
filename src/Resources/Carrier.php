@@ -23,6 +23,7 @@ class Carrier extends JsonResource
             'logo' => $this->image_url,
             'pickup_api_or_email' => $this->pickup_api_or_email,
             'has_ground_service' => $this->has_ground_service,
+            'has_api' => $this->has_api,
         ];
     }
 }

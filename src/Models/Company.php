@@ -730,11 +730,15 @@ class Company extends Model
     public function scopeFilterBySearch($query, $term)
     {
         $query->where(function ($query) use ($term) {
-            $term = str_replace(' ', '', $term);
             $term = "%" . $term . "%";
             $query->where(function ($query) use ($term) {
                 $query->where("name", 'LIKE', $term)
-                    ->orWhere("phone", 'LIKE', $term);
+                    ->orWhere("phone", 'LIKE', $term)
+                    ->orWhereHas('users', function ($query) use ($term) {
+                        $query->where("name","LIKE", $term)
+                            ->orWhere("email"," LIKE", $term)
+                            ->orWhere("phone"," LIKE", $term);
+                    });
             });
         });
     }

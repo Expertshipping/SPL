@@ -29,6 +29,7 @@ class CarrierResource extends JsonResource
             'pickups' => $this->whenLoaded('pickups'),
             'paperless'=> $this->paperless,
             'logo' => $this->image_url,
+            'has_api' => $this->has_api,
         ];
     }
 }
