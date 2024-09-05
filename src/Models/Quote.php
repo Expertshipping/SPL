@@ -19,6 +19,7 @@ class Quote extends Model
 
     public static function createQuoteFromRateRequest(Request $request, $rates)
     {
+        $packageDetails = self::getPackageDetails($request);
         return self::create([
             'user_id'               => $request->user()->id,
             'from_zip_code'         => $request->from['zipcode'],
@@ -30,7 +31,7 @@ class Quote extends Model
             'to_country'            => $request->to['country'],
             'to_province'           => $request->to['province'],
             'package_type'          => $request->packagingType,
-            'package_details'       => $request->boxes,
+            'package_details'       => $packageDetails,
             'insurance'             => $request->addInsurance,
             'insurance_value'       => $request->palletInsuranceValue,
             'residential'           => $request->to['residential'],
@@ -40,8 +41,26 @@ class Quote extends Model
         ]);
     }
 
+    /**
+     * Get package details based on the packaging type.
+     *
+     * @param Request $request
+     * @return array
+     */
+    protected static function getPackageDetails(Request $request)
+    {
+        return match ($request->packagingType) {
+            'box' => $request->boxes,
+            'pack' => $request->packs,
+            'envelope' => [$request->envelope],
+            'pallet' => $request->pallets,
+            default => [],
+        };
+    }
+
     public function user()
     {
         $this->belongsTo(User::class, 'user_id');
     }
+
 }
