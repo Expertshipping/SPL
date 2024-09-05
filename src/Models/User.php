@@ -1184,7 +1184,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function getTrainingNameAttribute()
     {
-        $totalHours = \App\Services\TimesheetService::getTotalHoursForUserAllTime(null, $this->id);
+        $totalHours = TimesheetService::getTotalHoursForUserAllTime(null, $this->id);
         if ($totalHours <= 80) {
             return $this->name . " (In Training)";
         }
