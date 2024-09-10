@@ -2,6 +2,7 @@
 
 namespace ExpertShipping\Spl\Models;
 
+use ExpertShipping\Spl\Helpers\Helper;
 use ExpertShipping\Spl\Models\Nova\Actions\PartialRefund;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -260,13 +261,13 @@ class Rate
             "type" => __("INSURANCE CHARGES")
         ];
 
-        $rate['rate'] += $insuranceRate;
+        $rate['rate'] = Helper::formatNumber($rate['rate']) + $insuranceRate;
         if (isset($rate['negotiated_rate'])) {
-            $rate['negotiated_rate'] += $insuranceRate;
+            $rate['negotiated_rate'] = Helper::formatNumber($rate['negotiated_rate']) + $insuranceRate;
         }
 
         if (isset($rate['expert_shipping_price'])) {
-            $rate['expert_shipping_price'] += $insuranceRate;
+            $rate['expert_shipping_price'] = Helper::formatNumber($rate['expert_shipping_price']) + $insuranceRate;
         }
         return $rate;
     }
