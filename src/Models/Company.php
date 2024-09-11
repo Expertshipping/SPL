@@ -70,6 +70,7 @@ class Company extends Model
         'update_form'                   =>  'array',
         'opening_days'                  =>  'array',
         'carrier_events_prices'         =>  'array',
+        'discount_parameters'           =>  'array',
     ];
 
     public static function boot()
