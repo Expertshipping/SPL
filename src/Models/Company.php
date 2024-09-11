@@ -743,6 +743,72 @@ class Company extends Model
         });
     }
 
+    public function scopeFilterByCompanyName($query, $term)
+    {
+        $query->where(function ($query) use ($term) {
+            $term = "%" . $term . "%";
+            $query->where(function ($query) use ($term) {
+                $query->where("name", 'LIKE', $term);
+            });
+        });
+    }
+
+    public function scopeFilterByCompanyPhone($query, $term)
+    {
+        $query->where(function ($query) use ($term) {
+            $term = "%" . $term . "%";
+            $query->where(function ($query) use ($term) {
+                $query->where("phone", 'LIKE', $term);
+            });
+        });
+    }
+
+    public function scopeFilterByCompanyEmail($query, $term)
+    {
+        $query->where(function ($query) use ($term) {
+            $term = "%" . $term . "%";
+            $query->where(function ($query) use ($term) {
+                $query->where("email", 'LIKE', $term);
+            });
+        });
+    }
+
+    public function scopeFilterByUsersName($query, $term)
+    {
+        $query->where(function ($query) use ($term) {
+            $term = "%" . $term . "%";
+            $query->where(function ($query) use ($term) {
+                $query->whereHas('users', function ($query) use ($term) {
+                        $query->where("name", "LIKE", $term);
+                    });
+            });
+        });
+    }
+
+    public function scopeFilterByUsersPhone($query, $term)
+    {
+        $query->where(function ($query) use ($term) {
+            $term = "%" . $term . "%";
+            $query->where(function ($query) use ($term) {
+                $query->whereHas('users', function ($query) use ($term) {
+                        $query->where("phone", "LIKE", $term);
+                    });
+            });
+        });
+    }
+
+    public function scopeFilterByUsersEmail($query, $term)
+    {
+        $query->where(function ($query) use ($term) {
+            $term = "%" . $term . "%";
+            $query->where(function ($query) use ($term) {
+                $query->whereHas('users', function ($query) use ($term) {
+                    $query->where("email", "LIKE", $term);
+                });
+            });
+        });
+    }
+
     public function scopeFilterByBillingOption($query, $billingOption)
     {
         $query->when($billingOption, function ($query, $billingOption) {
