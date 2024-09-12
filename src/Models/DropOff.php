@@ -28,6 +28,11 @@ class DropOff extends Model
         'origin',
         'receipt_token',
         'group_uuid',
+        'google_my_business_sms_sent',
+    ];
+
+    protected $casts = [
+        'google_my_business_sms_sent' => 'boolean',
     ];
 
     public function agent()
