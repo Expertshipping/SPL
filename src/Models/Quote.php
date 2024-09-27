@@ -2,6 +2,7 @@
 
 namespace ExpertShipping\Spl\Models;
 
+use App\Company;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -22,6 +23,7 @@ class Quote extends Model
         $packageDetails = self::getPackageDetails($request);
         return self::create([
             'user_id'               => $request->user()->id,
+            'company_id'            => $request->user()->company_id,
             'from_zip_code'         => $request->from['zipcode'],
             'from_city'             => $request->from['city'],
             'from_country'          => $request->from['country'],
@@ -58,9 +60,14 @@ class Quote extends Model
         };
     }
 
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'company_id');
+    }
+
     public function user()
     {
-        $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
 }
