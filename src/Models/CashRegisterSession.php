@@ -4,11 +4,28 @@ namespace ExpertShipping\Spl\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use ExpertShipping\Spl\Models\LocalInvoice;
 
 class CashRegisterSession extends Model
 {
     use HasFactory;
+
+    const CASH_DETAILS_AGENT_ALERT = [
+        ['coin' => 5, 'min'=> 3 ],
+        ['coin' => 2, 'min'=> 3 ],
+        ['coin' => 1, 'min'=> 3 ],
+        ['coin' => 0.25, 'min'=> 4 ],
+        ['coin' => 0.10, 'min'=> 6 ],
+        ['coin' => 0.05, 'min'=> 6 ],
+    ];
+
+    const CASH_DETAILS_CHANGE_ALERT = [
+        ['coin' => 5, 'min'=> 4 ],
+        ['coin' => 2, 'min'=> 8 ],
+        ['coin' => 1, 'min'=> 10 ],
+        ['coin' => 0.25, 'min'=> 10 ],
+        ['coin' => 0.10, 'min'=> 20 ],
+        ['coin' => 0.05, 'min'=> 20 ],
+    ];
 
     protected $fillable = [
         'cash_register_id',
@@ -228,5 +245,41 @@ class CashRegisterSession extends Model
         });
 
         return $refunds;
+    }
+
+    public function getCashDetailsAlertAttribute()
+    {
+        $coinsAgent = $this->cash_details['coinsAgent'] ?? [];
+        $coinsChange = $this->cash_details['coinsChange'] ?? [];
+
+        return [
+            'agent' => collect($coinsAgent)->filter(function ($coin) {
+                    return collect(self::CASH_DETAILS_AGENT_ALERT)->filter(function ($alert) use ($coin) {
+                            return $alert['coin'] == $coin['coin'] && $coin['quantity'] <= $alert['min'];
+                        })->count() > 0;
+                })->count() > 0,
+            'change' => collect($coinsChange)->filter(function ($coin) {
+                    return collect(self::CASH_DETAILS_CHANGE_ALERT)->filter(function ($alert) use ($coin) {
+                            return $alert['coin'] == $coin['coin'] && $coin['quantity'] <= $alert['min'];
+                        })->count() > 0;
+                })->count() > 0,
+        ];
+    }
+
+    public function getChangeAlertTableAttribute()
+    {
+        $coinsChange = $this->cash_details['coinsChange'];
+
+        return collect($coinsChange)->map(function ($coin) {
+            $min = collect(self::CASH_DETAILS_CHANGE_ALERT)->filter(function ($alert) use ($coin) {
+                return $alert['coin'] == $coin['coin'];
+            })->first()['min'] ?? 0;
+            return [
+                'coin' => $coin['coin'],
+                'quantity' => $coin['quantity'],
+                'min' => $min,
+                'alert' => $min > 0 && $coin['quantity'] <= $min,
+            ];
+        });
     }
 }

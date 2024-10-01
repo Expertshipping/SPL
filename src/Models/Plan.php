@@ -28,4 +28,9 @@ class Plan extends Model
     {
         return $this->belongsToMany(PlanFeature::class, 'plan_option', 'plan_id', 'plan_feature_id')->withTimestamps();
     }
+
+    public function planSubscriptions()
+    {
+        return $this->hasManyThrough(PlanSubscription::class, PlanPackage::class, 'plan_id', 'plan_package_id', 'id', 'id');
+    }
 }

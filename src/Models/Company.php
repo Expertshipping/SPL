@@ -342,7 +342,7 @@ class Company extends Model
 
     public function getCarrierAccount($carrierSlug, $action)
     {
-        $companyCarrier = $this->carriers()->whereHas('carrier', fn ($q) => $q->where('slug', $carrierSlug))->first();
+        $companyCarrier = $this->carriers()->whereHas('carrier', fn($q) => $q->where('slug', $carrierSlug))->first();
         $accountCarrier = null;
         if ($companyCarrier) {
             $selectedAccount = [
@@ -533,7 +533,10 @@ class Company extends Model
 
     public function getValidSubscriptionAttribute()
     {
-        return $this->planSubscriptions()->with(['plan_package', 'plan_package.plan'])->where("status", PlanSubscriptionStatusEnum::IN_USE->value)->first();
+        return $this->planSubscriptions
+            ->where("status", PlanSubscriptionStatusEnum::IN_USE)
+            ->first()
+            ?->loadMissing(['plan_package', 'plan_package.plan']);
     }
 
     public function getTrialSubscriptionAttribute()
@@ -727,16 +730,74 @@ class Company extends Model
     public function scopeFilterBySearch($query, $term)
     {
         $query->where(function ($query) use ($term) {
-            $term = str_replace(' ', '', $term);
             $term = "%" . $term . "%";
             $query->where(function ($query) use ($term) {
-                $query->whereRaw("REPLACE(name, ' ', '') LIKE ?", [$term])
-                    ->orWhereRaw("REPLACE(phone, ' ', '') LIKE ?", [$term])
+                $query->where("name", 'LIKE', $term)
+                    ->orWhere("phone", 'LIKE', $term)
                     ->orWhereHas('users', function ($query) use ($term) {
-                        $query->whereRaw("REPLACE(name, ' ', '') LIKE ?", [$term])
-                            ->orWhereRaw("REPLACE(email, ' ', '') LIKE ?", [$term])
-                            ->orWhereRaw("REPLACE(phone, ' ', '') LIKE ?", [$term]);
+                        $query->where("name","LIKE", $term)
+                            ->orWhere("email"," LIKE", $term)
+                            ->orWhere("phone"," LIKE", $term);
                     });
+            });
+        });
+    }
+
+    public function scopeFilterByCompanyName($query, $term)
+    {
+        $query->when($term, function ($query) use ($term) {
+            $query->where("name", 'LIKE', "%" . $term . "%");
+        });
+    }
+
+    public function scopeFilterByCompanyPhone($query, $term)
+    {
+        $query->when($term, function ($query) use ($term) {
+            $term = str_replace(' ', '', $term); // Remove spaces from the search term
+
+            $query->whereRaw('REPLACE(phone, " ", "") LIKE ?', ['%' . $term . '%']);
+        });
+    }
+
+    public function scopeFilterByCompanyEmail($query, $term)
+    {
+        $query->when($term, function ($query) use ($term) {
+            $query->where("email", 'LIKE', "%" . $term . "%");
+        });
+    }
+
+    public function scopeFilterByUsersName($query, $term)
+    {
+        $query->where(function ($query) use ($term) {
+            $term = "%" . $term . "%";
+            $query->where(function ($query) use ($term) {
+                $query->whereHas('users', function ($query) use ($term) {
+                        $query->where("name", "LIKE", $term);
+                    });
+            });
+        });
+    }
+
+    public function scopeFilterByUsersPhone($query, $term)
+    {
+        $query->where(function ($query) use ($term) {
+            $term = "%" . $term . "%";
+            $query->where(function ($query) use ($term) {
+                $query->whereHas('users', function ($query) use ($term) {
+                        $query->where("phone", "LIKE", $term);
+                    });
+            });
+        });
+    }
+
+    public function scopeFilterByUsersEmail($query, $term)
+    {
+        $query->where(function ($query) use ($term) {
+            $term = "%" . $term . "%";
+            $query->where(function ($query) use ($term) {
+                $query->whereHas('users', function ($query) use ($term) {
+                    $query->where("email", "LIKE", $term);
+                });
             });
         });
     }
@@ -771,5 +832,42 @@ class Company extends Model
     public function notes()
     {
         return $this->morphMany(Note::class, 'noteable');
+    }
+
+    public function scopeFilterByDateCommunication($query, $dates)
+    {
+        $dates = $dates ? explode(",", $dates) : [];
+        $query->when($dates && count($dates) == 2, function ($query) use ($dates) {
+            $query->whereHas('communicationHistories', function ($query) use ($dates) {
+                $query->whereBetween('created_at', $dates);
+            });
+        });
+    }
+
+    public function scopeFilterByNoShippingPeriod($query, $number)
+    {
+        $query->when($number, function ($query) use ($number) {
+            $query->whereHas('shipments', function ($query) use ($number) {
+                $query->whereNotIn('type', ['draft', 'cancelled'])->where('created_at', '>=', now()->subDays($number));
+            });
+        });
+    }
+
+    public function scopeFilterBySignupDate($query, $dates)
+    {
+        $query->when($dates, function ($query) use ($dates) {
+            $value = explode(',', $dates);
+            $query->whereRaw('cast(created_at as date) between ? and ?', [$value[0], $value[1]]);
+        });
+    }
+
+    public function scopeFilterByUserName($query, $term)
+    {
+        $query->when($term, function ($query) use ($term) {
+            $term = "%" . $term . "%";
+            $query->whereHas('users', function ($query) use ($term) {
+                $query->where("name", "LIKE", $term);
+            });
+        });
     }
 }

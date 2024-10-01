@@ -82,7 +82,8 @@ class Shipment extends JsonResource
             'service_code' => $this->service_code,
             'cpf_cnpj' => $this->cpf_cnpj,
             'return_label' => $this->return_label,
-            'original_shipment' => new Shipment($this->whenLoaded('returnLabel', fn() => $this->returnLabel->load(['carrier','invoice']))),
+            'original_shipment' => new Shipment($this->whenLoaded('originalLabel', fn() => $this->originalLabel->load(['carrier','invoice']))),
+            'return_shipment' => new Shipment($this->whenLoaded('returnLabel', fn() => $this->returnLabel->load(['carrier','invoice']))),
             'carrier' => new CarrierResource($this->whenLoaded('carrier')),
             'user' => $this->whenLoaded('user'),
             'package' => new PackageResource($this->whenLoaded('package')),
@@ -122,6 +123,7 @@ class Shipment extends JsonResource
             'failed_pickup' => $this->failed_pickup,
             'activities' => ShipmentActivity::collection($this->whenLoaded('activities')),
             'aramex_bulks' => Shipment::collection($this->whenLoaded('aramexBulks')),
+            'surcharges' => $this->whenLoaded('shipmentSurcharges'),
         ];
     }
 

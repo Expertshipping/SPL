@@ -7,7 +7,7 @@ use ExpertShipping\Spl\Models\Notifications\EmailConfirmation;
 use ExpertShipping\Spl\Models\Notifications\PasswordReset;
 use ExpertShipping\Spl\Models\Retail\AgentCommission;
 use ExpertShipping\Spl\Models\Retail\AgentWarning;
-use ExpertShipping\Spl\Models\Services\TimesheetService;
+use ExpertShipping\Spl\Services\TimesheetService;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use ExpertShipping\Spl\Services\UserIpAddress;
@@ -309,22 +309,22 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         ]);
     }
 
-    public function createInvoiceForUser(Model $relation, $charge = null)
+    public function createInvoiceForUser(Model $relation, $charge = null, $companyId = null)
     {
         $total = 0;
         if ($charge) {
             $total = $charge;
         } else {
-            if (get_class($relation) === Insurance::class) {
-                if ($relation->user->company->is_retail_reseller) {
+            if (get_class($relation) === 'App\Insurance') {
+                if ($relation->company->is_retail_reseller) {
                     $total = $relation->reseller_charged;
                 } else {
                     $total = $relation->price;
                 }
             }
 
-            if (get_class($relation) === Shipment::class) {
-                if ($relation->user->company->is_retail_reseller && is_numeric($relation->reseller_charged)) {
+            if (get_class($relation) === 'App\Shipment') {
+                if ($relation->company->is_retail_reseller && is_numeric($relation->reseller_charged)) {
                     $total = $relation->reseller_charged;
                 } else {
                     $total = $relation->rate;
@@ -349,7 +349,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         if (!$invoice) {
             $invoice = $this->localInvoices()->create([
                 'total' => Money::normalizeAmount($total),
-                'company_id' => $this->company_id,
+                'company_id' => $companyId ?? $this->company_id,
                 'closed_at' => null,
             ]);
         }
@@ -848,9 +848,15 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
     public function getUserRoleAttribute()
     {
         $company = $this->loadMissing('companies')->companies->where('id', $this->company_id)->first();
+
+        if($this->account_type === 'business' && !$company && !!$this->company){
+            return 'manager';
+        }
+
         if (!$company) {
             return null;
         }
+
         return $company->pivot->appRole->slug;
     }
 
@@ -1234,7 +1240,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function agentCommissions()
     {
-        return $this->hasMany(AgentCommission::class);
+        return $this->hasMany(AgentCommission::class, 'user_id');
     }
 
     public function giveCommission($commissionAmount, $commissionType, $commissionValue, $detail, $status = 'pending', $commissionable)

@@ -23,7 +23,7 @@
                                 {{ __('Invoice Date') }} :
                             </div>
                         </td>
-                        <td width="60px" align="right">
+                        <td width="120px" align="right">
                             <div class="invoice-date-details">
                                 {{ $invoice->created_at->format('d M Y') }}
                             </div>
@@ -32,7 +32,7 @@
                     <tr>
                         <td align="right" align="right">
                             <div class="invoice-date-title">
-                                {{ __('Amount Paid') }} :
+                                {{ __('Paid Amount') }} :
                             </div>
                         </td>
                         <td align="right">
@@ -49,7 +49,7 @@
                         </td>
                         <td align="right">
                             <div class="invoice-date-details">
-                                {{ $invoice->status }}
+                                {{ str()->headline(__($invoice->status)) }}
                             </div>
                         </td>
                     </tr>
@@ -79,33 +79,33 @@
 
     <hr>
 
-{{--    <table width="100%">--}}
-{{--        <tr>--}}
-{{--            <td width="130px">--}}
-{{--                <div class="billing-information-title">--}}
-{{--                    {{ __('Credit Card *****1234') }} :--}}
-{{--                </div>--}}
-{{--            </td>--}}
-{{--            <td>--}}
-{{--                <div class="billing-information-title">--}}
-{{--                    <strong>12.0$ USD</strong>--}}
-{{--                </div>--}}
-{{--            </td>--}}
-{{--        </tr>--}}
-{{--        <tr>--}}
-{{--            <td width="130px">--}}
-{{--                <div class="billing-information-title">--}}
-{{--                    {{ __('Solde') }} :--}}
-{{--                </div>--}}
-{{--            </td>--}}
-{{--            <td>--}}
-{{--                <div class="billing-information-title">--}}
-{{--                    <strong>100.0$ USD</strong>--}}
-{{--                </div>--}}
-{{--            </td>--}}
-{{--        </tr>--}}
-{{--    </table>--}}
-{{--    <br>--}}
+    {{--    <table width="100%">--}}
+    {{--        <tr>--}}
+    {{--            <td width="130px">--}}
+    {{--                <div class="billing-information-title">--}}
+    {{--                    {{ __('Credit Card *****1234') }} :--}}
+    {{--                </div>--}}
+    {{--            </td>--}}
+    {{--            <td>--}}
+    {{--                <div class="billing-information-title">--}}
+    {{--                    <strong>12.0$ USD</strong>--}}
+    {{--                </div>--}}
+    {{--            </td>--}}
+    {{--        </tr>--}}
+    {{--        <tr>--}}
+    {{--            <td width="130px">--}}
+    {{--                <div class="billing-information-title">--}}
+    {{--                    {{ __('Solde') }} :--}}
+    {{--                </div>--}}
+    {{--            </td>--}}
+    {{--            <td>--}}
+    {{--                <div class="billing-information-title">--}}
+    {{--                    <strong>100.0$ USD</strong>--}}
+    {{--                </div>--}}
+    {{--            </td>--}}
+    {{--        </tr>--}}
+    {{--    </table>--}}
+    {{--    <br>--}}
 
     <table width="100%" class="table-1">
         <tr>
@@ -113,6 +113,7 @@
             <th><div class="text-white">{{ __('Freight Charges') }}</div></th>
             <th><div class="text-white">{{ __('Fuel Charges') }}</div></th>
             <th><div class="text-white">{{ __('Accessorials') }}</div></th>
+            <th><div class="text-white">{{ __('Surcharges') }}</div></th>
             <th><div class="text-white">{{ __('Taxes') }}</div></th>
         </tr>
 
@@ -120,7 +121,8 @@
             <td>{{ $invoice->chargeable_details->count() }}</td>
             <td>{{ SplMoney::format($invoice->total_freight_charges) }}</td>
             <td>{{ SplMoney::format($invoice->total_fuel_charges) }}</td>
-            <td>N/A</td>
+            <td>{{ SplMoney::format($invoice->total_other_charges) }}</td>
+            <td>{{ SplMoney::format($invoice->total_surcharges) }}</td>
             <td>{{ SplMoney::format($invoice->total_taxes_charges) }}</td>
         </tr>
     </table>

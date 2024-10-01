@@ -5,6 +5,7 @@ namespace ExpertShipping\Spl\Models;
 use ExpertShipping\Spl\Helpers\Helper;
 use ExpertShipping\Spl\Models\Jobs\CalculateDistanceBetweenStoreAndClientForRetailShipments;
 use ExpertShipping\Spl\Models\Models\ReferralPayout;
+use ExpertShipping\Spl\Models\Retail\InsuranceSuggestion;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use ExpertShipping\Spl\Models\Traits\HasTrackingLink;
@@ -656,5 +657,10 @@ class Shipment extends Model
             $query->whereColumn('shipments.to_country', 'companies.country')
                 ->whereColumn('shipments.from_country', '!=', 'companies.country');
         });
+    }
+
+    public function insuranceSuggestion()
+    {
+        return $this->hasOne(InsuranceSuggestion::class);
     }
 }

@@ -76,7 +76,7 @@
                                 </td>
 
                                 <td class="text-open-sans-8 text-default text-right">
-                                    {{ $detail->invoiceable->start_date }}
+                                    {{ $detail->invoiceable->start_date->format('d/m/Y') }}
                                 </td>
                             </tr>
 

@@ -55,6 +55,8 @@ class Carrier extends Model implements HasMedia
         'carrier_color',
         'special_handling_price',
         'is_ltl',
+        'has_manifest',
+        'has_api',
     ];
 
     public $casts = [
@@ -64,6 +66,8 @@ class Carrier extends Model implements HasMedia
         'reseller_marge_details' => 'array',
         'has_ground_service' => 'boolean',
         'is_ltl' => 'boolean',
+        'has_manifest' => 'boolean',
+        'has_api' => 'boolean',
     ];
 
     protected $appends = [
@@ -142,5 +146,15 @@ class Carrier extends Model implements HasMedia
     public function shipmentTrackingStatusCodes()
     {
         return $this->hasMany(ShipmentTrackingStatusCode::class);
+    }
+
+    public function companies()
+    {
+        return $this->hasMany(CompanyCarrier::class);
+    }
+
+    public function carrierInvoices()
+    {
+        return $this->hasMany(CarrierInvoice::class);
     }
 }

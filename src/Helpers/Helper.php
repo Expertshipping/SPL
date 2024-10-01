@@ -274,4 +274,10 @@ class Helper
         return strtolower(str_replace(' ', '', $string));
     }
 
+    public static function formatNumber($number) {
+        $number = str_replace(' ', '', $number);
+        $number = str_replace(',', '', $number);
+
+        return $number;
+    }
 }

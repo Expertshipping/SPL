@@ -6,7 +6,6 @@ use ExpertShipping\Spl\Models\Retail\AgentCommission;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use ExpertShipping\Spl\Models\LocalInvoice;
 
 class InvoiceDetail extends Model
 {
@@ -116,15 +115,15 @@ class InvoiceDetail extends Model
 
     public function getCategoryNameAttribute()
     {
-        if ($this->invoiceable_type === Shipment::class) {
+        if ($this->invoiceable_type === 'App\Shipment') {
             return "Shipment " . ($this->invoiceable->carrier->name ?? '-');
         }
 
-        if ($this->invoiceable_type === Insurance::class) {
+        if ($this->invoiceable_type === 'App\Insurance') {
             return "Insurance";
         }
 
-        if ($this->invoiceable_type === Product::class) {
+        if ($this->invoiceable_type === 'App\Product') {
             if (!$this->invoiceable) {
                 return "Other services";
             }
@@ -132,22 +131,22 @@ class InvoiceDetail extends Model
                 return $this->invoiceable->category->name ?? '-';
         }
 
-        if ($this->invoiceable_type === Refund::class) {
+        if ($this->invoiceable_type === 'App\Refund') {
             if (!$this->invoiceable) {
                 return "Refund";
             }
             $refundedProducts = collect();
             foreach ($this->invoiceable->details as $detail) {
                 if ($refundedProduct = $detail['invoiceable_type']::find($detail['invoiceable_id'])) {
-                    if ($detail['invoiceable_type'] === Shipment::class) {
+                    if ($detail['invoiceable_type'] === 'App\Shipment') {
                         $refundedProducts->push("Shipment " . ($refundedProduct->carrier->name ?? '-'));
                     }
 
-                    if ($detail['invoiceable_type'] === Insurance::class) {
+                    if ($detail['invoiceable_type'] === 'App\Insurance') {
                         $refundedProducts->push("Insurance");
                     }
 
-                    if ($detail['invoiceable_type'] === Product::class) {
+                    if ($detail['invoiceable_type'] === 'App\Product') {
                         $refundedProducts->push("Other services " . ($refundedProduct->category->name ?? '-'));
                     }
                 }
@@ -156,7 +155,7 @@ class InvoiceDetail extends Model
             return $refundedProducts->first();
         }
 
-        if ($this->invoiceable_type === CorrectionRefund::class) {
+        if ($this->invoiceable_type === 'App\CorrectionRefund') {
             return "Correction Refund";
         }
 
@@ -165,15 +164,15 @@ class InvoiceDetail extends Model
 
     public function getParentCategoryNameAttribute()
     {
-        if ($this->invoiceable_type === Shipment::class) {
+        if ($this->invoiceable_type === 'App\Shipment') {
             return "Shipment";
         }
 
-        if ($this->invoiceable_type === Insurance::class) {
+        if ($this->invoiceable_type === 'App\Insurance') {
             return "Insurance";
         }
 
-        if ($this->invoiceable_type === Product::class) {
+        if ($this->invoiceable_type === 'App\Product') {
             if (!$this->invoiceable) {
                 return "Other services";
             }
@@ -181,22 +180,22 @@ class InvoiceDetail extends Model
             return $this->invoiceable->category->parent->name ?? $this->invoiceable->category->name ?? "Other services";
         }
 
-        if ($this->invoiceable_type === Refund::class) {
+        if ($this->invoiceable_type === 'App\Refund') {
             if (!$this->invoiceable) {
                 return "Refund";
             }
             $refundedProducts = collect();
             foreach ($this->invoiceable->details as $detail) {
                 if ($refundedProduct = $detail['invoiceable_type']::find($detail['invoiceable_id'])) {
-                    if ($detail['invoiceable_type'] === Shipment::class) {
+                    if ($detail['invoiceable_type'] === 'App\Shipment') {
                         $refundedProducts->push("Shipment");
                     }
 
-                    if ($detail['invoiceable_type'] === Insurance::class) {
+                    if ($detail['invoiceable_type'] === 'App\Insurance') {
                         $refundedProducts->push("Insurance");
                     }
 
-                    if ($detail['invoiceable_type'] === Product::class) {
+                    if ($detail['invoiceable_type'] === 'App\Product') {
                         $refundedProducts->push("Other services");
                     }
                 }
@@ -205,7 +204,7 @@ class InvoiceDetail extends Model
             return $refundedProducts->first();
         }
 
-        if ($this->invoiceable_type === CorrectionRefund::class) {
+        if ($this->invoiceable_type === 'App\CorrectionRefund') {
             return "Correction Refund";
         }
 
