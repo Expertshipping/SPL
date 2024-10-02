@@ -71,6 +71,7 @@ class Quote extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function shipment()
     {
         $this->belongsTo(Shipment::class, 'shipment_id');
     }
