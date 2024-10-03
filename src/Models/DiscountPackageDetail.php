@@ -61,17 +61,14 @@ class DiscountPackageDetail extends Model
     }
     public function getIndexByWeight($weight, $country, $zone= null)
     {
-        $discount = null;
-        if($zone) {
-            $discount = $this->discount[$country] ?? null;
+        $discount = $this->discount[$country] ?? null;
+
+        if($zone && !$discount) {
+            $discount = $this->discount[$zone] ?? null;
         }
 
         if(!$discount){
-            $discount = $this->discount[$country] ?? $this->discount['world'] ?? [];
-        }
-
-        if ($discount === []) {
-            return false;
+            $discount = $this->discount['world'] ?? null;
         }
 
         if (array_key_first($discount) === 'all') {
