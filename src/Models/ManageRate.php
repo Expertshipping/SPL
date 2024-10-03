@@ -141,11 +141,11 @@ class ManageRate
             $this->discountService = $discountService;
             $totalWeight = collect($packages)->sum('weight');
             $country = Str::upper($shipmentCountries['destination']);
-
+            $zone = null;
             if($zoneId = $this->getCarrierZoneFromCountryCode($country, $discountService->service->carrier)){
-                    $country = $zoneId;
+                $zone = $zoneId;
             }
-            
+
             if ($weightUnit !== env('WHITE_LABEL_WEIGHT_UNIT', 'LB')) {
                 if ($weightUnit === 'LB') {
                     $totalWeight = $totalWeight * 0.453592;
@@ -155,7 +155,8 @@ class ManageRate
                     $totalWeight = $totalWeight * 2.20462;
                 }
             }
-            $this->discountWeightIndex = $discountService->getIndexByWeight($totalWeight, $country) ?? 'all';
+
+            $this->discountWeightIndex = $discountService->getIndexByWeight($totalWeight, $country, $zone) ?? 'all';
             $this->companyService = $discountService;
             // define discount type (dollar or percentage) and also define discount package detail (zone or country or world)
             $this->defineDiscountType($discountService);
@@ -529,22 +530,21 @@ class ManageRate
         }
         if (isset($companyServiceDiscount->discount[$destination])) {
             $this->country = Str::upper($destination);
-        } else if ($zone && isset($companyServiceDiscount->discount[$zone])) {
-            $this->country = Str::upper($zone);
         } else {
             $this->country = 'world';
         }
 
-        if (isset($companyServiceDiscount->discount[$this->country][$this->discountWeightIndex]['link_to_carrier_id'])) {
+        $discountDetail = $companyServiceDiscount->discount[$this->country][$this->discountWeightIndex] ?? $companyServiceDiscount->discount[$zone][$this->discountWeightIndex] ?? null;
+        if (isset($discountDetail['link_to_carrier_id'])) {
             $this->discountType = 'link_to_carrier';
             return;
         }
 
-        $discountValue = $companyServiceDiscount->discount[$this->country][$this->discountWeightIndex]['dollar'][$packagingType];
+        $discountValue = $discountDetail['dollar'][$packagingType];
         if (!is_null($discountValue) && $discountValue != "") {
             $xDollar = $rateExample + $discountValue;
         }
-        $discountValue = (float) $companyServiceDiscount->discount[$this->country][$this->discountWeightIndex]['percentage'][$packagingType];
+        $discountValue = (float) $discountDetail['percentage'][$packagingType];
         if (!is_null($discountValue) && $discountValue != "") {
             $xPercentage = $rateExample + ($rateExample * $discountValue) / 100;
         }
