@@ -2,7 +2,6 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Company;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -73,6 +72,6 @@ class Quote extends Model
 
     public function shipment()
     {
-        $this->belongsTo(Shipment::class, 'shipment_id');
+        $this->hasOne(Shipment::class, 'shipment_id');
     }
 }
