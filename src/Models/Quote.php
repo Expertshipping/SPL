@@ -2,6 +2,7 @@
 
 namespace ExpertShipping\Spl\Models;
 
+use ExpertShipping\Spl\Models\Company;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -39,7 +40,6 @@ class Quote extends Model
             'signature_on_delivery' => $request->to['signature_on_delivery'],
             'saturday_delivery'     => $request->to['saturday_delivery'],
             'rates'                 => $rates,
-            'origin'                => $request->origin,
         ]);
     }
 
@@ -68,10 +68,5 @@ class Quote extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
-    }
-
-    public function shipment()
-    {
-        $this->hasOne(Shipment::class, 'shipment_id');
     }
 }
