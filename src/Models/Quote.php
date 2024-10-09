@@ -40,6 +40,7 @@ class Quote extends Model
             'signature_on_delivery' => $request->to['signature_on_delivery'],
             'saturday_delivery'     => $request->to['saturday_delivery'],
             'rates'                 => $rates,
+            'origin'                => $request->origin,
         ]);
     }
 
@@ -68,5 +69,10 @@ class Quote extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function shipment()
+    {
+        $this->hasOne(Shipment::class, 'shipment_id');
     }
 }
