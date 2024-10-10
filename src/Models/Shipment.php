@@ -200,6 +200,8 @@ class Shipment extends Model
         'failed_aramex_hub_label',
         'failed_pickup',
         'retail_reseller_rate_details',
+        'quote_id',
+        'quote_duration',
     ];
 
     protected $casts = [
@@ -662,5 +664,9 @@ class Shipment extends Model
     public function insuranceSuggestion()
     {
         return $this->hasOne(InsuranceSuggestion::class);
+    }
+
+    public function quote() {
+        return $this->hasOne(Quote::class);
     }
 }

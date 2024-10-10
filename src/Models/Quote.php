@@ -2,7 +2,7 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Company;
+use ExpertShipping\Spl\Models\Company;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -69,5 +69,4 @@ class Quote extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-
 }

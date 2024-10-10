@@ -31,12 +31,12 @@ class CarrierPickup extends Model
         return $this->belongsTo(Carrier::class);
     }
 
-    public static function isCompleted($carrierId)
+    public static function isCompleted($carrierId, $groundService = false)
     {
         return self::whereDate('date', today())
             ->where('carrier_id', $carrierId)
             ->where('company_id', auth()->user()->company_id)
-            // ->where('ground_service', $carrierId === 1 ? true : false)
+            ->where('ground_service', $groundService)
             ->exists();
     }
 }

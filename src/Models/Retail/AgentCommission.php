@@ -95,6 +95,8 @@ class AgentCommission extends Model
 
     public function getPalier1AmountAttribute()
     {
+        if($this->paid_amount < 0) return $this->paid_amount;
+
         $commission = $this->commission;
         if($commission->commission_type == 'percentage'){
             if(!$this->invoiceDetail) return 0;
@@ -106,6 +108,8 @@ class AgentCommission extends Model
 
     public function getPalier2AmountAttribute()
     {
+        if($this->paid_amount < 0) return $this->paid_amount;
+
         $commission = $this->commission;
         if($commission->commission_type == 'percentage'){
             if(!$this->invoiceDetail) return 0;
