@@ -4,6 +4,7 @@
 namespace ExpertShipping\Spl\Models;
 
 use ExpertShipping\Spl\Helpers\Helper;
+use ExpertShipping\Spl\Helpers\LabelType;
 use ExpertShipping\Spl\Services\TaxService;
 use Illuminate\Support\Str;
 
@@ -142,7 +143,8 @@ class ManageRate
         if($discountService){
             $this->discountService = $discountService;
             $totalWeight = collect($packages)->sum('weight');
-            $country = Str::upper($shipmentCountries['destination']);
+            $labelType = LabelType::labelType(request());
+            $country = Str::upper($shipmentCountries[$labelType === 'import' ? 'depart' : 'destination']);
             $zone = null;
             if($zoneId = $this->getCarrierZoneFromCountryCode($country, $discountService->service->carrier)){
                 $zone = $zoneId;
@@ -527,16 +529,6 @@ class ManageRate
         $rateExample = (float) Money::fromCent($this->rate)->inCurrencyAmount();
         $packagingType = request()->get('packagingType');
 
-        $destination = Str::upper($this->destination);
-        $zone = null;
-        if($zoneId = $this->getCarrierZoneFromCountryCode($destination, $companyServiceDiscount->service->carrier)){
-            $zone = $zoneId;
-        }
-
-        if (isset($companyServiceDiscount->discount[$destination])) {
-            $this->country = Str::upper($destination);
-        }
-
         if (isset($this->discountDetailByCountryOrZoneOrWorld['link_to_carrier_id'])) {
             $this->discountType = 'link_to_carrier';
             return;
@@ -616,11 +608,17 @@ class ManageRate
     {
         $country = Country::where('code', $countryCode)->first();
         if($country){
-            if($zone = $carrier->zones()->whereHas('countries', function($q) use ($country){
-                $q->where('countries.id', $country->id);
-            })->first()){
-                return "{$zone->id}";
-            }
+            $labelType = LabelType::labelType(request());
+            if($zone = $carrier
+                ->zones()
+                ->whereHas('countries', function($q) use ($country){
+                    $q->where('countries.id', $country->id);
+                })
+                ->where('import_or_export', 'like', $labelType)
+                ->first()
+            ){
+                    return "{$zone->id}";
+                }
         }
         return null;
     }
