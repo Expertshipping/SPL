@@ -614,7 +614,7 @@ class ManageRate
                 ->whereHas('countries', function($q) use ($country){
                     $q->where('countries.id', $country->id);
                 })
-                ->where('import_or_export', 'like', $labelType)
+                ->where('import_or_export', 'like', "%$labelType%")
                 ->first()
             ){
                     return "{$zone->id}";

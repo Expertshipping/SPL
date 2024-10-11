@@ -71,6 +71,10 @@ class DiscountPackageDetail extends Model
             $discount = $this->discount['world'] ?? null;
         }
 
+        if(!$discount){
+            return false;
+        }
+
         if (array_key_first($discount) === 'all') {
             return 'all';
         } else {
