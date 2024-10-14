@@ -831,7 +831,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
     {
         return $this->belongsToMany(Company::class, 'company_user', 'user_id', 'company_id')
             ->using(CompanyUser::class)
-            ->withPivot('app_role_id')
+            ->withPivot('app_role_id', 'can_view_cost')
             ->withTimestamps();
     }
 
@@ -1357,5 +1357,14 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
     public function workingShifts()
     {
         return $this->hasMany(WorkingShift::class);
+    }
+
+    public function getCanViewCostAttribute()
+    {
+        $company = $this->loadMissing('companies')->companies->where('id', $this->company_id)->first();
+        if(!$company)
+            return false;
+
+        return $company->pivot->can_view_cost;
     }
 }
