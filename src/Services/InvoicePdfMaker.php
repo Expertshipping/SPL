@@ -36,11 +36,19 @@ class InvoicePdfMaker
     {
         $attribute = $this->invoice->company->is_retail_reseller ? 'retail_reseller_rate_details' : 'rate_details';
 
-        $pdf = Pdf::loadView('spl::invoices.invoice.invoice', [
-            'invoice' => $this->invoice,
-            'detailsTaxes' => $this->invoice->details_taxes,
-            'rateDetailsAttribute' => $attribute,
-        ]);
+        if($this->invoice->company->country === 'MA'){
+            $pdf = Pdf::loadView('spl::invoices.invoice.MA.invoice', [
+                'invoice' => $this->invoice,
+                'detailsTaxes' => $this->invoice->details_taxes,
+                'rateDetailsAttribute' => $attribute,
+            ]);
+        }else{
+            $pdf = Pdf::loadView('spl::invoices.invoice.invoice', [
+                'invoice' => $this->invoice,
+                'detailsTaxes' => $this->invoice->details_taxes,
+                'rateDetailsAttribute' => $attribute,
+            ]);
+        }
 
         $context = stream_context_create([
             'ssl' => [
@@ -58,6 +66,14 @@ class InvoicePdfMaker
     protected function view()
     {
         $attribute = $this->invoice->company->is_retail_reseller ? 'retail_reseller_rate_details' : 'rate_details';
+
+        if($this->invoice->company->country === 'MA'){
+            return View::make('spl::invoices.invoice.MA.invoice', [
+                'invoice' => $this->invoice,
+                'detailsTaxes' => $this->invoice->details_taxes,
+                'rateDetailsAttribute' => $attribute,
+            ]);
+        }
 
         return View::make('spl::invoices.invoice.invoice', [
             'invoice' => $this->invoice,

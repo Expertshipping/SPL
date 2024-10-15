@@ -338,15 +338,23 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
         $invoice = $this->localInvoices()
             ->whereNotNull('company_id')
-            ->whereDoesntHave('bulkInvoices')
-            ->whereNull('closed_at')
-            ->whereDoesntHave('details', function ($query) {
-                $query->whereNull('meta_data->payment_details');
-            })
             ->orderByDesc('id')
             ->first();
 
-        if (!$invoice) {
+        if(!$invoice){
+            $newInvoice = true;
+        }else{
+            $billingPeriod = $this->company->billing_period;
+            match ($billingPeriod) {
+                'monthly' => $newInvoice = $invoice->created_at->year !== now()->year || $invoice->created_at->month !== now()->month,
+                'every_two_weeks' => $newInvoice = $invoice->created_at->year !== now()->year || (now()->day >= 15 && $invoice->created_at->day < 15) || (now()->day < 15 && $invoice->created_at->day >= 15),
+                'weekly' => $newInvoice = $invoice->created_at->year !== now()->year || $invoice->created_at->week !== now()->week,
+                'daily' => $newInvoice = $invoice->created_at->year !== now()->year || $invoice->created_at->day !== now()->day,
+                default => $newInvoice = true,
+            };
+        }
+
+        if ($newInvoice) {
             $invoice = $this->localInvoices()->create([
                 'total' => Money::normalizeAmount($total),
                 'company_id' => $companyId ?? $this->company_id,

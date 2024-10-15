@@ -110,6 +110,10 @@ class InvoiceDetail extends Model
             return "Correction Refund " . optional(optional($this->invoiceable->refund)->invoiceDetail)->invoice_id;
         }
 
+        if ($this->invoiceable_type === 'App\\ShipmentSurcharge') {
+            return "Shipment Surcharge";
+        }
+
         return "<>";
     }
 
