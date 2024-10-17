@@ -339,6 +339,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         $invoice = $this->localInvoices()
             ->whereNotNull('company_id')
             ->orderByDesc('id')
+            ->whereNull('paid_at')
             ->first();
 
         if(!$invoice){
@@ -359,6 +360,10 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
                 'total' => Money::normalizeAmount($total),
                 'company_id' => $companyId ?? $this->company_id,
                 'closed_at' => null,
+            ]);
+        }else{
+            $invoice->update([
+                'created_at' => now(),
             ]);
         }
 

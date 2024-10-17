@@ -79,6 +79,10 @@ class LocalInvoice extends Model
 
     public function getStatusAttribute()
     {
+        if ($this->isPartiallyPaid()) {
+            return 'partially paid';
+        }
+
         if ($this->isUnderValidation()) {
             return 'under validation';
         }
@@ -105,6 +109,11 @@ class LocalInvoice extends Model
         return !is_null($this->paid_at)
             && is_null($this->refunded_at)
             && is_null($this->canceled_at);
+    }
+
+    private function isPartiallyPaid()
+    {
+        return $this->paid_amount && $this->paid_amount < $this->total_ht + $this->total_taxes;
     }
 
     private function isUnderValidation()
