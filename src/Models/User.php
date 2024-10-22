@@ -249,7 +249,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
                 ->map(function ($carrierAccount) {
                     $account = new \stdClass();
                     $account->id = $carrierAccount->id;
-                    $account->type =  CompanyCarrier::class;
+                    $account->type =  'App\CompanyCarrier';
                     $account->carrier = Str::upper($carrierAccount->carrier->slug);
                     $account->is_active = $carrierAccount->is_active;
                     $account->api_credentials = $carrierAccount->options;
