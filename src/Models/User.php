@@ -245,6 +245,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         if ($this->company) {
             return $this->company->carriers()
                 ->whereHas('carrier', fn ($query) => $query->whereIn('slug', $activeCarriers))
+                ->where('is_active', 1)
                 ->get()
                 ->map(function ($carrierAccount) {
                     $account = new \stdClass();
