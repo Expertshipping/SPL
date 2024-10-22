@@ -28,6 +28,7 @@ class InvoiceDetail extends Model
         'moved',
         'canceled_at',
         'pos',
+        'sale_invoice_detail_id',
     ];
 
 

@@ -115,6 +115,18 @@ class Insurance extends Model
     {
         return $this->morphOne(InvoiceDetail::class, 'invoiceable');
     }
+    
+    public function receiptDetail()
+    {
+        return $this->morphOne(InvoiceDetail::class, 'invoiceable')
+            ->where('pos', true);
+    }
+
+    public function saleDetail()
+    {
+        return $this->morphOne(InvoiceDetail::class, 'invoiceable')
+            ->where('pos', false);
+    }
 
     public function company()
     {

@@ -2,11 +2,14 @@
 
 namespace ExpertShipping\Spl\Models;
 
+use App\Jobs\GetShipmentCostRate;
 use ExpertShipping\Spl\Models\Mailbox\MailboxConversation;
 use ExpertShipping\Spl\Models\Mailbox\MailboxEmail;
 use ExpertShipping\Spl\Models\Mailbox\MailboxFolder;
 use ExpertShipping\Spl\Models\Mailbox\Services\MailboxImapConnection;
 use Carbon\Carbon;
+use ExpertShipping\Spl\Services\GetCostService;
+use ExpertShipping\Spl\Services\GetMargeService;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Database\Eloquent\Model;
@@ -70,6 +73,7 @@ class Company extends Model
         'update_form'                   =>  'array',
         'opening_days'                  =>  'array',
         'carrier_events_prices'         =>  'array',
+        'reseller_insurance_shipment_marge' => 'array',
     ];
 
     public static function boot()
@@ -869,5 +873,96 @@ class Company extends Model
                 $query->where("name", "LIKE", $term);
             });
         });
+    }
+
+    public function insurances()
+    {
+        return $this->hasMany(Insurance::class);
+    }
+
+    public function addUnpaidItemsToInvoice(){
+        $unpaidItems = InvoiceDetail::query()
+            ->whereHas('invoice', function ($query) {
+                $query->where('company_id', $this->id);
+            })
+            ->where('pos', true)
+            ->whereNull('sale_invoice_detail_id')
+            ->get();
+
+        if($unpaidItems->isEmpty()){
+            return;
+        }
+
+        $invoice = $this->localInvoices()
+            ->whereDoesntHave('posDetails')
+            ->orderByDesc('id')
+            ->whereNull('paid_at')
+            ->first();
+
+        if(!$invoice){
+            $newInvoice = true;
+        }
+        else{
+            $billingPeriod = $this->billing_period;
+            match ($billingPeriod) {
+                'monthly' => $newInvoice = $invoice->created_at->year !== now()->year || $invoice->created_at->month !== now()->month,
+                'every_two_weeks' => $newInvoice = $invoice->created_at->year !== now()->year || (now()->day >= 15 && $invoice->created_at->day < 15) || (now()->day < 15 && $invoice->created_at->day >= 15),
+                'weekly' => $newInvoice = $invoice->created_at->year !== now()->year || $invoice->created_at->week !== now()->week,
+                'daily' => $newInvoice = $invoice->created_at->year !== now()->year || $invoice->created_at->day !== now()->day,
+                default => $newInvoice = true,
+            };
+        }
+
+        if ($newInvoice) {
+            $invoice = $this->localInvoices()->create([
+                'total' => Money::normalizeAmount(0),
+                'company_id' => $this->id,
+                'closed_at' => null,
+                'user_id' => $this->user_id,
+            ]);
+        }else{
+            $invoice->update([
+                'created_at' => now(),
+            ]);
+        }
+        $unpaidItems->each(function ($item) use ($invoice) {
+            $revenue = $invoice->total_ht > 10000 ? 'high' : 'low';
+            $cost = GetCostService::getCost($item->invoiceable);
+            $percentage = GetMargeService::getMarge($item->invoiceable, $revenue, $this) / 100;
+
+            if($percentage == 0 || ($cost == 0 && $item->invoiceable_type !== 'App\Product')){
+                return;
+            }
+
+            $totatHT = round(($item->total_ht + $item->total_taxes - $cost) * $percentage, 2);
+            if($totatHT == 0){
+                return;
+            }
+
+            $newItem = $item->replicate();
+            $newItem->price = round($totatHT / $item->quantity, 2);
+            $newItem->total_ht = $totatHT;
+            $newItem->taxes = null;
+            $newItem->total_taxes = 0;
+            $newItem->pos = false;
+            $newItem->invoice_id = $invoice->id;
+            $newItem->meta_data = [
+                'percentage' => $percentage,
+                'pos_price' => $item->price,
+                'cost' => $cost,
+            ];
+            $newItem->save();
+
+            $item->update([
+                'sale_invoice_detail_id' => $newItem->id,
+            ]);
+        });
+
+        $invoice->updateTotal(false);
+    }
+
+    public function resellerCompanyCategoryMarges()
+    {
+        return $this->hasMany(ResellerCompanyCategoryMarge::class);
     }
 }

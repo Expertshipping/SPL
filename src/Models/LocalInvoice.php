@@ -402,6 +402,11 @@ class LocalInvoice extends Model
         return $this->hasMany(InvoiceDetail::class, 'invoice_id')->where('pos', 1);
     }
 
+    public function saleDetails()
+    {
+        return $this->hasMany(InvoiceDetail::class, 'invoice_id')->where('pos', 0);
+    }
+
     public function getChangeDueAttribute()
     {
         $details = collect($this->metadata['payment_details']);
