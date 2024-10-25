@@ -776,8 +776,8 @@ class Company extends Model
             $term = "%" . $term . "%";
             $query->where(function ($query) use ($term) {
                 $query->whereHas('users', function ($query) use ($term) {
-                        $query->where("name", "LIKE", $term);
-                    });
+                    $query->where("name", "LIKE", $term);
+                });
             });
         });
     }
@@ -788,8 +788,8 @@ class Company extends Model
             $term = "%" . $term . "%";
             $query->where(function ($query) use ($term) {
                 $query->whereHas('users', function ($query) use ($term) {
-                        $query->where("phone", "LIKE", $term);
-                    });
+                    $query->where("phone", "LIKE", $term);
+                });
             });
         });
     }
@@ -934,7 +934,7 @@ class Company extends Model
                 return;
             }
 
-            $totatHT = round(($item->total_ht + $item->total_taxes - $cost) * $percentage, 2);
+            $totatHT = round((($item->total_ht + $item->total_taxes - $cost) * $percentage) + $cost, 2) ;
             if($totatHT == 0){
                 return;
             }
