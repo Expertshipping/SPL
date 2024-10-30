@@ -54,7 +54,7 @@ class Quote extends Model
         return match ($request->packagingType) {
             'box' => $request->boxes,
             'pack' => $request->packs,
-            'envelope' => [$request->envelope],
+            'envelope' => [$request->envelopeWeight],
             'pallet' => $request->pallets,
             default => [],
         };
