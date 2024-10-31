@@ -9,6 +9,10 @@ class Date implements FilterContract
 {
     public static function apply($query, $value)
     {
+        if(str_contains($value, ',')) {
+            $value = explode(',', $value);
+        }
+
         if(is_array($value)) {
             $dateFrom = Carbon::create($value[0]);
             $dateTo = Carbon::create($value[1]);
