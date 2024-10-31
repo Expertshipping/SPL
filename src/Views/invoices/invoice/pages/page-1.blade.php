@@ -32,12 +32,36 @@
                     <tr>
                         <td align="right" align="right">
                             <div class="invoice-date-title">
+                                {{ __('Total') }} :
+                            </div>
+                        </td>
+                        <td align="right">
+                            <div class="invoice-date-details">
+                                <strong>{{ SplMoney::format($invoice->total) }}</strong>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right" align="right">
+                            <div class="invoice-date-title">
                                 {{ __('Paid Amount') }} :
                             </div>
                         </td>
                         <td align="right">
                             <div class="invoice-date-details">
                                 <strong>{{ SplMoney::format($invoice->total_paid_amount) }}</strong>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right" align="right">
+                            <div class="invoice-date-title">
+                                {{ __('Due Amount') }} :
+                            </div>
+                        </td>
+                        <td align="right">
+                            <div class="invoice-date-details">
+                                <strong>{{ SplMoney::format($invoice->total_due_amount) }}</strong>
                             </div>
                         </td>
                     </tr>
@@ -253,7 +277,7 @@
                         </td>
                         <td align="right" width="120px">
                             <div class="billing-information-title text-right">
-                                <strong>{{ SplMoney::format($invoice->total) }}</strong>
+                                <strong>{{ SplMoney::format($invoice->total_due_amount) }}</strong>
                             </div>
                         </td>
                     </tr>
