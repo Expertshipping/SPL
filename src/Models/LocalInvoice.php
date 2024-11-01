@@ -114,10 +114,10 @@ class LocalInvoice extends Model
     private function isPartiallyPaid()
     {
         if($this->paid_amount){
-            return  $this->paid_amount < $this->total_ht + $this->total_taxes;
+            return  $this->paid_amount < ($this->total_ht + $this->total_taxes);
         }
 
-        return $this->total_paid_amount < $this->total_ht + $this->total_taxes;
+        return $this->total_due_amount > 0 && $this->total_paid_amount > 0 && $this->total_due_amount !== $this->total_paid_amount;
     }
 
     private function isUnderValidation()
