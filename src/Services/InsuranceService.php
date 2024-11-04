@@ -1373,7 +1373,9 @@ class InsuranceService
 
         $charge = $calulatedRate;
 
-        if(auth()->user()->company->is_retail_reseller
+        if(
+            auth()->user() &&
+            auth()->user()->company->is_retail_reseller
             && isset(auth()->user()->company->theme_setting['insurance_rate'])
             && auth()->user()->company->theme_setting['insurance_rate']!=0
         ){
