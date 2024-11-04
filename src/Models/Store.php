@@ -26,4 +26,10 @@ class Store extends Company
         return $this->hasMany(LocalInvoice::class, 'company_id', 'id')
             ->orderBy('id', 'desc');
     }
+
+    public function margeCategories()
+    {
+        return $this->hasMany(ResellerCompanyCategoryMarge::class, 'company_id', 'id')
+            ->orderBy('id', 'desc');
+    }
 }

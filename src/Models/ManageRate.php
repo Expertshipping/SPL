@@ -4,6 +4,7 @@
 namespace ExpertShipping\Spl\Models;
 
 use ExpertShipping\Spl\Helpers\Helper;
+use ExpertShipping\Spl\Helpers\LabelType;
 use ExpertShipping\Spl\Services\TaxService;
 use Illuminate\Support\Str;
 
@@ -103,7 +104,9 @@ class ManageRate
     public $rateType;
     public $charge;
     public $country;
+    public $zone;
     public $discountWeightIndex;
+    public $discountDetailByCountryOrZoneOrWorld;
 
     private $rate;
     private $discountService;
@@ -140,7 +143,13 @@ class ManageRate
         if($discountService){
             $this->discountService = $discountService;
             $totalWeight = collect($packages)->sum('weight');
-            $country = Str::upper($shipmentCountries['destination']);
+            $labelType = LabelType::labelType(request());
+            $country = Str::upper($shipmentCountries[$labelType === 'import' ? 'depart' : 'destination']);
+            $zone = null;
+            if($zoneId = $this->getCarrierZoneFromCountryCode($country, $discountService->service->carrier)){
+                $zone = $zoneId;
+            }
+            $this->zone = $zone;
 
             if ($weightUnit !== env('WHITE_LABEL_WEIGHT_UNIT', 'LB')) {
                 if ($weightUnit === 'LB') {
@@ -151,8 +160,11 @@ class ManageRate
                     $totalWeight = $totalWeight * 2.20462;
                 }
             }
-            $this->discountWeightIndex = $discountService->getIndexByWeight($totalWeight, $country) ?? 'all';
+
+            $this->discountWeightIndex = $discountService->getIndexByWeight($totalWeight, $country, $zone) ?? 'all';
             $this->companyService = $discountService;
+            // define discount type (dollar or percentage) and also define discount package detail (zone or country or world)
+            $this->discountDetailByCountryOrZoneOrWorld = $discountService->discount[$country][$this->discountWeightIndex] ?? $discountService->discount[$zone][$this->discountWeightIndex] ?? $discountService->discount['world'][$this->discountWeightIndex] ?? null;
             $this->defineDiscountType($discountService);
         }
     }
@@ -190,7 +202,7 @@ class ManageRate
 
         $packagingType = request()->get('packagingType');
 
-        if ($companyServiceDiscount->discount[$this->country][$this->discountWeightIndex][$this->discountType][$packagingType] == 0) {
+        if ($this->discountDetailByCountryOrZoneOrWorld[$this->discountType][$packagingType] == 0) {
             return $this->coastRate();
         }
 
@@ -293,7 +305,7 @@ class ManageRate
     {
         $packagingType = request()->get('packagingType');
 
-        return $service->discount[$this->country][$this->discountWeightIndex][$this->discountType][$packagingType];
+        return $this->discountDetailByCountryOrZoneOrWorld[$this->discountType][$packagingType];
     }
 
     private function provinceTaxDetails()
@@ -316,7 +328,7 @@ class ManageRate
 
                 if ($this->discountType === 'link_to_carrier') {
                     $amount = -1;
-                    $link = $this->companyService->discount[$this->country][$this->discountWeightIndex];
+                    $link = $this->discountDetailByCountryOrZoneOrWorld;
                 } else {
                     if (Helper::inArrayWithoutCase($detail['type'], self::DISCOUNTABLE_DETAILS)) {
                         if ((float) $this->discountValue($this->companyService) < 0) {
@@ -517,23 +529,16 @@ class ManageRate
         $rateExample = (float) Money::fromCent($this->rate)->inCurrencyAmount();
         $packagingType = request()->get('packagingType');
 
-        $destination = Str::upper($this->destination);
-        if (isset($companyServiceDiscount->discount[$destination])) {
-            $this->country = Str::upper($destination);
-        } else {
-            $this->country = 'world';
-        }
-
-        if (isset($companyServiceDiscount->discount[$this->country][$this->discountWeightIndex]['link_to_carrier_id'])) {
+        if (isset($this->discountDetailByCountryOrZoneOrWorld['link_to_carrier_id'])) {
             $this->discountType = 'link_to_carrier';
             return;
         }
 
-        $discountValue = $companyServiceDiscount->discount[$this->country][$this->discountWeightIndex]['dollar'][$packagingType];
+        $discountValue = $this->discountDetailByCountryOrZoneOrWorld['dollar'][$packagingType];
         if (!is_null($discountValue) && $discountValue != "") {
             $xDollar = $rateExample + $discountValue;
         }
-        $discountValue = (float) $companyServiceDiscount->discount[$this->country][$this->discountWeightIndex]['percentage'][$packagingType];
+        $discountValue = (float) $this->discountDetailByCountryOrZoneOrWorld['percentage'][$packagingType];
         if (!is_null($discountValue) && $discountValue != "") {
             $xPercentage = $rateExample + ($rateExample * $discountValue) / 100;
         }
@@ -597,5 +602,24 @@ class ManageRate
 
         $price = floatval(str_replace(",", "", $price));
         return number_format($price, 2);
+    }
+
+    private function getCarrierZoneFromCountryCode($countryCode, $carrier): ?string
+    {
+        $country = Country::where('code', $countryCode)->first();
+        if($country){
+            $labelType = LabelType::labelType(request());
+            if($zone = $carrier
+                ->zones()
+                ->whereHas('countries', function($q) use ($country){
+                    $q->where('countries.id', $country->id);
+                })
+                ->where('import_or_export', 'like', "%$labelType%")
+                ->first()
+            ){
+                    return "{$zone->id}";
+                }
+        }
+        return null;
     }
 }

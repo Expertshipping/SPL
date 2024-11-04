@@ -77,7 +77,7 @@
                     </td>
 
                     <td class="text-open-sans-8 text-default text-right">
-                        {{ $shipment->start_date }}
+                        {{ $shipment->start_date->format('d/m/Y') }}
                     </td>
                 </tr>
 

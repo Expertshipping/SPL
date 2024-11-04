@@ -29,4 +29,9 @@ class DiscountPackage extends Model
             $discountPackage->discountPackageDetails()->delete();
         });
     }
+
+    function companies()
+    {
+        return $this->hasMany(Company::class);
+    }
 }

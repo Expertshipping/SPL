@@ -5,6 +5,7 @@ namespace ExpertShipping\Spl\Models;
 use ExpertShipping\Spl\Helpers\Helper;
 use ExpertShipping\Spl\Models\Jobs\CalculateDistanceBetweenStoreAndClientForRetailShipments;
 use ExpertShipping\Spl\Models\Models\ReferralPayout;
+use ExpertShipping\Spl\Models\Retail\InsuranceSuggestion;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use ExpertShipping\Spl\Models\Traits\HasTrackingLink;
@@ -199,6 +200,8 @@ class Shipment extends Model
         'failed_aramex_hub_label',
         'failed_pickup',
         'retail_reseller_rate_details',
+        'quote_id',
+        'quote_duration',
     ];
 
     protected $casts = [
@@ -656,5 +659,14 @@ class Shipment extends Model
             $query->whereColumn('shipments.to_country', 'companies.country')
                 ->whereColumn('shipments.from_country', '!=', 'companies.country');
         });
+    }
+
+    public function insuranceSuggestion()
+    {
+        return $this->hasOne(InsuranceSuggestion::class);
+    }
+
+    public function quote() {
+        return $this->hasOne(Quote::class);
     }
 }

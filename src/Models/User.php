@@ -7,7 +7,7 @@ use ExpertShipping\Spl\Models\Notifications\EmailConfirmation;
 use ExpertShipping\Spl\Models\Notifications\PasswordReset;
 use ExpertShipping\Spl\Models\Retail\AgentCommission;
 use ExpertShipping\Spl\Models\Retail\AgentWarning;
-use ExpertShipping\Spl\Models\Services\TimesheetService;
+use ExpertShipping\Spl\Services\TimesheetService;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use ExpertShipping\Spl\Services\UserIpAddress;
@@ -245,11 +245,12 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         if ($this->company) {
             return $this->company->carriers()
                 ->whereHas('carrier', fn ($query) => $query->whereIn('slug', $activeCarriers))
+                ->where('is_active', 1)
                 ->get()
                 ->map(function ($carrierAccount) {
                     $account = new \stdClass();
                     $account->id = $carrierAccount->id;
-                    $account->type =  CompanyCarrier::class;
+                    $account->type =  'App\CompanyCarrier';
                     $account->carrier = Str::upper($carrierAccount->carrier->slug);
                     $account->is_active = $carrierAccount->is_active;
                     $account->api_credentials = $carrierAccount->options;
@@ -309,22 +310,22 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         ]);
     }
 
-    public function createInvoiceForUser(Model $relation, $charge = null)
+    public function createInvoiceForUser(Model $relation, $charge = null, $companyId = null)
     {
         $total = 0;
         if ($charge) {
             $total = $charge;
         } else {
-            if (get_class($relation) === Insurance::class) {
-                if ($relation->user->company->is_retail_reseller) {
+            if (get_class($relation) === 'App\Insurance') {
+                if ($relation->company->is_retail_reseller) {
                     $total = $relation->reseller_charged;
                 } else {
                     $total = $relation->price;
                 }
             }
 
-            if (get_class($relation) === Shipment::class) {
-                if ($relation->user->company->is_retail_reseller && is_numeric($relation->reseller_charged)) {
+            if (get_class($relation) === 'App\Shipment') {
+                if ($relation->company->is_retail_reseller && is_numeric($relation->reseller_charged)) {
                     $total = $relation->reseller_charged;
                 } else {
                     $total = $relation->rate;
@@ -337,20 +338,34 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         $total = str_replace(' ', '', $total);
 
         $invoice = $this->localInvoices()
+            ->whereDoesntHave('posDetails')
             ->whereNotNull('company_id')
-            ->whereDoesntHave('bulkInvoices')
-            ->whereNull('closed_at')
-            ->whereDoesntHave('details', function ($query) {
-                $query->whereNull('meta_data->payment_details');
-            })
             ->orderByDesc('id')
+            ->whereNull('paid_at')
             ->first();
 
-        if (!$invoice) {
+        if(!$invoice){
+            $newInvoice = true;
+        }else{
+            $billingPeriod = $this->company->billing_period;
+            match ($billingPeriod) {
+                'monthly' => $newInvoice = $invoice->created_at->year !== now()->year || $invoice->created_at->month !== now()->month,
+                'every_two_weeks' => $newInvoice = $invoice->created_at->year !== now()->year || (now()->day >= 15 && $invoice->created_at->day < 15) || (now()->day < 15 && $invoice->created_at->day >= 15),
+                'weekly' => $newInvoice = $invoice->created_at->year !== now()->year || $invoice->created_at->week !== now()->week,
+                'daily' => $newInvoice = $invoice->created_at->year !== now()->year || $invoice->created_at->day !== now()->day,
+                default => $newInvoice = true,
+            };
+        }
+
+        if ($newInvoice) {
             $invoice = $this->localInvoices()->create([
                 'total' => Money::normalizeAmount($total),
-                'company_id' => $this->company_id,
+                'company_id' => $companyId ?? $this->company_id,
                 'closed_at' => null,
+            ]);
+        }else{
+            $invoice->update([
+                'created_at' => now(),
             ]);
         }
 
@@ -831,7 +846,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
     {
         return $this->belongsToMany(Company::class, 'company_user', 'user_id', 'company_id')
             ->using(CompanyUser::class)
-            ->withPivot('app_role_id')
+            ->withPivot('app_role_id', 'can_view_cost')
             ->withTimestamps();
     }
 
@@ -1240,7 +1255,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function agentCommissions()
     {
-        return $this->hasMany(AgentCommission::class);
+        return $this->hasMany(AgentCommission::class, 'user_id');
     }
 
     public function giveCommission($commissionAmount, $commissionType, $commissionValue, $detail, $status = 'pending', $commissionable)
@@ -1357,5 +1372,14 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
     public function workingShifts()
     {
         return $this->hasMany(WorkingShift::class);
+    }
+
+    public function getCanViewCostAttribute()
+    {
+        $company = $this->loadMissing('companies')->companies->where('id', $this->company_id)->first();
+        if(!$company)
+            return false;
+
+        return $company->pivot->can_view_cost;
     }
 }

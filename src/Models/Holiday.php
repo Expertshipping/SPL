@@ -15,6 +15,7 @@ class Holiday extends Model
         'date'          => 'datetime:Y-m-d',
         'date_from'     => 'datetime:Y-m-d',
         'date_to'       => 'datetime:Y-m-d',
+        'is_yearly'     => 'boolean',
     ];
 
     public function company()
