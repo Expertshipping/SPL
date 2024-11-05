@@ -112,7 +112,7 @@ class InvoiceDetail extends Model
         }
 
         if ($this->invoiceable_type === 'App\\ShipmentSurcharge') {
-            return "Shipment Surcharge";
+            return "Shipment Surcharge : " . ($this->invoiceable->shipment->tracking_number ?? '-');
         }
 
         return "<>";
