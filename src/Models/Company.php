@@ -74,6 +74,7 @@ class Company extends Model
         'opening_days'                  =>  'array',
         'carrier_events_prices'         =>  'array',
         'reseller_insurance_shipment_marge' => 'array',
+        'discount_parameter'            =>  'array',
     ];
 
     public static function boot()
