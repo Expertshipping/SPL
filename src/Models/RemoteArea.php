@@ -11,7 +11,7 @@ class RemoteArea extends Model
 
     protected $guarded = [];
 
-    protected $casts = [
-        'remote_courier_code' => 'json',
-    ];
+    public function carrier() {
+        return $this->belongsTo(Carrier::class);
+    }
 }
