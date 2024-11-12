@@ -10,4 +10,8 @@ class RemoteArea extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    protected $casts = [
+        'remote_courier_code' => 'json',
+    ];
 }
