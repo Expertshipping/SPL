@@ -82,7 +82,8 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         'has_right_to_commission',
         'preferred_language',
 
-        'hide_from_timesheet'
+        'hide_from_timesheet',
+        'availability_notified_at'
     ];
 
     protected $attributes = [
@@ -116,17 +117,18 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
      * @var array
      */
     protected $casts = [
-        'trial_ends_at' => 'datetime',
-        'uses_two_factor_auth' => 'boolean',
-        'active' => 'boolean',
-        'options' =>  'array',
-        'custom_branding' =>  'array',
-        'blocked_at' => 'datetime',
-        'availability' => 'array',
-        'is_spark_user' => 'boolean',
-        'hidden_at' => 'datetime',
-        'dashboard_order' => 'array',
-        'hide_from_timesheet' => 'boolean',
+        'trial_ends_at'                     => 'datetime',
+        'uses_two_factor_auth'              => 'boolean',
+        'active'                            => 'boolean',
+        'options'                           =>  'array',
+        'custom_branding'                   =>  'array',
+        'blocked_at'                        => 'datetime',
+        'availability'                      => 'array',
+        'is_spark_user'                     => 'boolean',
+        'hidden_at'                         => 'datetime',
+        'dashboard_order'                   => 'array',
+        'hide_from_timesheet'               => 'boolean',
+        'availability_notified_at'          => 'datetime',
     ];
 
     public static $packs = [
