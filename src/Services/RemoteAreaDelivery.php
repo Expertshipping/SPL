@@ -6,16 +6,15 @@ use ExpertShipping\Spl\Models\RemoteArea;
 
 class RemoteAreaDelivery
 {
-
-    public function check($country, $zipCode)
+    public static function check(string $country, string $postalCode)
     {
         return RemoteArea::query()
             ->where('country', $country)
-            ->where('postal_code', $zipCode)
+            ->where('postal_code', $postalCode)
             ->get()
-            ->map(fn($r) => [
-                'carrier' => $r->carrier->slug ?? 'ALL',
-            ])
-            ->toArray();
+            ->map(fn($r) => $r->carrier->slug ?? 'ALL')
+            ->unique()
+            ->values();
+
     }
 }
