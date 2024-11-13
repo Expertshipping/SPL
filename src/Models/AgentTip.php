@@ -2,6 +2,7 @@
 
 namespace ExpertShipping\Spl\Models;
 
+use ExpertShipping\Spl\Models\Traits\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use ExpertShipping\Spl\Models\LocalInvoice;
@@ -9,6 +10,7 @@ use ExpertShipping\Spl\Models\LocalInvoice;
 class AgentTip extends Model
 {
     use HasFactory;
+    use Filterable;
 
     protected $fillable = [
         'user_id',
