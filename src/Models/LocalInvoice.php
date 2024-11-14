@@ -700,11 +700,11 @@ class LocalInvoice extends Model
 
     public function getTotalPaidAmountAttribute()
     {
-        $total = InvoiceDetail::query()
-            ->where('invoice_id', $this->id)
+        $total = $this
+            ->details
             ->where('pos', 0)
             ->whereNull('canceled_at')
-            ->whereNotNull('meta_data->payment_date')
+            ->whereNotNull('meta_data.payment_date')
             ->sum('price');
 
         if($total === 0 && $this->paid_at){
@@ -718,11 +718,10 @@ class LocalInvoice extends Model
     {
         $total = $this->total_ht + $this->total_taxes;
 
-        $totalDueAmount = InvoiceDetail::query()
-            ->where('invoice_id', $this->id)
+        $totalDueAmount = $this->details
             ->where('pos', 0)
             ->whereNull('canceled_at')
-            ->whereNull('meta_data->payment_date')
+            ->whereNull('meta_data.payment_date')
             ->sum('price');
 
         if($this->paid_at && $total == $totalDueAmount){
