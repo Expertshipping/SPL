@@ -146,7 +146,7 @@ class Shipment extends JsonResource
         $countriesFiles = Cache::remember('countriesFiles', 500, function () {
             return File::query()
                 ->with('media')
-                ->all();
+                ->get();
         });
 
         return $countriesFiles
