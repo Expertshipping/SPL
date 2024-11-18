@@ -346,7 +346,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
             ->whereDoesntHave('posDetails')
             ->whereNotNull('company_id')
             ->orderByDesc('id')
-            ->whereNull('paid_at')
+            //->whereNull('paid_at')
             ->first();
 
         if(!$invoice){
