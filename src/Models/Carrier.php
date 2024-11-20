@@ -110,6 +110,12 @@ class Carrier extends Model implements HasMedia
     {
         return $this->getFirstMediaUrl('carriers-logo');
     }
+
+    public function getPosImageUrlAttribute()
+    {
+        return $this->getFirstMediaUrl('carrier-pos-logo');
+    }
+
     public function scopeActiveForInventory($query)
     {
         return $query->where('active_for_inventory', true);
