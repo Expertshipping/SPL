@@ -13,9 +13,10 @@ class WorkingShift extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'days' => 'array',
-        'start_on' => 'date',
-        'end_on' => 'date',
+        'days'          => 'array',
+        'start_on'      => 'date',
+        'end_on'        => 'date',
+        'update_form'   => 'array',
     ];
 
     public static function boot()
