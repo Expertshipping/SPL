@@ -103,7 +103,11 @@ class TimesheetService
                         ->get();
 
         return $timesheets->sum(function ($timesheet) {
-            return $timesheet->scheduled_start_date->diffInHours($timesheet->scheduled_end_date);
+            if(!is_null($timesheet->scheduled_start_date) && !is_null($timesheet->scheduled_end_date)) {
+                return $timesheet->scheduled_start_date->diffInHours($timesheet->scheduled_end_date);
+            } else {
+                return 0;
+            }
         });
     }
 }
