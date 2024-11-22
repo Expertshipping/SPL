@@ -27,4 +27,7 @@ class UserCoupon extends Model
         return $this->hasOne(LocalInvoice::class, 'invoice_id');
     }
 
+    public function coupon() {
+        return $this->belongsTo(Coupon::class);
+    }
 }
