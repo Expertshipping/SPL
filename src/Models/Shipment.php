@@ -3,7 +3,7 @@
 namespace ExpertShipping\Spl\Models;
 
 use ExpertShipping\Spl\Helpers\Helper;
-use ExpertShipping\Spl\Models\Jobs\CalculateDistanceBetweenStoreAndClientForRetailShipments;
+use ExpertShipping\Spl\Jobs\CalculateDistanceBetweenStoreAndClientForRetailShipments;
 use ExpertShipping\Spl\Models\Models\ReferralPayout;
 use ExpertShipping\Spl\Models\Retail\InsuranceSuggestion;
 use Illuminate\Database\Eloquent\Model;
