@@ -1406,4 +1406,9 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
     {
         return $this->belongsToMany(Coupon::class, 'user_coupons')->withTimestamps();
     }
+
+    public function userCoupons()
+    {
+        return $this->hasMany(UserCoupon::class);
+    }
 }

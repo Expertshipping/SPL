@@ -202,6 +202,7 @@ class Shipment extends Model
         'retail_reseller_rate_details',
         'quote_id',
         'quote_duration',
+        'coupon_id',
     ];
 
     protected $casts = [
@@ -668,5 +669,9 @@ class Shipment extends Model
 
     public function quote() {
         return $this->hasOne(Quote::class);
+    }
+
+    public function userCoupon() {
+        return $this->belongsTo(UserCoupon::class, 'coupon_id');
     }
 }

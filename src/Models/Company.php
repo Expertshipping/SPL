@@ -965,4 +965,9 @@ class Company extends Model
     {
         return $this->hasMany(ResellerCompanyCategoryMarge::class);
     }
+
+    public function userCoupons()
+    {
+        return $this->hasMany(UserCoupon::class);
+    }
 }
