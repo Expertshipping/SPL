@@ -113,11 +113,7 @@ class LocalInvoice extends Model
 
     private function isPartiallyPaid()
     {
-        if($this->paid_amount){
-            return  $this->paid_amount < ($this->total_ht + $this->total_taxes);
-        }
-
-        return $this->total_due_amount > 0 && $this->total_paid_amount > 0 && $this->total_due_amount !== $this->total_paid_amount;
+        return $this->paid_amount && $this->paid_amount < $this->total_ht + $this->total_taxes;
     }
 
     private function isUnderValidation()
@@ -700,8 +696,7 @@ class LocalInvoice extends Model
 
     public function getTotalPaidAmountAttribute()
     {
-        $total = $this
-            ->details
+        $total = $this->details
             ->where('pos', 0)
             ->whereNull('canceled_at')
             ->whereNotNull('meta_data.payment_date')
@@ -716,19 +711,11 @@ class LocalInvoice extends Model
 
     public function getTotalDueAmountAttribute()
     {
-        $total = $this->total_ht + $this->total_taxes;
-
-        $totalDueAmount = $this->details
+        return $this->details
             ->where('pos', 0)
             ->whereNull('canceled_at')
             ->whereNull('meta_data.payment_date')
             ->sum('price');
-
-        if($this->paid_at && $total == $totalDueAmount){
-            return 0;
-        }
-
-        return $totalDueAmount;
     }
 
     public function getTotalFreightChargesAttribute(){

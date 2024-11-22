@@ -173,6 +173,7 @@
         </tr>
 
         @foreach ($invoice->details as $detail)
+            @if(!$detail->canceled_at)
             <tr class="item last">
                 <td colspan="2">
                     <table>
@@ -188,6 +189,7 @@
                     </table>
                 </td>
             </tr>
+            @endif
         @endforeach
 
         <tr>
