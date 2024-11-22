@@ -41,4 +41,25 @@ class PayPeriodsService{
         return null;
     }
 
+    public static function getPayPeriodFromRequest(): array
+    {
+        if(request('pay_range_from') && request('pay_range_to') && request('agent_type') === 'self-employed'){
+            $start = Carbon::parse(request()->get('pay_range_from'))->format('Y-m-d');
+            $end = Carbon::parse(request()->get('pay_range_to'))->format('Y-m-d');
+        }else{
+            $payPeriods = PayPeriodsService::getPayPeriods(date('Y'));
+            $currentPeriod = $payPeriods[request()->get('pay_period', 0)];
+            $start = $currentPeriod['start']->format('Y-m-d');
+            $end = $currentPeriod['end']->format('Y-m-d');
+        }
+
+        $paymentPeriod = $start.' - '.$end;
+
+        return [
+            'start' => $start,
+            'end' => $end,
+            'paymentPeriod' => $paymentPeriod,
+        ];
+    }
+
 }

@@ -75,6 +75,8 @@ class Company extends Model
         'carrier_events_prices'         =>  'array',
         'reseller_insurance_shipment_marge' => 'array',
         'discount_parameter'            =>  'array',
+        'email_credential'              =>  'array',
+        'sms_credential'                =>  'array',
     ];
 
     public static function boot()

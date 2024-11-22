@@ -21,6 +21,10 @@ class Commissionable extends Model
         'commission_value_palier_2',
     ];
 
+    public function agentCommissions(){
+        return $this->hasMany(AgentCommission::class, 'commission_id');
+    }
+
     public function commissionable(){
         return $this->morphTo();
     }
