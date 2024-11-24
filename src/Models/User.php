@@ -1401,14 +1401,4 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
         return $company->pivot->can_view_cost;
     }
-
-    public function coupons()
-    {
-        return $this->belongsToMany(Coupon::class, 'user_coupons')->withTimestamps();
-    }
-
-    public function userCoupons()
-    {
-        return $this->hasMany(UserCoupon::class);
-    }
 }

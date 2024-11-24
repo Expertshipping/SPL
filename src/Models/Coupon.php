@@ -12,8 +12,8 @@ class Coupon extends Model
         'is_active' => 'boolean',
     ];
 
-    public function users()
+    public function leads()
     {
-        return $this->belongsToMany(User::class, 'user_coupons')->withTimestamps();
+        return $this->belongsToMany(Lead::class, 'lead_coupons')->withTimestamps();
     }
 }

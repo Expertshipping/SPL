@@ -14,15 +14,16 @@ class Campaign extends Model
     protected $casts = [
         'sent' => 'boolean',
         'send_date' => 'datetime',
+        'channels' => 'array',
     ];
 
-    public function userCoupons()
+    public function leadCoupons()
     {
-        return $this->hasMany(UserCoupon::class);
+        return $this->hasMany(LeadCoupon::class);
     }
 
-    public function userCouponsInvoiced()
+    public function leadCouponsInvoiced()
     {
-        return $this->userCoupons()->whereNotNull('invoice_id');
+        return $this->leadCoupons()->whereNotNull('invoice_id');
     }
 }

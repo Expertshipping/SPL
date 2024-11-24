@@ -966,11 +966,6 @@ class Company extends Model
         return $this->hasMany(ResellerCompanyCategoryMarge::class);
     }
 
-    public function userCoupons()
-    {
-        return $this->hasMany(UserCoupon::class);
-    }
-
     public function unpaidInvoices(){
         return $this->localInvoices()
             ->whereHas('saleDetails')
