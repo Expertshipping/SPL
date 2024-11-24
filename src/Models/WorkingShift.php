@@ -7,6 +7,8 @@ use Ramsey\Uuid\Uuid;
 
 class WorkingShift extends Model
 {
+    const STATUS_PENDING = 'PENDING';
+    const STATUS_ACTIVE = 'ACTIVE';
 
     protected $table = 'working_shifts';
 
