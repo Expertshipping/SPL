@@ -30,24 +30,25 @@ class Campaign extends Model
     public function getLeads(){
         $leads = collect();
         if($this->recipient === 'Dop-off'){
-            $leads = Lead::whereHas('invoice', function($query){
-                    $query->whereHas('details', function($query){
-                        $query->whereHasMorph('invoiceable', [Product::class], function($query){
-                            $query->where('products.name', 'like', 'Drop-Off%');
-                        });
-                    });
-                })
+            $leads = DropOff::query()
                 ->when($this->period, fn($q) => $q->whereBetween('created_at', [$this->send_date->copy()->subMonths($this->period), $this->send_date]))
-                ->when($this->channels, fn($q) => $q->whereIn('type', $this->channels))
-                ->distinct('value');
+                ->when(count($this->channels) === 1 && in_array('phone_number', $this->channels), fn($q) => $q->whereNotNull('phone_number')->distinct('phone_number'))
+                ->when(count($this->channels) === 1 &&  in_array('email', $this->channels), fn($q) => $q->whereNotNull('email')->distinct('email'))
+                ->when(count($this->channels) === 2, function($q) {
+                    $q->where(function($q){
+                        $q->whereNotNull('phone_number')
+                            ->orWhereNotNull('email')
+                            ->distinct(['phone_number', 'email']);
+                    });
+                });
         }
 
         if($this->recipient === 'Shipments'){
             $leads = Lead::whereHas('invoice', function($query){
-                    $query->whereHas('details', function($query){
-                        $query->whereHasMorph('invoiceable', [Shipment::class]);
-                    });
-                })
+                $query->whereHas('details', function($query){
+                    $query->whereHasMorph('invoiceable', [Shipment::class]);
+                });
+            })
                 ->when($this->period, fn($q) => $q->whereBetween('created_at', [$this->send_date->copy()->subMonths($this->period), $this->send_date]))
                 ->when($this->channels, fn($q) => $q->whereIn('type', $this->channels))
                 ->distinct('value');
@@ -55,12 +56,12 @@ class Campaign extends Model
 
         if($this->recipient === 'Sales without shipments'){
             $leads = Lead::whereHas('invoice', function($query){
-                    $query->whereHas('details', function($query){
-                        $query->whereHasMorph('invoiceable', [Product::class], function($query){
-                            $query->where('products.name', 'NOT LIKE', 'Drop-Off%');
-                        });
+                $query->whereHas('details', function($query){
+                    $query->whereHasMorph('invoiceable', [Product::class], function($query){
+                        $query->where('products.name', 'NOT LIKE', 'Drop-Off%');
                     });
-                })
+                });
+            })
                 ->when($this->period, fn($q) => $q->whereBetween('created_at', [$this->send_date->copy()->subMonths($this->period), $this->send_date]))
                 ->when($this->channels, fn($q) => $q->whereIn('type', $this->channels))
                 ->distinct('value');
