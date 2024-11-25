@@ -26,4 +26,46 @@ class Campaign extends Model
     {
         return $this->leadCoupons()->whereNotNull('invoice_id');
     }
+
+    public function getLeads(){
+        $leads = collect();
+        if($this->recipient === 'Dop-off'){
+            $leads = Lead::whereHas('invoice', function($query){
+                $query->whereHas('details', function($query){
+                    $query->whereHasMorph('invoiceable', [Product::class], function($query){
+                        $query->where('products.name', 'like', 'Drop-Off%');
+                    });
+                });
+            })
+                ->when($this->period, fn($q) => $q->whereBetween('created_at', [now()->subMonths($this->period), now()]))
+                ->when($this->channels, fn($q) => $q->whereIn('type', $this->channels))
+                ->distinct('value');
+        }
+
+        if($this->recipient === 'Shipments'){
+            $leads = Lead::whereHas('invoice', function($query){
+                $query->whereHas('details', function($query){
+                    $query->whereHasMorph('invoiceable', [Shipment::class]);
+                });
+            })
+                ->when($this->period, fn($q) => $q->whereBetween('created_at', [now()->subMonths($this->period), now()]))
+                ->when($this->channels, fn($q) => $q->whereIn('type', $this->channels))
+                ->distinct('value');
+        }
+
+        if($this->recipient === 'Sales without shipments'){
+            $leads = Lead::whereHas('invoice', function($query){
+                $query->whereHas('details', function($query){
+                    $query->whereHasMorph('invoiceable', [Product::class], function($query){
+                        $query->where('products.name', 'NOT LIKE', 'Drop-Off%');
+                    });
+                });
+            })
+                ->when($this->period, fn($q) => $q->whereBetween('created_at', [now()->subMonths($this->period), now()]))
+                ->when($this->channels, fn($q) => $q->whereIn('type', $this->channels))
+                ->distinct('value');
+        }
+
+        return $leads;
+    }
 }
