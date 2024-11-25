@@ -17,14 +17,14 @@ class Campaign extends Model
         'channels' => 'array',
     ];
 
-    public function leadCoupons()
+    public function sentCoupons()
     {
-        return $this->hasMany(LeadCoupon::class);
+        return $this->hasMany(SentCoupon::class);
     }
 
-    public function leadCouponsInvoiced()
+    public function sentCouponsInvoiced()
     {
-        return $this->leadCoupons()->whereNotNull('invoice_id');
+        return $this->sentCoupons()->whereNotNull('invoice_id');
     }
 
     public function getLeads(){
@@ -32,15 +32,19 @@ class Campaign extends Model
         if($this->recipient === 'Dop-off'){
             $leads = DropOff::query()
                 ->when($this->period, fn($q) => $q->whereBetween('created_at', [$this->send_date->copy()->subMonths($this->period), $this->send_date]))
-                ->when(count($this->channels) === 1 && in_array('phone_number', $this->channels), fn($q) => $q->whereNotNull('phone_number')->distinct('phone_number'))
-                ->when(count($this->channels) === 1 &&  in_array('email', $this->channels), fn($q) => $q->whereNotNull('email')->distinct('email'))
-                ->when(count($this->channels) === 2, function($q) {
-                    $q->where(function($q){
+                ->when(count($this->channels) === 1, function ($q) {
+                    if (in_array('phone', $this->channels)) {
+                        $q->whereNotNull('phone_number')->distinct('phone_number');
+                    } elseif (in_array('email', $this->channels)) {
+                        $q->whereNotNull('email')->distinct('email');
+                    }
+                })
+                ->when(count($this->channels) === 2, fn($q) =>
+                    $q->where(function ($q) {
                         $q->whereNotNull('phone_number')
-                            ->orWhereNotNull('email')
-                            ->distinct(['phone_number', 'email']);
-                    });
-                });
+                          ->orWhereNotNull('email');
+                    })->distinct(['phone_number', 'email'])
+                );
         }
 
         if($this->recipient === 'Shipments'){
