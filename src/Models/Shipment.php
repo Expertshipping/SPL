@@ -671,7 +671,7 @@ class Shipment extends Model
         return $this->hasOne(Quote::class);
     }
 
-    public function leadCoupon() {
-        return $this->belongsTo(LeadCoupon::class, 'coupon_id');
+    public function sentCoupon() {
+        return $this->belongsTo(SentCoupon::class, 'coupon_id');
     }
 }
