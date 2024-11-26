@@ -19,6 +19,7 @@ class Commissionable extends Model
         'commissionable_id',
         'admin_id',
         'commission_value_palier_2',
+        'active'
     ];
 
     public function agentCommissions(){
@@ -60,5 +61,10 @@ class Commissionable extends Model
         }
 
         return $productName;
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('active', true);
     }
 }
