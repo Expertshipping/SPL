@@ -203,6 +203,7 @@ class Shipment extends Model
         'quote_id',
         'quote_duration',
         'coupon_id',
+        'tracking_numbers',
     ];
 
     protected $casts = [
@@ -234,6 +235,7 @@ class Shipment extends Model
         'failed_aramex_hub_label' => 'boolean',
         'failed_pickup' => 'boolean',
         'retail_reseller_rate_details' => 'array',
+        'tracking_numbers' => 'array',
     ];
 
     public static function boot()
@@ -385,6 +387,7 @@ class Shipment extends Model
                         ->orWhere('to_province', 'like', $term)
                         ->orWhere('to_email', 'like', "%$term%")
                         ->orWhere('to_phone', 'like', "%$term%")
+                        ->orWhere('tracking_numbers', 'like', "%$term%")
                         ->orWhereIn('carrier_id', function ($query) use ($term) {
                             $query->select('id')
                                 ->from('carriers')
