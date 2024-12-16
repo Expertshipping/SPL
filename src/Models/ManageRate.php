@@ -114,6 +114,7 @@ class ManageRate
     private $taxService;
     private $discountType;
 
+    private $packagingType;
 
     /**
      * ManageRate constructor.
@@ -126,9 +127,23 @@ class ManageRate
      * @param $state
      * @param $carrier
      * @param $discountService
+     * @param $resellerCost
+     * @param $packages
+     * @param $weightUnit
      */
-    public function __construct($rate,  $baseRate, $rateType, $rateInfos, $shipmentCountries, $state, $carrier, $discountService = null, $resellerCost = true, $packages, $weightUnit)
-    {
+    public function __construct(
+        $rate,
+        $baseRate,
+        $rateType,
+        $rateInfos,
+        $shipmentCountries,
+        $state,
+        $carrier,
+        $discountService = null,
+        $resellerCost = true,
+        $packages,
+        $weightUnit
+    ) {
         $this->taxService = app(TaxService::class);
         $this->rate = Money::fromCurrencyAmount((float) $rate)->inCent();
         $this->baseRate = Money::fromCurrencyAmount((float) $baseRate)->inCent();
@@ -200,7 +215,7 @@ class ManageRate
             return $this->coastRate();
         }
 
-        $packagingType = request()->get('packagingType');
+        $packagingType = $this->packagingType ?? request()->get('packagingType');
 
         if ($this->discountDetailByCountryOrZoneOrWorld[$this->discountType][$packagingType] == 0) {
             return $this->coastRate();
@@ -303,7 +318,7 @@ class ManageRate
      */
     private function discountValue($service)
     {
-        $packagingType = request()->get('packagingType');
+        $packagingType = $this->packagingType ?? request()->get('packagingType');
 
         return $this->discountDetailByCountryOrZoneOrWorld[$this->discountType][$packagingType];
     }
@@ -617,9 +632,14 @@ class ManageRate
                 ->where('import_or_export', 'like', "%$labelType%")
                 ->first()
             ){
-                    return "{$zone->id}";
-                }
+                return "{$zone->id}";
+            }
         }
         return null;
+    }
+
+    public function setPackagingType($packagingType)
+    {
+        $this->packagingType = $packagingType;
     }
 }
