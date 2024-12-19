@@ -646,7 +646,7 @@ class Shipment extends Model
             'pickup_country' => $this->from_country,
             'pickup_phone_number' => $request['pickup_phone'] ?? $this->from_phone,
             'pickup_email' => $this->from_email,
-            'carrierAccounts' => request()->user()->carrierAccounts(),
+            'carrierAccounts' => $this->user->carrierAccounts(),
             'total_pieces' => count($this->package->meta_data) ?? 1,
         ];
     }
