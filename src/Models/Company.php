@@ -968,4 +968,32 @@ class Company extends Model
     {
         return $this->hasMany(ResellerCompanyCategoryMarge::class);
     }
+
+    public function unpaidInvoices(){
+        return $this->localInvoices()
+            ->whereHas('saleDetails')
+            ->where('paid_at', null)
+            ->where('total', '>', 0)
+            ->get()
+            ->where('status', 'unpaid')
+            ->filter(function ($invoice): bool {
+                if ($invoice->company->billing_period === 'monthly') {
+                    return $invoice->created_at->year <= now()->year && $invoice->created_at->month < now()->month;
+                }
+
+                if ($invoice->company->billing_period === 'weekly') {
+                    return $invoice->created_at->diffInDays(now()) >= 7;
+                }
+
+                if ($invoice->company->billing_period === 'every_two_weeks') {
+                    return $invoice->created_at->diffInDays(now()) >= 14;
+                }
+
+                if($invoice->company->billing_period === 'daily') {
+                    return $invoice->created_at->diffInDays(now()) >= 1;
+                }
+
+                return false;
+            });
+    }
 }

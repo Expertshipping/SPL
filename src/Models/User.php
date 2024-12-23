@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Validation\ValidationException;
@@ -82,7 +83,9 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         'has_right_to_commission',
         'preferred_language',
 
-        'hide_from_timesheet'
+        'hide_from_timesheet',
+        'availability_notified_at',
+        'in_training'
     ];
 
     protected $attributes = [
@@ -116,17 +119,19 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
      * @var array
      */
     protected $casts = [
-        'trial_ends_at' => 'datetime',
-        'uses_two_factor_auth' => 'boolean',
-        'active' => 'boolean',
-        'options' =>  'array',
-        'custom_branding' =>  'array',
-        'blocked_at' => 'datetime',
-        'availability' => 'array',
-        'is_spark_user' => 'boolean',
-        'hidden_at' => 'datetime',
-        'dashboard_order' => 'array',
-        'hide_from_timesheet' => 'boolean',
+        'trial_ends_at'                     => 'datetime',
+        'uses_two_factor_auth'              => 'boolean',
+        'active'                            => 'boolean',
+        'options'                           =>  'array',
+        'custom_branding'                   =>  'array',
+        'blocked_at'                        => 'datetime',
+        'availability'                      => 'array',
+        'is_spark_user'                     => 'boolean',
+        'hidden_at'                         => 'datetime',
+        'dashboard_order'                   => 'array',
+        'hide_from_timesheet'               => 'boolean',
+        'availability_notified_at'          => 'datetime',
+        'in_training'                       => 'boolean',
     ];
 
     public static $packs = [
@@ -341,7 +346,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
             ->whereDoesntHave('posDetails')
             ->whereNotNull('company_id')
             ->orderByDesc('id')
-            ->whereNull('paid_at')
+            //->whereNull('paid_at')
             ->first();
 
         if(!$invoice){
@@ -852,12 +857,20 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function getUserCompaniesAttribute()
     {
-        return $this->companies->map(fn ($company) => [
-            'company_id' => $company->id,
-            'company_role' => $company->pivot->appRole->slug,
-            'company_name' => $company->name,
-            'cash_registers' => $company->cashRegisters
-        ]);
+        $appRoles = Cache::rememberForever('appRoles', function () {
+            return AppRole::all();
+        });
+
+        return $this->companies->map(function ($company) use ($appRoles){
+            $appRole = $appRoles->where('id', $company->pivot->app_role_id)->first();
+
+            return [
+                'company_id' => $company->id,
+                'company_role' => $appRole?->slug,
+                'company_name' => $company->name,
+                'cash_registers' => $company->cashRegisters
+            ];
+        });
     }
 
     public function getUserRoleAttribute()
@@ -1199,10 +1212,16 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function getTrainingNameAttribute()
     {
+        if (!$this->in_training) {
+            return $this->name;
+        }
+
         $totalHours = TimesheetService::getTotalHoursForUserAllTime(null, $this->id);
         if ($totalHours <= 80) {
             return $this->name . " (In Training)";
         }
+
+        $this->update(['in_training' => false]);
 
         return $this->name;
     }

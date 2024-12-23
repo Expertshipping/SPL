@@ -3,7 +3,7 @@
 namespace ExpertShipping\Spl\Models;
 
 use ExpertShipping\Spl\Helpers\Helper;
-use ExpertShipping\Spl\Models\Jobs\CalculateDistanceBetweenStoreAndClientForRetailShipments;
+use ExpertShipping\Spl\Jobs\CalculateDistanceBetweenStoreAndClientForRetailShipments;
 use ExpertShipping\Spl\Models\Models\ReferralPayout;
 use ExpertShipping\Spl\Models\Retail\InsuranceSuggestion;
 use Illuminate\Database\Eloquent\Model;
@@ -202,6 +202,11 @@ class Shipment extends Model
         'retail_reseller_rate_details',
         'quote_id',
         'quote_duration',
+        'coupon_id',
+        'tracking_numbers',
+        'is_manual_shipment',
+
+        'taxes',
     ];
 
     protected $casts = [
@@ -233,6 +238,9 @@ class Shipment extends Model
         'failed_aramex_hub_label' => 'boolean',
         'failed_pickup' => 'boolean',
         'retail_reseller_rate_details' => 'array',
+        'tracking_numbers' => 'array',
+        'is_manual_shipment' => 'boolean',
+        'taxes' => 'array',
     ];
 
     public static function boot()
@@ -384,6 +392,7 @@ class Shipment extends Model
                         ->orWhere('to_province', 'like', $term)
                         ->orWhere('to_email', 'like', "%$term%")
                         ->orWhere('to_phone', 'like', "%$term%")
+                        ->orWhere('tracking_numbers', 'like', "%$term%")
                         ->orWhereIn('carrier_id', function ($query) use ($term) {
                             $query->select('id')
                                 ->from('carriers')
@@ -640,7 +649,7 @@ class Shipment extends Model
             'pickup_country' => $this->from_country,
             'pickup_phone_number' => $request['pickup_phone'] ?? $this->from_phone,
             'pickup_email' => $this->from_email,
-            'carrierAccounts' => request()->user()->carrierAccounts(),
+            'carrierAccounts' => $this->user->carrierAccounts(),
             'total_pieces' => count($this->package->meta_data) ?? 1,
         ];
     }
@@ -668,5 +677,9 @@ class Shipment extends Model
 
     public function quote() {
         return $this->hasOne(Quote::class);
+    }
+
+    public function sentCoupon() {
+        return $this->belongsTo(SentCoupon::class, 'coupon_id');
     }
 }

@@ -103,7 +103,12 @@ class Shipment extends JsonResource
             'has_issue' => $this->has_issue,
             'issue_description' => $this->issue_description,
             'total_charged' => round($this->total_charged, 2),
-            'consumer_invoice_link' => $this->saleDetail && $this->saleDetail->invoice && $this->saleDetail->invoice->token ? url('/i/'.$this->saleDetail->invoice->token) : '',
+            'consumer_invoice_link' => function () {
+                if ($this->relationLoaded('saleDetail') && $this->saleDetail->relationLoaded('invoice')) {
+                    return $this->saleDetail->invoice->token ? url('/i/' . $this->saleDetail->invoice->token) : '';
+                }
+                return '';
+            },
             'saturday_delivery' => $this->saturday_delivery,
             'signature_on_delivery' => $this->signature_on_delivery,
             'is_paid' => $this->is_paid,
@@ -124,6 +129,8 @@ class Shipment extends JsonResource
             'activities' => ShipmentActivity::collection($this->whenLoaded('activities')),
             'aramex_bulks' => Shipment::collection($this->whenLoaded('aramexBulks')),
             'surcharges' => $this->whenLoaded('shipmentSurcharges'),
+
+            'is_manual_shipment' => $this->is_manual_shipment,
         ];
     }
 
@@ -138,8 +145,10 @@ class Shipment extends JsonResource
     }
 
     protected function files(){
-        $countriesFiles = Cache::remember('users', 500, function () {
-            return File::all();
+        $countriesFiles = Cache::remember('countriesFiles', 500, function () {
+            return File::query()
+                ->with('media')
+                ->get();
         });
 
         return $countriesFiles

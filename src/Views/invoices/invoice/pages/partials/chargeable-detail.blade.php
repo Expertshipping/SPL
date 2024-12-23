@@ -152,9 +152,13 @@
                 </table>
                 <hr>
             @else
-                @if(isset($shipment->{$rateDetailsAttribute}))
+                @php
+                    $arrayDetails = $shipment->{$rateDetailsAttribute}['rateDetails'] ?? $shipment->{$rateDetailsAttribute} ?? null;
+                    $sumArray = collect($arrayDetails)->sum('amount');
+                @endphp
+                @if(isset($arrayDetails))
                     <table width="100%">
-                        @foreach($shipment->{$rateDetailsAttribute} as $rateDetail)
+                        @foreach($arrayDetails as $rateDetail)
                             <tr>
                                 <td class="text-open-sans-8 text-default">
                                     {{ $rateDetail['type'] }}
@@ -165,6 +169,17 @@
                                 </td>
                             </tr>
                         @endforeach
+                        @if($shipment->company->is_retail_reseller && $shipment->company->billing_system === 'periodic' && $sumArray < $detail->total)
+                            <tr>
+                                <td class="text-open-sans-8 text-default">
+                                    {{ __('Expert Shipping Marge') }}
+                                </td>
+
+                                <td class="text-open-sans-8 text-default text-right">
+                                    {{ SplMoney::format($detail->total - $sumArray, $shipment->company->currency) }}
+                                </td>
+                            </tr>
+                        @endif
                     </table>
                     <hr>
                 @endif
