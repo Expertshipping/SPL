@@ -11,6 +11,38 @@ class Carrier extends Model implements HasMedia
 {
     use InteractsWithMedia;
 
+    const TAXES = [
+        'MA' => [
+            'aramex' => [
+                'VAT' => 20,
+            ],
+        ]
+    ];
+
+    const VARIABLE_TAXES = [
+        'MA' => [
+            'chronopost' => [
+                'VAT' => [
+                    [
+                        'rate' => 36,
+                        'min' => 0,
+                        'max' => 30,
+                    ],
+                    [
+                        'rate' => 100,
+                        'min' => 30,
+                        'max' => 50,
+                    ],
+                    [
+                        'rate' => 200,
+                        'min' => 50,
+                        'max' => 1000,
+                    ]
+                ],
+            ],
+        ]
+    ];
+
     public $fillable = [
         'name',
         'slug',
