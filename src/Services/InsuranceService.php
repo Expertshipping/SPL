@@ -27,6 +27,8 @@ class InsuranceService
         'aramex' => 127
     ];
 
+    const CHANGE_RATE = 1.4;
+
     private static $fileTypes = [
         'evidences_0' => 1,
         'evidences_1' => 2,
@@ -1310,7 +1312,7 @@ class InsuranceService
     public function getRate($insuredValue, $shipFromCountry, $shipToCountry, $carrier, $serviceCode, $cost = false)
     {
         $service = \App\Service::where('code', $serviceCode)->first();
-        $insuredValueInUSD = round(($insuredValue / 1.2), 0);
+        $insuredValueInUSD = round(($insuredValue / self::CHANGE_RATE), 0);
         $availableDestination = collect(static::$countries)->where('code', $shipToCountry)->first();
         if(!array_key_exists($serviceCode, static::$services)){
             return [
@@ -1396,7 +1398,7 @@ class InsuranceService
             'userId' => config('services.insurance.user_id'),
             'carrier' => (string) static::$carriers[$shipment->carrier->slug],
             'service' => static::$services[$shipment->service_code],
-            'declaredValue' => (string) round(($shipment->package->insured_value / 1.2), 0),
+            'declaredValue' => (string) round(($shipment->package->insured_value / self::CHANGE_RATE), 0),
             'shipFrom' => $shipment->from_country,
             'shipTo' => $shipment->to_country,
             'trackingNum' => $shipment->tracking_number,
@@ -1427,7 +1429,7 @@ class InsuranceService
         $params = [
             "Carrier" => (string) static::$carriers[$insurance->carrier->slug],
             "Service" => (string) static::$services[$insurance->service->code],
-            "DeclaredValue" => round(($insurance->declared_value / 1.2), 0),
+            "DeclaredValue" => round(($insurance->declared_value / self::CHANGE_RATE), 0),
             "FromCountryCode" => $insurance->ship_from,
             "ToCountryCode" => $insurance->ship_to,
             "TrackingNum" => $insurance->tracking_number,
@@ -1605,7 +1607,7 @@ class InsuranceService
             'TrackingNum' => $claim->meta_data['trackingNum'],
             'DiscoveredDate' => $claim->meta_data['discoveredDate'],
             'ClaimType' => $claim->meta_data['claimType'],
-            'ClaimAmount' => round(($claim->meta_data['claimAmount'] / 1.2), 0),
+            'ClaimAmount' => round(($claim->meta_data['claimAmount'] / self::CHANGE_RATE), 0),
             'LossType' => $claim->meta_data['lossType'],
             'HasSalvage' => $hasSalvage,
             'Contents' => $claim->meta_data['contents'],
@@ -1625,7 +1627,7 @@ class InsuranceService
     }
 
     protected function convertToCanadianDollar($amount){
-        return $amount*1.2;
+        return $amount*self::CHANGE_RATE;
     }
 
     private function callApi($method, $uri, $params = [])

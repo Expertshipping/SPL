@@ -86,6 +86,7 @@ class Rate
                             && $testCompanyService;
                     })
                     ->map(function ($rate) use ($carrierName, $discountsServicesLocal, $account, &$self) {
+                        $clone = $rate;
                         $requestRate = isset($rate['total_charge']) ? $rate['total_charge']['amount'] : $rate['rate'];
 
                         $rate['carrier_rate'] = $requestRate;
@@ -107,7 +108,8 @@ class Rate
                             if ($search === false) {
                                 $self->errors[] = [
                                     'carrier' => Str::lower($carrierName),
-                                    'error' => 'The maximum sum assured for this career is exceeded.'
+                                    // add service name to the error message
+                                    'error' => __("No insurance rate found for " . $clone['desc'] . " service")
                                 ];
                             }
                             return $rate;
