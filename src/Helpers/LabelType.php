@@ -8,7 +8,7 @@ class LabelType
     {
         $labelType = 'all';
         if($request->to['country'] === $request->from['country'] && $request->from['country'] === (auth()->user()->company->country??auth()->user()->country)){
-            $labelType = 'local';
+            $labelType = 'domestic';
         }
 
         if($request->to['country'] !== $request->from['country'] && $request->from['country'] === (auth()->user()->company->country??auth()->user()->country)){
