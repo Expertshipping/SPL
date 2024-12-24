@@ -204,7 +204,9 @@ class Shipment extends Model
         'quote_duration',
         'coupon_id',
         'tracking_numbers',
-        'is_manual_shipment'
+        'is_manual_shipment',
+
+        'taxes',
     ];
 
     protected $casts = [
@@ -238,6 +240,7 @@ class Shipment extends Model
         'retail_reseller_rate_details' => 'array',
         'tracking_numbers' => 'array',
         'is_manual_shipment' => 'boolean',
+        'taxes' => 'array',
     ];
 
     public static function boot()

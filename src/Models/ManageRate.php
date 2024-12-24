@@ -107,6 +107,8 @@ class ManageRate
     public $zone;
     public $discountWeightIndex;
     public $discountDetailByCountryOrZoneOrWorld;
+    public $labelType;
+    public $appliedLabelType;
 
     private $rate;
     private $discountService;
@@ -159,6 +161,7 @@ class ManageRate
             $this->discountService = $discountService;
             $totalWeight = collect($packages)->sum('weight');
             $labelType = LabelType::labelType(request());
+            $this->labelType = $labelType;
             $country = Str::upper($shipmentCountries[$labelType === 'import' ? 'depart' : 'destination']);
             $zone = null;
             if($zoneId = $this->getCarrierZoneFromCountryCode($country, $discountService->service->carrier)){
@@ -176,10 +179,16 @@ class ManageRate
                 }
             }
 
-            $this->discountWeightIndex = $discountService->getIndexByWeight($totalWeight, $country, $zone) ?? 'all';
+            if(isset($discountService->discount[$this->labelType])){
+                $this->appliedLabelType = $this->labelType;
+            }else{
+                $this->appliedLabelType = 'all';
+            }
+
+            $this->discountWeightIndex = $discountService->getIndexByWeight($totalWeight, $country,$this->appliedLabelType, $zone) ?? 'all';
             $this->companyService = $discountService;
             // define discount type (dollar or percentage) and also define discount package detail (zone or country or world)
-            $this->discountDetailByCountryOrZoneOrWorld = $discountService->discount[$country][$this->discountWeightIndex] ?? $discountService->discount[$zone][$this->discountWeightIndex] ?? $discountService->discount['world'][$this->discountWeightIndex] ?? null;
+            $this->discountDetailByCountryOrZoneOrWorld = $discountService->discount[$this->appliedLabelType][$country][$this->discountWeightIndex] ?? $discountService->discount[$this->appliedLabelType][$zone][$this->discountWeightIndex] ?? $discountService->discount[$this->appliedLabelType]['world'][$this->discountWeightIndex] ?? null;
             $this->defineDiscountType($discountService);
         }
     }
