@@ -126,7 +126,7 @@
                         </td>
 
                         <td>
-                            Facture : <strong> #{{($invoice->id + env('INVOICE_NUMBER_START', 0))}}</strong> <br>
+                            Facture : <strong> #{{ $invoice->invoice_number }}</strong> <br>
                             Date: {{$invoice->created_at->format('d-m-Y')}}<br />
                         </td>
                     </tr>
