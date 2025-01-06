@@ -166,7 +166,7 @@
                     <tr class="no-border">
                         <td align="left" class="no-border">
                             <span class="total">
-                                {{ Helper::moneyFormat(round($invoice->total, 2), "") }}<sup>$</sup>
+                                {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat(round($invoice->total, 2), "") }}<sup>$</sup>
                             </span>
                         </td>
                     </tr>
@@ -241,7 +241,7 @@
                             </td>
 
                             <td align="left" valign="top" width="15%">
-                                {{ Helper::moneyFormat($detail->price, "") }}
+                                {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->price, "") }}
                             </td>
 
                             <td align="center" valign="top" width="15%">
@@ -255,7 +255,7 @@
                             </td>
 
                             <td align="right" valign="top" width="15%">
-                                {{ Helper::moneyFormat(round($detail->total_ht_discount, 2), "$") }}
+                                {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat(round($detail->total_ht_discount, 2), "$") }}
                             </td>
                         </tr>
                     </table>
@@ -268,7 +268,7 @@
                             {{__("Total Discount")}}
                         </td>
                         <td align="right" class="no-border">
-                            -{{ Helper::moneyFormat($invoice->discount) }}
+                            -{{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->discount) }}
                         </td>
                     </tr>
                     <tr class="no-border">
@@ -276,7 +276,7 @@
                             {{__("Sub total")}}
                         </td>
                         <td align="right" class="no-border">
-                            {{ Helper::moneyFormat($invoice->total - $invoice->sum_tax) }}
+                            {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->total - $invoice->sum_tax) }}
                         </td>
                     </tr>
                     @if(isset($invoice->taxes_without_shipment['taxes']) && is_array($invoice->taxes_without_shipment['taxes']))
@@ -294,7 +294,7 @@
                                     {{ $invoice->company->getTaxNumber($key) }}
                                 </td>
                                 <td align="right" class="no-border">
-                                    {{ Helper::moneyFormat($value) }} <br>
+                                    {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($value) }} <br>
                                 </td>
                             </tr>
                         @endforeach
@@ -306,7 +306,7 @@
                         </td>
                         <td align="right" class="no-border">
                             <div class="total-price">
-                                {{ Helper::moneyFormat(round($invoice->total, 2)) }}
+                                {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat(round($invoice->total, 2)) }}
                             </div>
                         </td>
                     </tr>
@@ -330,9 +330,9 @@
                         <td align="right">
                             <strong>{{__("AMOUNT")}}</strong> <br>
                             @foreach ($invoice->metadata['payment_details'] as $detail)
-                                {{ Helper::moneyFormat($detail['amount']) }} <br>
+                                {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail['amount']) }} <br>
                             @endforeach
-                            {{Helper::moneyFormat($invoice->change_due)}}
+                            {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->change_due)}}
                         </td>
                     </tr>
                 </table>

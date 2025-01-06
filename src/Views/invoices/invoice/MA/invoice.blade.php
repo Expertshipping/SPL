@@ -221,13 +221,13 @@
                                 </td>
                                 <td width="15%" style="text-align: center;">{{$detail->quantity}}</td>
                                 <td width="15%" style="text-align: right;">
-                                    {{Helper::moneyFormat($detail->total_ht, env('WHITE_LABEL_CURRENCY', 'CAD'))}}
+                                    {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->total_ht, env('WHITE_LABEL_CURRENCY', 'CAD'))}}
                                 </td>
                                 <td width="15%" style="text-align: right;">
-                                    {{Helper::moneyFormat($detail->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD'))}}
+                                    {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD'))}}
                                 </td>
                                 <td width="15%" style="text-align: right;">
-                                    {{Helper::moneyFormat($detail->total_ht + $detail->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD'))}}
+                                    {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->total_ht + $detail->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD'))}}
                                 </td>
                             </tr>
                         </table>
@@ -269,7 +269,7 @@
                             </td>
                             <td width="50%" style="text-align: right;">
                                 <strong>
-                                    {{ Helper::moneyFormat($invoice->total_ht, env('WHITE_LABEL_CURRENCY', 'CAD')) }}
+                                    {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->total_ht, env('WHITE_LABEL_CURRENCY', 'CAD')) }}
                                 </strong>
                             </td>
                         </tr>
@@ -279,7 +279,7 @@
                             </td>
                             <td width="50%" style="text-align: right;">
                                 <strong>
-                                    {{ Helper::moneyFormat($invoice->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD')) }}
+                                    {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD')) }}
                                 </strong>
                             </td>
                         </tr>
@@ -289,7 +289,7 @@
                             </td>
                             <td width="50%" style="text-align: right;">
                                 <strong>
-                                    {{ Helper::moneyFormat($invoice->total_ht + $invoice->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD')) }}
+                                    {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->total_ht + $invoice->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD')) }}
                                 </strong>
                             </td>
                         </tr>
