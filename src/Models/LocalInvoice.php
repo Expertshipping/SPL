@@ -856,7 +856,10 @@ class LocalInvoice extends Model
     public function generateInvoiceNumber()
     {
         $year = now()->year;
-        $number = self::query()->whereYear('created_at', now()->year)->count();
+        $number = self::query()
+            ->withTrashed()
+            ->whereYear('created_at', now()->year)
+            ->count();
         return $year . '-' . str_pad($number, 6, '0', STR_PAD_LEFT);
     }
 }
