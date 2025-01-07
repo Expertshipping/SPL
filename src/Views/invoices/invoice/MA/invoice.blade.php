@@ -218,6 +218,15 @@
                                         {{ __("Insurance Number : ") }} {{ $detail->invoiceable->transaction_number }} <br>
                                         {{ __("Insured Value : ") }} {{ env('WHITE_LABEL_CURRENCY', '$') }} {{ $detail->invoiceable->declared_value }}
                                     @endif
+
+                                    @if ($detail->invoiceable_type==="App\Insurance")
+                                        {{ __("Insurance Number : ") }} {{ $detail->invoiceable->transaction_number }} <br>
+                                        {{ __("Insured Value : ") }} {{ env('WHITE_LABEL_CURRENCY', '$') }} {{ $detail->invoiceable->declared_value }}
+                                    @endif
+
+                                    @if ($detail->invoiceable_type==="App\AdditionalService")
+                                        {{ $detail->invoiceable->name }}
+                                    @endif
                                 </td>
                                 <td width="15%" style="text-align: center;">{{$detail->quantity}}</td>
                                 <td width="15%" style="text-align: right;">
