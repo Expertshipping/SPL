@@ -105,7 +105,7 @@
             </td>
 
             <td align="left" valign="top" width="20%">
-                {{ Helper::moneyFormat($detail->price, "") }}
+                {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->price, "") }}
             </td>
 
             <td align="center" valign="top" width="20%">
@@ -113,7 +113,7 @@
             </td>
 
             <td align="right" valign="top" width="20%">
-                {{ Helper::moneyFormat(round($detail->price*$detail->quantity, 2), "") }}
+                {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat(round($detail->price*$detail->quantity, 2), "") }}
             </td>
         </tr>
     </table>
@@ -127,7 +127,7 @@
                 {{__("Tip")}}
             </td>
             <td align="right" class="no-border">
-                {{ Helper::moneyFormat($invoice->agentTip->tip_amount, env('WHITE_LABEL_CURRENCY', '$')) }}
+                {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->agentTip->tip_amount, env('WHITE_LABEL_CURRENCY', '$')) }}
             </td>
         </tr>
     @endif
@@ -136,7 +136,7 @@
             {{__("Total Discount")}}
         </td>
         <td align="right" class="no-border">
-            {{ Helper::moneyFormat($invoice->discount, env('WHITE_LABEL_CURRENCY', '$')) }}
+            {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->discount, env('WHITE_LABEL_CURRENCY', '$')) }}
         </td>
     </tr>
 
@@ -145,7 +145,7 @@
             {{__("Sub total")}}
         </td>
         <td align="right" class="no-border">
-            {{ Helper::moneyFormat($invoice->total - $invoice->sum_tax, env('WHITE_LABEL_CURRENCY', '$')) }}
+            {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->total - $invoice->sum_tax, env('WHITE_LABEL_CURRENCY', '$')) }}
         </td>
     </tr>
     @foreach ($invoice->taxes_without_shipment['taxes'] as $key=>$value)
@@ -162,7 +162,7 @@
                 {{$invoice->company->getTaxNumber($key) }}
             </td>
             <td align="right" class="no-border">
-                {{ Helper::moneyFormat($value, env('WHITE_LABEL_CURRENCY', '$')) }} <br>
+                {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($value, env('WHITE_LABEL_CURRENCY', '$')) }} <br>
             </td>
         </tr>
     @endforeach
@@ -173,7 +173,7 @@
         </td>
         <td align="right" class="no-border">
             <div class="total-price">
-                {{ Helper::moneyFormat(round($invoice->total+($invoice->agentTip->tip_amount ?? 0), 2), env('WHITE_LABEL_CURRENCY', '$')) }}
+                {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat(round($invoice->total+($invoice->agentTip->tip_amount ?? 0), 2), env('WHITE_LABEL_CURRENCY', '$')) }}
             </div>
         </td>
     </tr>
@@ -204,9 +204,9 @@
         <td align="right">
             <strong>{{__("AMOUNT")}}</strong> <br>
             @foreach ($invoice->metadata['payment_details'] as $detail)
-                {{ Helper::moneyFormat($detail['amount'], env('WHITE_LABEL_CURRENCY', '$')) }} <br>
+                {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail['amount'], env('WHITE_LABEL_CURRENCY', '$')) }} <br>
             @endforeach
-            {{Helper::moneyFormat($invoice->change_due, env('WHITE_LABEL_CURRENCY', '$'))}}
+            {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->change_due, env('WHITE_LABEL_CURRENCY', '$'))}}
         </td>
     </tr>
 </table>
