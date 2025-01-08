@@ -29,7 +29,7 @@ class InvoicePdfMaker
 
     protected function getFileName()
     {
-        return 'invoice-' . $this->invoice->company->invoice_printing_option . '-'. $this->invoice->id;
+        return 'invoice-' . $this->invoice->company->invoice_printing_option . '-'. $this->invoice->invoice_number;
     }
 
     protected function pdf()

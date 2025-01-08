@@ -8,13 +8,20 @@
     <title>Invoice #{{$invoice->id}}</title>
 
     <style>
+        body, html {
+            padding: 0;
+            margin: 0;
+        }
+        html{
+            margin: 5px;
+        }
         .invoice-box {
             max-width: 900px;
             margin: auto;
             padding: 0px;
             /* border: 1px solid #eee; */
             /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); */
-            font-size: 16px;
+            font-size: 14px;
             line-height: 24px;
             font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
             color: #555;
@@ -26,7 +33,7 @@
             text-align: left;
         }
 
-        .invoice-box table td {
+        .invoice-box table.padding td {
             padding: 5px;
             vertical-align: top;
         }
@@ -46,6 +53,7 @@
         }
 
         .invoice-box table tr.information table td {
+            padding: 0;
             padding-bottom: 40px;
         }
 
@@ -111,12 +119,24 @@
             left: 0;
             right: 0;
         }
+
+        .totaux{
+            width: 100%;
+        }
+
+        .totaux tr td{
+            padding: 5px;
+        }
+
+        .totaux tr td:nth-child(2){
+            text-align: right;
+        }
     </style>
 </head>
 
 <body>
 <div class="invoice-box">
-    <table cellpadding="0" cellspacing="0">
+    <table cellpadding="0" cellspacing="0" class="padding">
         <tr class="top">
             <td colspan="2">
                 <table>
@@ -156,8 +176,8 @@
                             @if($invoice->company->phone)
                                 {{$invoice->company->phone}}<br />
                             @endif
-                            @if($invoice->company->address)
-                                {{$invoice->company->address}}<br />
+                            @if($invoice->company->addr1)
+                                {{$invoice->company->addr1}}<br />
                             @endif
                             @isset($invoice->company->legal_details['ice'])
                                 ICE : {{$invoice->company->legal_details['ice']}}<br />
@@ -167,11 +187,13 @@
                 </table>
             </td>
         </tr>
+    </table>
 
+    <table cellpadding="0" cellspacing="0" >
         {{--       TABLE HEADER         --}}
         <tr class="heading">
             <td colspan="2">
-                <table>
+                <table class="padding">
                     <tr>
                         <td style="border: 0;" width="40%">Description</td>
                         <td style="border: 0;text-align: center;" width="15%">Quantité</td>
@@ -184,11 +206,11 @@
         </tr>
 
         {{--       DETAILS         --}}
-        @foreach ($invoice->details as $detail)
+        @foreach ($invoice->details as $key => $detail)
             @if(!$detail->canceled_at)
-                <tr class="item last">
+                <tr class="item">
                     <td colspan="2">
-                        <table>
+                        <table class="padding">
                             <tr>
                                 <td width="40%">
                                     @if ($detail->invoiceable_type==="App\Refund")
@@ -245,11 +267,16 @@
             @endif
         @endforeach
 
-        {{--        TOTAL        --}}
+    </table>
+
+    <br><br>
+
+    {{--        TOTAL        --}}
+    <table cellpadding="0" cellspacing="0" class="padding">
         <tr>
             <td width="50%"></td>
             <td>
-                <table>
+                <table class="totaux">
                     @if ($invoice->total_discount>0)
                         <tr>
                             <td width="50%" style="text-align: left;">
