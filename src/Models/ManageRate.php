@@ -550,7 +550,10 @@ class ManageRate
     {
         $xDollar = 0;
         $xPercentage = 0;
-        $rateExample = (float) Money::fromCent($this->rate)->inCurrencyAmount();
+        $rate = $this->rate;
+        $rate = str_replace(',', '', $rate);
+        $rate = str_replace(' ', '', $rate);
+        $rateExample = (float) $rate;
         $packagingType = request()->get('packagingType');
 
         if (isset($this->discountDetailByCountryOrZoneOrWorld['link_to_carrier_id'])) {
