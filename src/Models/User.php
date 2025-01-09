@@ -373,8 +373,6 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
                 'total' => Money::normalizeAmount($total),
                 'company_id' => $companyId ?? $this->company_id,
                 'closed_at' => null,
-                'total_ht' => Money::normalizeAmount($total - $taxes),
-                'total_taxes' => Money::normalizeAmount($taxes),
             ]);
         }else{
             $invoice->update([
