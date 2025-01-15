@@ -159,11 +159,11 @@
                 <table>
                     <tr>
                         <td>
-                            WISE GLOBAL SHIPPING <br>
+                            WISE GLOBAL SERVICES <br>
                             387 Bd Mohammed V, 20290 <br>
                             Casablanca Maroc<br>
                             +212 5222-48985 <br>
-                            387@awsel.ma <br>
+                            contact@awsel.ma <br>
                         </td>
 
                         <td>
