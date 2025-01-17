@@ -26,6 +26,20 @@ class Company extends Model
     const ACCOUNT_TYPE_RETAIL_RESELLER = 'retail_reseller';
     const ACCOUNT_TYPE_CONSUMER = 'consumer';
 
+    public array $condition = [];
+    public string $route = 'verification';
+
+    public function __construct()
+    {
+        static::addGlobalScope('type', function ($query) {
+            $query->where($this->condition);
+        });
+    }
+
+    public function scopeByType($query, $type)
+    {
+        return $query->where('account_type', $type);
+    }
 
     protected $connection = 'mysql';
     protected $morphClass = 'company';
@@ -296,7 +310,7 @@ class Company extends Model
 
     public function shipments()
     {
-        return $this->hasMany(Shipment::class)->orderBy('id', 'desc');
+        return $this->hasMany(Shipment::class, 'company_id')->orderBy('id', 'desc');
     }
 
     public function addSolde($amount)
