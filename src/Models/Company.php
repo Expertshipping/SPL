@@ -400,6 +400,32 @@ class Company extends Model
         return $this->hasMany(Refund::class);
     }
 
+    public function scopeFilterBySignupOrigin($query, $platformId)
+    {
+        $query->when($platformId, function ($query) use ($platformId) {
+            $query->where('origin', $platformId);
+        });
+    }
+
+    public function scopeFilterByIntegration($query, $integration)
+    {
+        return $query->when($integration, function ($query) use ($integration) {
+            $query->whereHas('users.integrations', function ($query) use ($integration) {
+                $query->where('platform_id', $integration);
+            });
+        });
+    }
+
+    public function integrations()
+    {
+        return $this->hasManyThrough(Integration::class, User::class, 'company_id', 'user_id');
+    }
+
+    public function scopeFilterByName($query, $name)
+    {
+        return $query->where('name', 'like', '%' . $name . '%');
+    }
+    
     public function getResellerAttribute()
     {
         if ($this->is_retail_reseller) {
