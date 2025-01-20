@@ -225,7 +225,7 @@ class Company extends Model
 
     public function activeCarriers()
     {
-        return $this->belongsToMany(Carrier::class, 'active_carrier_companies')
+        return $this->belongsToMany(Carrier::class, 'active_carrier_companies', 'company_id', 'carrier_id')
             ->using(ActiveCarrierCompany::class)
             ->withPivot(['created_at', 'updated_at']);
     }
@@ -425,7 +425,7 @@ class Company extends Model
     {
         return $query->where('name', 'like', '%' . $name . '%');
     }
-    
+
     public function getResellerAttribute()
     {
         if ($this->is_retail_reseller) {
