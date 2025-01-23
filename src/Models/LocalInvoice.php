@@ -32,6 +32,7 @@ class LocalInvoice extends Model
         'old_data' => 'boolean',
         'payment_validated' => 'boolean',
         'closed_at'   => 'date',
+        'bill_to' => 'array',
     ];
 
     protected $appends = ['tax_rates', 'status', 'total_charged', 'taxes', 'has_bulk'];
