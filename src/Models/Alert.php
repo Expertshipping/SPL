@@ -14,6 +14,10 @@ class Alert extends Model
 
     protected $casts = [
         'is_dismissible'    => 'boolean',
+        'is_accepted'       => 'boolean',
         'status'            => AlertStatusEnum::class,
+        'confirmed_users'   => 'array',
+        'companies_ids'     => 'array',
+        'closed_users'      => 'array',
     ];
 }
