@@ -26,6 +26,20 @@ class Company extends Model
     const ACCOUNT_TYPE_RETAIL_RESELLER = 'retail_reseller';
     const ACCOUNT_TYPE_CONSUMER = 'consumer';
 
+    public array $condition = [];
+    public string $route = 'verification';
+
+    public function __construct()
+    {
+        static::addGlobalScope('type', function ($query) {
+            $query->where($this->condition);
+        });
+    }
+
+    public function scopeByType($query, $type)
+    {
+        return $query->where('account_type', $type);
+    }
 
     protected $connection = 'mysql';
     protected $morphClass = 'company';
@@ -214,7 +228,7 @@ class Company extends Model
 
     public function activeCarriers()
     {
-        return $this->belongsToMany(Carrier::class, 'active_carrier_companies')
+        return $this->belongsToMany(Carrier::class, 'active_carrier_companies', 'company_id', 'carrier_id')
             ->using(ActiveCarrierCompany::class)
             ->withPivot(['created_at', 'updated_at']);
     }
@@ -299,7 +313,7 @@ class Company extends Model
 
     public function shipments()
     {
-        return $this->hasMany(Shipment::class)->orderBy('id', 'desc');
+        return $this->hasMany(Shipment::class, 'company_id')->orderBy('id', 'desc');
     }
 
     public function addSolde($amount)
@@ -387,6 +401,32 @@ class Company extends Model
     public function refunds()
     {
         return $this->hasMany(Refund::class);
+    }
+
+    public function scopeFilterBySignupOrigin($query, $platformId)
+    {
+        $query->when($platformId, function ($query) use ($platformId) {
+            $query->where('origin', $platformId);
+        });
+    }
+
+    public function scopeFilterByIntegration($query, $integration)
+    {
+        return $query->when($integration, function ($query) use ($integration) {
+            $query->whereHas('users.integrations', function ($query) use ($integration) {
+                $query->where('platform_id', $integration);
+            });
+        });
+    }
+
+    public function integrations()
+    {
+        return $this->hasManyThrough(Integration::class, User::class, 'company_id', 'user_id');
+    }
+
+    public function scopeFilterByName($query, $name)
+    {
+        return $query->where('name', 'like', '%' . $name . '%');
     }
 
     public function getResellerAttribute()

@@ -8,13 +8,20 @@
     <title>Invoice #{{$invoice->id}}</title>
 
     <style>
+        body, html {
+            padding: 0;
+            margin: 0;
+        }
+        html{
+            margin: 5px;
+        }
         .invoice-box {
-            max-width: 800px;
+            max-width: 900px;
             margin: auto;
-            padding: 30px;
+            padding: 0px;
             /* border: 1px solid #eee; */
             /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); */
-            font-size: 16px;
+            font-size: 14px;
             line-height: 24px;
             font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
             color: #555;
@@ -26,7 +33,7 @@
             text-align: left;
         }
 
-        .invoice-box table td {
+        .invoice-box table.padding td {
             padding: 5px;
             vertical-align: top;
         }
@@ -46,6 +53,7 @@
         }
 
         .invoice-box table tr.information table td {
+            padding: 0;
             padding-bottom: 40px;
         }
 
@@ -111,12 +119,24 @@
             left: 0;
             right: 0;
         }
+
+        .totaux{
+            width: 100%;
+        }
+
+        .totaux tr td{
+            padding: 5px;
+        }
+
+        .totaux tr td:nth-child(2){
+            text-align: right;
+        }
     </style>
 </head>
 
 <body>
 <div class="invoice-box">
-    <table cellpadding="0" cellspacing="0">
+    <table cellpadding="0" cellspacing="0" class="padding">
         <tr class="top">
             <td colspan="2">
                 <table>
@@ -126,7 +146,7 @@
                         </td>
 
                         <td>
-                            Facture : <strong> #{{($invoice->id + env('INVOICE_NUMBER_START', 0))}}</strong> <br>
+                            Facture : <strong> #{{ $invoice->invoice_number }}</strong> <br>
                             Date: {{$invoice->created_at->format('d-m-Y')}}<br />
                         </td>
                     </tr>
@@ -139,18 +159,26 @@
                 <table>
                     <tr>
                         <td>
-                            WISE GLOBAL SHIPPING <br>
+                            WISE GLOBAL SERVICES <br>
                             387 Bd Mohammed V, 20290 <br>
                             Casablanca Maroc<br>
                             +212 5222-48985 <br>
-                            387@awsel.ma <br>
+                            contact@awsel.ma <br>
                         </td>
 
                         <td>
-                            {{$invoice->company->name}}<br />
-                            {{$invoice->company->email}}<br />
-                            {{$invoice->company->phone}}<br />
-                            {{$invoice->company->address}}<br />
+                            @if($invoice->company->name)
+                                {{$invoice->company->name}}<br />
+                            @endif
+                            @if($invoice->company->email)
+                                {{$invoice->company->email}}<br />
+                            @endif
+                            @if($invoice->company->phone)
+                                {{$invoice->company->phone}}<br />
+                            @endif
+                            @if($invoice->company->addr1)
+                                {{$invoice->company->addr1}}<br />
+                            @endif
                             @isset($invoice->company->legal_details['ice'])
                                 ICE : {{$invoice->company->legal_details['ice']}}<br />
                             @endisset
@@ -159,44 +187,96 @@
                 </table>
             </td>
         </tr>
+    </table>
 
+    <table cellpadding="0" cellspacing="0" >
+        {{--       TABLE HEADER         --}}
         <tr class="heading">
             <td colspan="2">
-                <table>
+                <table class="padding">
                     <tr>
-                        <td style="border: 0;" width="60%">Description</td>
-                        <td style="border: 0;text-align: center;" width="20%">Quantité</td>
-                        <td style="border: 0;text-align: right;" width="20%">Prix</td>
+                        <td style="border: 0;" width="40%">Description</td>
+                        <td style="border: 0;text-align: center;" width="15%">Quantité</td>
+                        <td style="border: 0;text-align: right;" width="15%">Prix HT</td>
+                        <td style="border: 0;text-align: right;" width="15%">TVA</td>
+                        <td style="border: 0;text-align: right;" width="15%">Prix TTC</td>
                     </tr>
                 </table>
             </td>
         </tr>
 
-        @foreach ($invoice->details as $detail)
+        {{--       DETAILS         --}}
+        @foreach ($invoice->details as $key => $detail)
             @if(!$detail->canceled_at)
-            <tr class="item last">
-                <td colspan="2">
-                    <table>
-                        <tr>
-                            <td width="60%">
-                                {{$detail->product_name}}
-                            </td>
-                            <td width="20%" style="text-align: center;">{{$detail->quantity}}</td>
-                            <td width="20%" style="text-align: right;">
-                                {{$detail->price}}
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
+                <tr class="item">
+                    <td colspan="2">
+                        <table class="padding">
+                            <tr>
+                                <td width="40%">
+                                    @if ($detail->invoiceable_type==="App\Refund")
+                                        Refund
+                                    @endif
+
+                                    @if ($detail->invoiceable_type==="App\Shipment")
+                                        @php
+                                            $shipment = App\Shipment::whereId($detail->invoiceable_id)->withService()->first();
+                                        @endphp
+                                        {{ $shipment->carrier->name }}
+                                        ({{ $shipment->service?->name }}) : <br>
+                                        {{ $shipment->tracking_number }} <br>
+                                        @if ($shipment->pickup && $shipment->pickup->pickup_number)
+                                            Pickup Confirmation : {{$shipment->pickup->pickup_number}}
+                                        @endif
+                                    @endif
+
+                                    @if ($detail->invoiceable_type==="App\Product")
+                                        {{ $detail->invoiceable->name }}
+                                        @if(isset($detail->meta_data['tracking_number']))
+                                            : {{ $detail->meta_data['tracking_number'] }}
+                                        @endif
+                                    @endif
+
+                                    @if ($detail->invoiceable_type==="App\Insurance")
+                                        {{ __("Insurance Number : ") }} {{ $detail->invoiceable->transaction_number }} <br>
+                                        {{ __("Insured Value : ") }} {{ env('WHITE_LABEL_CURRENCY', '$') }} {{ $detail->invoiceable->declared_value }}
+                                    @endif
+
+                                    @if ($detail->invoiceable_type==="App\Insurance")
+                                        {{ __("Insurance Number : ") }} {{ $detail->invoiceable->transaction_number }} <br>
+                                        {{ __("Insured Value : ") }} {{ env('WHITE_LABEL_CURRENCY', '$') }} {{ $detail->invoiceable->declared_value }}
+                                    @endif
+
+                                    @if ($detail->invoiceable_type==="App\AdditionalService")
+                                        {{ $detail->invoiceable->name }}
+                                    @endif
+                                </td>
+                                <td width="15%" style="text-align: center;">{{$detail->quantity}}</td>
+                                <td width="15%" style="text-align: right;">
+                                    {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->total_ht, env('WHITE_LABEL_CURRENCY', 'CAD'))}}
+                                </td>
+                                <td width="15%" style="text-align: right;">
+                                    {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD'))}}
+                                </td>
+                                <td width="15%" style="text-align: right;">
+                                    {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->total_ht + $detail->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD'))}}
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
             @endif
         @endforeach
 
+    </table>
+
+    <br><br>
+
+    {{--        TOTAL        --}}
+    <table cellpadding="0" cellspacing="0" class="padding">
         <tr>
             <td width="50%"></td>
-
             <td>
-                <table>
+                <table class="totaux">
                     @if ($invoice->total_discount>0)
                         <tr>
                             <td width="50%" style="text-align: left;">
@@ -221,11 +301,31 @@
                     @else
                         <tr>
                             <td width="50%" style="text-align: left;">
+                                Total HT
+                            </td>
+                            <td width="50%" style="text-align: right;">
+                                <strong>
+                                    {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->total_ht, env('WHITE_LABEL_CURRENCY', 'CAD')) }}
+                                </strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" style="text-align: left;">
+                                Total TVA
+                            </td>
+                            <td width="50%" style="text-align: right;">
+                                <strong>
+                                    {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD')) }}
+                                </strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" style="text-align: left;">
                                 Total TTC
                             </td>
                             <td width="50%" style="text-align: right;">
                                 <strong>
-                                    {{$invoice->total}} {{env('WHITE_LABEL_CURRENCY')}}
+                                    {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->total_ht + $invoice->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD')) }}
                                 </strong>
                             </td>
                         </tr>

@@ -7,6 +7,7 @@ use ExpertShipping\Spl\Models\Notifications\EmailConfirmation;
 use ExpertShipping\Spl\Models\Notifications\PasswordReset;
 use ExpertShipping\Spl\Models\Retail\AgentCommission;
 use ExpertShipping\Spl\Models\Retail\AgentWarning;
+use ExpertShipping\Spl\Services\TaxService;
 use ExpertShipping\Spl\Services\TimesheetService;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -318,6 +319,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
     public function createInvoiceForUser(Model $relation, $charge = null, $companyId = null)
     {
         $total = 0;
+        $taxes = null;
         if ($charge) {
             $total = $charge;
         } else {
@@ -336,6 +338,10 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
                     $total = $relation->rate;
                 }
             }
+        }
+
+        if (in_array(get_class($relation), ['App\\Shipment', Shipment::class])) {
+            $taxes = app(TaxService::class)->getVAT($relation, env('WHITE_LABEL_COUNTRY', 'CA'));
         }
 
         // remove , and space from total
@@ -380,6 +386,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
             'invoiceable_id' => $relation->id,
             'price' => $total,
             'quantity' => 1,
+            'taxes' => $taxes
         ]);
 
         $invoice->updateTotal(false);

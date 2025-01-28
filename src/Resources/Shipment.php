@@ -129,7 +129,7 @@ class Shipment extends JsonResource
             'activities' => ShipmentActivity::collection($this->whenLoaded('activities')),
             'aramex_bulks' => Shipment::collection($this->whenLoaded('aramexBulks')),
             'surcharges' => $this->whenLoaded('shipmentSurcharges'),
-
+            'quote' => $this->whenLoaded('quote'),
             'is_manual_shipment' => $this->is_manual_shipment,
         ];
     }

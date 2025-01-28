@@ -1,32 +1,36 @@
 <?php
+
+
 namespace ExpertShipping\Spl\Services;
 
+
+use ExpertShipping\Spl\Models\Carrier;
 use ExpertShipping\Spl\Models\Money;
+use ExpertShipping\Spl\Models\Shipment;
+use Illuminate\Support\Str;
 use Laravel\Cashier\Cashier;
 
 class TaxService
 {
-
-
     public function details($amount, $state)
     {
-            $taxesRates = config('statesTaxesInfo.'.$state);
-            $amount = str_replace(',','',$amount);
-            $preTaxPrice = round($amount / (1 + ($this->tps($state) / 100) + ($this->tvp($state) / 100)), 2);
-            $tpsAmount = $this->calcTps($state, $preTaxPrice);
-            $tvpAmount = $this->calcTvp($state, $preTaxPrice);
-            return [
-                'preTaxPrice' => $this->formatAmount(Money::fromCurrencyAmount($preTaxPrice)->inCent()),
-                'tpsAmount' => Money::fromCurrencyAmount($tpsAmount)->inCent(),
-                'tvpAmount' => Money::fromCurrencyAmount($tvpAmount)->inCent(),
-                'taxesRatesModel' => $taxesRates,
-            ];
+        $taxesRates = config('statesTaxesInfo.'.$state);
+        $amount = str_replace(',','',$amount);
+        $preTaxPrice = round($amount / (1 + ($this->tps($state) / 100) + ($this->tvp($state) / 100)), 2);
+        $tpsAmount = $this->calcTps($state, $preTaxPrice);
+        $tvpAmount = $this->calcTvp($state, $preTaxPrice);
+        return [
+            'preTaxPrice' => $this->formatAmount(Money::fromCurrencyAmount($preTaxPrice)->inCent()),
+            'tpsAmount' => Money::fromCurrencyAmount($tpsAmount)->inCent(),
+            'tvpAmount' => Money::fromCurrencyAmount($tvpAmount)->inCent(),
+            'taxesRatesModel' => $taxesRates,
+        ];
     }
 
     public function getTaxes($amount, $state, $isPreTaxed=false, $toCountry='CA')
     {
-
         $amount = str_replace(',','',$amount);
+        $preTaxPrice = 0;
         if($isPreTaxed){
             $preTaxPrice = $amount;
         }else{
@@ -69,7 +73,7 @@ class TaxService
 
         if(env('WHITE_LABEL_COUNTRY')==='MA'){
             $taxes = [];
-            $taxes['TVA']= $preTaxPrice*0.2;
+            $taxes['TVA']= $preTaxPrice * 0.2;
             return[
                 'taxes' => $taxes,
                 'preTax' => $preTaxPrice,
@@ -94,7 +98,7 @@ class TaxService
     {
         $rateDetails = collect([]);
         collect($this->details($rate, $state))
-                ->each(function ($item, $key) use(&$rateDetails) {
+            ->each(function ($item, $key) use(&$rateDetails) {
                 if(in_array($key, ['tpsAmount', 'tvpAmount'])) {
                     $rateDetails->push(['type' => $key, 'amount'=> Money::fromCent($item)->inCurrencyAmount()]);
                 }
@@ -160,9 +164,68 @@ class TaxService
      */
     public function calcTaxedSurcharge($surchargeAmount, $state): float {
         return (float) $surchargeAmount + (
-            (float) $this->calcTps($state, $surchargeAmount)
-            +
-            (float) $this->calcTvp($state, $surchargeAmount)
-       );
+                (float) $this->calcTps($state, $surchargeAmount)
+                +
+                (float) $this->calcTvp($state, $surchargeAmount)
+            );
+    }
+
+    public static function calculateTaxForShipment($shipment)
+    {
+        if($shipment->from_country === $shipment->to_country){
+            $state = $shipment->to_province;
+            $country = $shipment->to_country;
+        }else{
+            return [];
+        }
+        $amount = str_replace(',', '', $shipment->rate);
+        $amount = str_replace(' ', '', $amount);
+        $amount = doubleval($amount);
+
+        $taxService = app(self::class);
+        return $taxService->getTaxes($amount, Str::upper($state), true, $country)['taxes'];
+    }
+
+    public function getVAT($product, $country){
+        // check if the product is an object
+        if(!is_object($product)){
+            return [];
+        }
+        $class = get_class($product);
+        if(in_array($class, ['App\\Shipment', \ExpertShipping\Spl\Models\Shipment::class]) && $product->carrier){
+            $taxes = $product->taxes ?? [];
+            if(!empty($taxes)){
+                if($product->carrier->slug === 'dhl' && $country === 'MA'){
+                    return [
+                        'TVA' => collect($taxes)->sum('amount')
+                    ];
+                }
+                return $taxes;
+            }
+
+            $staticTaxes = Carrier::TAXES[$country][$product->carrier?->slug] ?? [];
+            $variableTaxes = Carrier::VARIABLE_TAXES[$country][$product->carrier?->slug] ?? [];
+            if(!empty($staticTaxes)){
+                foreach ($staticTaxes as $tax => $rate){
+                    $taxes[$tax] = $rate;
+                }
+            }
+
+            $weight = $product->total_weight_details['billed_weight'] ?? null;
+            if(!empty($variableTaxes) && $weight){
+                foreach ($variableTaxes as $tax => $rates){
+                    foreach ($rates as $rate){
+                        if($weight >= $rate['min'] && $weight <= $rate['max']){
+                            $taxes[$tax] = $rate['rate'];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return $taxes;
+        }
+
+        return [];
     }
 }

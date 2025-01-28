@@ -84,7 +84,7 @@ class Helper
         $carriers = [
             'fedex' => [
                 'airway_lb' => $weight/166,
-                'airway_kg' => $weight/6000,
+                'airway_kg' => $weight/5000,
                 'ground_lb' => $weight/166,
                 'ground_kg' => $weight/6000,
             ],

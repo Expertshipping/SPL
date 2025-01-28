@@ -297,7 +297,7 @@
         <div class="float-left" style="font-size: 13px;margin: 0;text-transform:uppercase;">
             <span>
                 @if(env('APP_NAME', 'ShipPayLess') === 'Awsel')
-                    <strong>WISE GLOBAL SERVICE</strong> <br>
+                    <strong>WISE GLOBAL SERVICES</strong> <br>
                     387 Bd Mohammed V, Casablanca <br>
                     20290 Casablanca MA <br>
                     +212 5222-48985 <br>

@@ -2,6 +2,7 @@
 
 namespace ExpertShipping\Spl\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -31,6 +32,7 @@ class LocalInvoice extends Model
         'old_data' => 'boolean',
         'payment_validated' => 'boolean',
         'closed_at'   => 'date',
+        'bill_to' => 'array',
     ];
 
     protected $appends = ['tax_rates', 'status', 'total_charged', 'taxes', 'has_bulk'];
@@ -574,6 +576,11 @@ class LocalInvoice extends Model
     {
         parent::boot();
 
+        // Auto add invoiceNumber when creating a new invoice (order of the invoice in current year)
+        static::creating(function ($invoice) {
+            $invoice->invoice_number = $invoice->generateInvoiceNumber();
+        });
+
         static::deleting(function ($user) {
             $user->details()->forceDelete();
             $user->leads()->forceDelete();
@@ -840,4 +847,20 @@ class LocalInvoice extends Model
         return encrypt($this->id);
     }
 
+
+    // Invoice number getter if the field invoice_number is null then return the id
+    public function getInvoiceNumberAttribute($value)
+    {
+        return $value ?? $this->id;
+    }
+
+    public function generateInvoiceNumber()
+    {
+        $year = now()->year;
+        $number = self::query()
+            ->withTrashed()
+            ->whereYear('created_at', now()->year)
+            ->count();
+        return $year . '-' . str_pad($number, 6, '0', STR_PAD_LEFT);
+    }
 }

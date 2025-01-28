@@ -59,16 +59,16 @@ class DiscountPackageDetail extends Model
         //     $discountPackageDetail->companyDiscounts()->delete();
         // });
     }
-    public function getIndexByWeight($weight, $country, $zone= null)
+    public function getIndexByWeight($weight, $country, $appliedType, $zone= null)
     {
-        $discount = $this->discount[$country] ?? null;
+        $discount = $this->discount[$appliedType][$country] ?? null;
 
         if($zone && !$discount) {
-            $discount = $this->discount[$zone] ?? null;
+            $discount = $this->discount[$appliedType][$zone] ?? null;
         }
 
         if(!$discount){
-            $discount = $this->discount['world'] ?? null;
+            $discount = $this->discount[$appliedType]['world'] ?? null;
         }
 
         if(!$discount){
