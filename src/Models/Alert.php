@@ -2,7 +2,7 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Enums\AlertStatusEnum;
+use ExpertShipping\Spl\Enum\AlertStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
