@@ -242,6 +242,11 @@ class Shipment extends ComputedModel
         ])->with('service');
     }
 
+    public function scopeExcludeTypes($query, $types)
+    {
+        return $query->whereNotIn('type',  (array) $types);
+    }
+
     public function scopeFilterBySearchTerm($query, $term)
     {
         $query->when($term, function ($query, $term) {
@@ -633,19 +638,15 @@ class Shipment extends ComputedModel
         if($this->invoice){
             $total = $this->invoice->total;
         } else {
+            $pos = 1;
             if(
-                $this->company &&
-                ($this->company->account_type === 'business' || $this->company->is_retail_reseller)
+                $this->company?->account_type === 'business' || $this->company?->is_retail_reseller
             ){
-                $total = DB::table('invoice_details')
-                    ->where('pos', false)
-                    ->where('invoiceable_id', $this->id)
-                    ->where('invoiceable_type', 'App\\Shipment')
-                    ->selectRaw('SUM(total_ht + total_taxes) as total')
-                    ->value('total');
-            } else {
-                $total = DB::table('invoice_details')
-                ->where('pos', true)
+                $pos = 0;
+            }
+
+            $total = DB::table('invoice_details')
+                ->where('pos', $pos)
                 ->where('invoiceable_id', $this->id)
                 ->where('invoiceable_type', 'App\\Shipment')
                 ->selectRaw('SUM(total_ht + total_taxes) as total')
@@ -681,8 +682,6 @@ class Shipment extends ComputedModel
 
         return $marge;
     }
-
-
 
     public function getCarrierChargedPriceAttribute(){
         if ($this->hasComputedData('carrier_charged_price')) {

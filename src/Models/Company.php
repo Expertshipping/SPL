@@ -708,7 +708,7 @@ class Company extends ComputedModel
         return $this->referrals->map(function ($company) {
             $rates = $company->shipments
                 ->whereNull('referral_payout_id')
-                ->whereNotIn('type', ['cancelled', 'draft'])
+                ->excludeTypes(['cancelled', 'draft'])
                 ->sum(function ($shipment) {
                     return $shipment->rate - $shipment->cost_rate;
                 });
@@ -721,7 +721,7 @@ class Company extends ComputedModel
 
             $ratesPayable = $company->shipments()
                 ->whereNull('referral_payout_id')
-                ->whereNotIn('type', ['cancelled', 'draft'])
+                ->excludeTypes(['cancelled', 'draft'])
                 ->whereHas('carrierInvoices', function ($q) {
                     $q->where('carrier_invoices.status', 'verified');
                 })
@@ -738,7 +738,7 @@ class Company extends ComputedModel
                 'company' => $company->name ?? null,
                 'signup_date' => $company->created_at->format('d/m/Y'),
                 'active_account' => $company->user->active,
-                'count_shipments' => $company->shipments->whereNotIn('type', ['cancelled', 'draft'])->count(),
+                'count_shipments' => $company->shipments->excludeTypes(['cancelled', 'draft'])->count(),
                 'earning' => round($earning, 2),
                 'payable' => round($earningPayable, 2),
             ];
@@ -899,7 +899,7 @@ class Company extends ComputedModel
     {
         $query->when($number, function ($query) use ($number) {
             $query->whereHas('shipments', function ($query) use ($number) {
-                $query->whereNotIn('type', ['draft', 'cancelled'])->where('created_at', '>=', now()->subDays($number));
+                $query->excludeTypes(['draft', 'cancelled'])->where('created_at', '>=', now()->subDays($number));
             });
         });
     }
@@ -1062,6 +1062,31 @@ class Company extends ComputedModel
         }
         return $this->setComputedCharge();
     }
+
+    public function getinvoicesTotal($pos)
+    {
+        $shipmentWithoutInvoiceIds = $this->shipments()
+            ->excludeTypes(['draft', 'cancelled'])
+            ->whereDoesntHave('invoice')
+            ->pluck('id')
+            ->toArray();
+
+        $shipmentWithInvoiceIds = $this->shipments()
+            ->excludeTypes(['draft', 'cancelled'])
+            ->whereHas('invoice')
+            ->pluck('id')
+            ->toArray();
+
+        $invoicesTotal = DB::table('invoices')->whereNull("deleted_at")->whereIn('shipment_id', $shipmentWithInvoiceIds)->sum('total');
+        $invoicesDetailTotal = DB::table('invoice_details')
+            ->where('pos', $pos)
+            ->whereIn('invoiceable_id', $shipmentWithoutInvoiceIds)
+            ->where('invoiceable_type', 'App\\Shipment')
+            ->selectRaw('SUM(total_ht + total_taxes) as total')
+            ->value('total');
+        return $invoicesDetailTotal + $invoicesTotal;
+    }
+
     public function setComputedCharge()
     {
         $shipmentIds = $this->shipments()->pluck('id')->toArray();
@@ -1071,12 +1096,7 @@ class Company extends ComputedModel
         ){
             $pos = false;
         }
-        $totalSales = DB::table('invoice_details')
-                    ->where('pos', $pos)
-                    ->whereIn('invoiceable_id', $shipmentIds)
-                    ->where('invoiceable_type', 'App\\Shipment')
-                    ->selectRaw('SUM(total_ht + total_taxes) as total')
-                    ->value('total');
+        $totalSales = $this->getinvoicesTotal($pos);
 
         $totalSalesPrice = DB::table('invoice_details')
                     ->where('pos', $pos)
@@ -1110,7 +1130,7 @@ class Company extends ComputedModel
 
 
         $salesPrice = $totalSalesPrice + $totalSalesPriceEdited + $shipmentWithoutSales;
-        $carrier_charged_price = DB::table('carrier_invoice_shipments')
+        $carrierChargedPrice = DB::table('carrier_invoice_shipments')
                 ->whereIn('shipment_id',  $shipmentIds)
                 ->selectRaw("
                 SUM(
@@ -1124,8 +1144,8 @@ class Company extends ComputedModel
                 ")
                 ->value('total');
 
-        $refund_price = $this->setCompanyRefundPrice($shipmentIds);
-        $marge = $salesPrice - ($carrier_charged_price + $refund_price);
+        $refundPrice = $this->setCompanyRefundPrice($shipmentIds);
+        $marge = $salesPrice - ($carrierChargedPrice + $refundPrice);
         $sum = $totalSales - $marge;
         $this->setComputedData('charge', $sum);
         return $sum;
@@ -1237,7 +1257,7 @@ class Company extends ComputedModel
     public function setComputedShipmentsCount()
     {
         $data = DB::table('shipments')
-        ->whereNotIn('type', ['draft', 'cancelled'])
+        ->excludeTypes(['draft', 'cancelled'])
         ->where('company_id', $this->id)->count();
         $this->setComputedData('shipments_count', $data);
         return $data;
