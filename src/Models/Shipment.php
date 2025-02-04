@@ -650,7 +650,7 @@ class Shipment extends ComputedModel
                 ->where('invoiceable_id', $this->id)
                 ->where('invoiceable_type', 'App\\Shipment')
                 ->selectRaw('SUM(total_ht + total_taxes) as total')
-                ->value('total');            }
+                ->value('total');
         }
         $this->setComputedData('sale_price_with_taxes', $total);
         return $total;
