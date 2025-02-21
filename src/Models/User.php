@@ -340,10 +340,6 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
             }
         }
 
-        if (in_array(get_class($relation), ['App\\Shipment', Shipment::class])) {
-            $taxes = app(TaxService::class)->getVAT($relation, env('WHITE_LABEL_COUNTRY', 'CA'));
-        }
-
         // remove , and space from total
         $total = str_replace(',', '', $total);
         $total = str_replace(' ', '', $total);
