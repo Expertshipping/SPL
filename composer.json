@@ -17,7 +17,7 @@
     "php": "~8.0.0|~8.1.0|~8.2.0|~8.3.0",
     "spatie/laravel-ignition": "^2.0",
     "spatie/laravel-medialibrary": "^10.7|^11.0",
-    "spatie/laravel-permission": "^5.5.0",
+    "spatie/laravel-permission": "^6.0@dev",
     "spatie/laravel-translatable": "^6.5",
     "laravel/cashier": "^14.0",
     "spatie/browsershot": "^4.0.2"
