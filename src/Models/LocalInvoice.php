@@ -2,7 +2,6 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -582,10 +581,10 @@ class LocalInvoice extends Model
         });
 
         static::deleting(function ($user) {
-            $user->details()->forceDelete();
-            $user->leads()->forceDelete();
-            $user->clientExperienceDetail()->forceDelete();
-            $user->agentTip()->forceDelete();
+            $user->details()->delete();
+            $user->leads()->delete();
+            $user->clientExperienceDetail()->delete();
+            $user->agentTip()->delete();
         });
     }
 
