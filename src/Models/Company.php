@@ -18,8 +18,10 @@ use ExpertShipping\Spl\Enum\CompanyStatusEnum;
 use ExpertShipping\Spl\Enum\PlanSubscriptionStatusEnum;
 use ExpertShipping\Spl\Models\LocalInvoice as ModelsLocalInvoice;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Company extends Model
+class Company extends Model implements HasMedia
 {
     const ACCOUNT_TYPE_RETAIL = 'retail';
     const ACCOUNT_TYPE_BUSINESS = 'business';
@@ -28,6 +30,7 @@ class Company extends Model
     public static array $condition = [];
     public string $route = 'verification';
 
+    use InteractsWithMedia;
 
     public function scopeByType($query, $type)
     {
@@ -1032,4 +1035,14 @@ class Company extends Model
                 return false;
             });
     }
+
+    public function getFullAddressAttribute() {
+        return $this->addr1 . ' ' . $this->addr2 . ', ' . $this->city . ', ' . $this->state . ' ' . $this->zip_code. ', ' . $this->country;
+    }
+
+    public function getStoreImageAttribute()
+    {
+        return $this->getFirstMediaUrl('store-image');
+    }
+
 }
