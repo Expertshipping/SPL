@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('slug')->unique()->nullable();
             $table->boolean('is_active')->default(true);
             $table->json('meta')->nullable();
-            $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
-            $table->foreignId('carrier_id')->constrained('carriers')->onDelete('cascade');
+            $table->unsignedBigInteger('company_id');
+            $table->unsignedBigInteger('carrier_id');
             $table->timestamps();
         });
     }
