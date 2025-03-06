@@ -7,7 +7,7 @@ use ExpertShipping\Spl\Models\Notifications\EmailConfirmation;
 use ExpertShipping\Spl\Models\Notifications\PasswordReset;
 use ExpertShipping\Spl\Models\Retail\AgentCommission;
 use ExpertShipping\Spl\Models\Retail\AgentWarning;
-use ExpertShipping\Spl\Services\TaxService;
+use ExpertShipping\Spl\Services\PayPeriodsService;
 use ExpertShipping\Spl\Services\TimesheetService;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -54,40 +54,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
     use Billable;
 
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'company', 'first_name', 'last_name', 'tel', 'email', 'country', 'password', 'addr1',
-        'addr2', 'city', 'zip_code', 'province', 'instant_payment', 'phone', 'blocked_at',
-        'name', 'discount', 'email', 'uuid', 'signup_completed_at', 'first_name', 'last_name', 'account_type', 'custom_branding', 'company_id', 'activate_account_token', 'active', 'color', 'options',
-
-        'ip_address', 'montly_salary', 'hourly_salary', 'moneris_id', 'card_last_four', 'referral_code', 'referral_id', 'referral_percentage',
-
-        'availability', 'is_spark_user',
-        'hidden_at',
-
-        'firebase_token', 'firebase_uid',
-
-        'consumer_card_code', 'consumer_card', 'photo_url',
-
-        'mobile_platform',
-        'mobile_platform_version',
-
-        'dashboard_order',
-        'ip_restrictions',
-        'agent_type',
-        'api_token',
-
-        'has_right_to_commission',
-        'preferred_language',
-
-        'hide_from_timesheet',
-        'availability_notified_at',
-        'in_training'
-    ];
+    protected $guarded = [];
 
     protected $attributes = [
         'account_type' => 'business',
@@ -1053,7 +1020,13 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
             return true;
         }
 
-        if (env('WHITE_LABEL_COUNTRY', 'CA') === 'MA') {
+        if (config('app.white_label.country') === 'MA') {
+            return true;
+        }
+
+        if(
+            $this->company && $this->user_role==='manager'
+        ){
             return true;
         }
 
@@ -1064,6 +1037,14 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         }
 
         return false;
+    }
+
+    public function getIsAgentAttribute()
+    {
+        return $this->companies()
+            ->where('companies.id', $this->company_id)
+            ->wherePivot('is_agent', true)
+            ->exists();
     }
 
     public function getAvailabilitySortedAttribute()
@@ -1403,5 +1384,15 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
             return false;
 
         return $company->pivot->can_view_cost;
+    }
+
+    public function getHasWarningAttribute()
+    {
+        $payPeriod = PayPeriodsService::getPayPeriodsByDate(now()->year, now());
+
+        return $this->agentWarnings()
+                ->where('created_at', '>=', $payPeriod['start'])
+                ->where('created_at', '<=', $payPeriod['end'])
+                ->count() > 0;
     }
 }
