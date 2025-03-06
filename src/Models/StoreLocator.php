@@ -26,43 +26,48 @@ class StoreLocator extends Model
         return $this->belongsTo(Carrier::class, 'carrier_id');
     }
 
+    public function googleBusiness()
+    {
+        return $this->belongsTo(GoogleBusiness::class, 'google_business_id');
+    }
+
     public static function getServicesAvailable() {
         return [
             [
-                'name' => 'UPS Ground',
-                'description' => 'UPS Ground',
-                'color' => '#ff0000',
-                'icon' => 'fa fa-truck',
+                'name' => __('Service Shipping'),
+                'description' => __('Offer a wide range of national and international shipping services'),
+                'color' => '#20C4F4',
+                'icon' => 'fa fa-plane-up',
             ],
             [
-                'name' => 'UPS Next Day Air',
-                'description' => 'UPS Next Day Air',
-                'color' => '#ff0000',
-                'icon' => 'fa fa-truck',
+                'name' => __('Box Posts'),
+                'description' => __('Forwarding subscriptions and services'),
+                'color' => '#FF8C00',
+                'icon' => 'fa fa-box',
             ],
             [
-                'name' => 'UPS 2nd Day Air',
-                'description' => 'UPS 2nd Day Air',
-                'color' => '#ff0000',
-                'icon' => 'fa fa-truck',
+                'name' => __('Insurance'),
+                'description' => __('Offered insurance for deposits and shipments'),
+                'color' => '#172B4D',
+                'icon' => 'fa fa-shield-halved',
             ],
             [
-                'name' => 'UPS 3 Day Select',
-                'description' => 'UPS 3 Day Select',
-                'color' => '#ff0000',
-                'icon' => 'fa fa-truck',
+                'name' => __('Packaging services and supplies'),
+                'description' => __('Specialized packaging and supplies, custom packaging'),
+                'color' => '#5D60EC',
+                'icon' => 'fa fa-tape',
             ],
             [
-                'name' => 'UPS Next Day Air Saver',
-                'description' => 'UPS Next Day Air Saver',
-                'color' => '#ff0000',
-                'icon' => 'fa fa-truck',
+                'name' => __('Collection and deposit services (PUDO)'),
+                'description' => __('Online order collection and free return services for clients'),
+                'color' => '#CC7429',
+                'icon' => 'fa fa-dolly',
             ],
             [
-                'name' => 'UPS Next Day Air Early A.M.',
-                'description' => 'UPS Next Day Air Early A.M.',
-                'color' => '#ff0000',
-                'icon' => 'fa fa-truck',
+                'name' => __('Printing and photocopy services'),
+                'description' => __('Professional and personal printing solutions'),
+                'color' => '#0C8',
+                'icon' => 'fa fa-print',
             ]
         ];
     }
