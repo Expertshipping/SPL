@@ -26,6 +26,11 @@ class StoreLocator extends Model
         return $this->belongsTo(Carrier::class, 'carrier_id');
     }
 
+    public function googleBusiness()
+    {
+        return $this->belongsTo(GoogleBusiness::class, 'google_business_id');
+    }
+
     public static function getServicesAvailable() {
         return [
             [
