@@ -161,7 +161,7 @@ class PurolatorEventsService
                         "termId" => $store->purolator_term_id,
                         "srcSysCd" => "AGENT",
                         "srcSysRefCd" => "EXPERTSHIPPING",
-                        "usrId" => (string) auth()->id(),
+                        "usrId" => (string) $store->user_id,
                         "rteId" => $routeNumber
                     ],
                     "events" => [
