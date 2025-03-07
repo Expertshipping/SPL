@@ -234,9 +234,8 @@ class PurolatorEventsService
                     try {
                         $url = asset('static/images/signature'.rand(1, 18).'.png');
                         $filename = time() .".png";
-                        $filenameCopy = time() ."-copy.png";
-                        if(request()->has('signature_file')){
-                            Storage::disk('tmp')->put($filename, request('signature_file'));
+                        if(isset($attributes['signature_file'])){
+                            Storage::disk('tmp')->put($filename, file_get_contents($attributes['signature_file']));
                             optional($carrierEvent)->update([
                                 'signature_origin' => 'mobile'
                             ]);
