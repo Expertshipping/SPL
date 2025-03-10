@@ -107,7 +107,7 @@ class CategoryProduct extends Model implements HasMedia
         });
     }
 
-    private static function categoryResource($category, $order)
+    public static function categoryResource($category, $order)
     {
         if (isset($order[$category->id])) {
             $ids = $order[$category->id];
