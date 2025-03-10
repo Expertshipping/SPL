@@ -135,6 +135,7 @@ class CategoryProduct extends Model implements HasMedia
             "products"      => (new ProductCollection($products))->collection,
             "childrens"     => $childrens,
             "company_id"    => $category->company_id,
+            "parent_id"     => $category->parent_id,
         ];
     }
 
