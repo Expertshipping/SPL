@@ -18,23 +18,19 @@ use ExpertShipping\Spl\Enum\CompanyStatusEnum;
 use ExpertShipping\Spl\Enum\PlanSubscriptionStatusEnum;
 use ExpertShipping\Spl\Models\LocalInvoice as ModelsLocalInvoice;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Company extends Model
+class Company extends Model implements HasMedia
 {
     const ACCOUNT_TYPE_RETAIL = 'retail';
     const ACCOUNT_TYPE_BUSINESS = 'business';
     const ACCOUNT_TYPE_RETAIL_RESELLER = 'retail_reseller';
     const ACCOUNT_TYPE_CONSUMER = 'consumer';
-
-    public array $condition = [];
+    public static array $condition = [];
     public string $route = 'verification';
 
-    public function __construct()
-    {
-        static::addGlobalScope('type', function ($query) {
-            $query->where($this->condition);
-        });
-    }
+    use InteractsWithMedia;
 
     public function scopeByType($query, $type)
     {
@@ -96,6 +92,11 @@ class Company extends Model
     public static function boot()
     {
         parent::boot();
+
+        static::addGlobalScope('type', function ($query) {
+            $query->where(static::$condition);
+        });
+
         self::creating(function ($model) {
             $model->uuid = (string) Uuid::uuid4();
             $model->rate_visibility = [
@@ -1036,4 +1037,14 @@ class Company extends Model
                 return false;
             });
     }
+
+    public function getFullAddressAttribute() {
+        return $this->addr1 . ' ' . $this->addr2 . ', ' . $this->city . ', ' . $this->state . ' ' . $this->zip_code. ', ' . $this->country;
+    }
+
+    public function getStoreImageAttribute()
+    {
+        return $this->getFirstMediaUrl('store-image');
+    }
+
 }
