@@ -563,8 +563,9 @@ class ManageRate
 
         $discountValue = $this->discountDetailByCountryOrZoneOrWorld['dollar'][$packagingType];
         if (!is_null($discountValue) && $discountValue != "") {
-            $xDollar = $rateExample + $discountValue;
+            $xDollar = ($rateExample * 100) + $discountValue;
         }
+
         $discountValue = (float) $this->discountDetailByCountryOrZoneOrWorld['percentage'][$packagingType];
         if (!is_null($discountValue) && $discountValue != "") {
             $xPercentage = $rateExample + ($rateExample * $discountValue) / 100;
