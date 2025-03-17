@@ -4,6 +4,7 @@ namespace ExpertShipping\Spl\Providers;
 
 use ExpertShipping\Spl\Helpers\Money;
 use ExpertShipping\Spl\Services\InsuranceService;
+use ExpertShipping\Spl\Services\OpenAIService;
 use ExpertShipping\Spl\Services\SearchSelectService;
 use Illuminate\Support\ServiceProvider;
 
@@ -30,10 +31,16 @@ final class PackageServiceProvider extends ServiceProvider
 
         $this->mergeConfigFrom(__DIR__.'/../Config/spl.php', 'spl');
 
-
-
         $this->app->singleton('insurance', function () {
             return new InsuranceService();
         });
+
+        $this->app->bind('openai-text', function ($app) {
+            return new OpenAIService();
+        });
+
+        $this->publishes([
+            __DIR__ . '/../Config/openai.php' => config_path('openai.php'),
+        ], 'config');
     }
 }
