@@ -35,6 +35,12 @@ class Product extends JsonResource
             'hide_from_pos' => $this->hide_from_pos,
             'name_origin' => $this->getTranslations('name'),
             'company_id' => $this->company_id,
+            'pos_companies' => $this->whenLoaded('posCompanies', $this->posCompanies->map(function ($company) {
+                return [
+                    'id' => $company->id,
+                    'name' => $company->name,
+                ];
+            })),
         ];
     }
 }
