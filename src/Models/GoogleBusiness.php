@@ -33,4 +33,9 @@ class GoogleBusiness extends Model
             $smsService->send($number, $this->sms_message);
         }
     }
+
+    public function storeLocator()
+    {
+        return $this->hasOne(StoreLocator::class);
+    }
 }
