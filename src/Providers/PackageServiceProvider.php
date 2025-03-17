@@ -30,6 +30,7 @@ final class PackageServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../Views', 'spl');
 
         $this->mergeConfigFrom(__DIR__.'/../Config/spl.php', 'spl');
+        $this->mergeConfigFrom(__DIR__.'/../Config/openai.php', 'openai');
 
         $this->app->singleton('insurance', function () {
             return new InsuranceService();
