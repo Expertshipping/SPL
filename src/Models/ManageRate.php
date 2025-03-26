@@ -27,6 +27,15 @@ class ManageRate
         'Transportation Charges',
     ];
 
+    const BASE_PRICE_KEYS = [
+        'BasePrice',
+        'Base Price',
+        'base',
+        'Freight Charge',
+        'Transportation Charges',
+        'TotalBaseCharge',
+    ];
+
     static $FILTER_DETAILS = [
         'BasePrice',
         'TransportationCharges',
@@ -342,34 +351,51 @@ class ManageRate
 
     public function rateDetails(array $details, $fromCountry, $toCountry)
     {
-        $allDetails = collect(array_merge($details))
-            ->filter()
-            ->filter($this->filterTaxes())
-            ->map(function ($detail) {
-                $amount = str_replace(' ', '', $detail['amount']);
-                $amount = str_replace(',', '', $amount);
-                $link = null;
+        $basePriceKey = collect($details)->search(function ($detail) {
+            return in_array($detail['type'], self::BASE_PRICE_KEYS);
+        });
 
-                if ($this->discountType === 'link_to_carrier') {
-                    $amount = -1;
-                    $link = $this->discountDetailByCountryOrZoneOrWorld;
-                } else {
-                    if (Helper::inArrayWithoutCase($detail['type'], self::DISCOUNTABLE_DETAILS)) {
-                        if ((float) $this->discountValue($this->companyService) < 0) {
-                            $amount = $amount - $this->calculateDiscountValueForAmount($amount, abs($this->discountValue($this->companyService)), $this->discountType);
-                        } else {
-                            $amount = $amount + $this->calculateDiscountValueForAmount($amount, abs($this->discountValue($this->companyService)), $this->discountType);
+        if($basePriceKey !== false && $this->discountType === 'dollar'){
+            if ((float) $this->discountValue($this->companyService) < 0) {
+                $details[$basePriceKey]['amount'] = round($details[$basePriceKey]['amount'] - $this->discountValue($this->companyService), 2);
+            } else {
+                $details[$basePriceKey]['amount'] = round($details[$basePriceKey]['amount'] + $this->discountValue($this->companyService), 2);
+            }
+
+            $allDetails = collect(array_merge($details))
+                ->filter()
+                ->filter($this->filterTaxes());
+        }else{
+            $allDetails = collect(array_merge($details))
+                ->filter()
+                ->filter($this->filterTaxes())
+                ->map(function ($detail) {
+                    $amount = str_replace(' ', '', $detail['amount']);
+                    $amount = str_replace(',', '', $amount);
+                    $link = null;
+
+                    if ($this->discountType === 'link_to_carrier') {
+                        $amount = -1;
+                        $link = $this->discountDetailByCountryOrZoneOrWorld;
+                    } else {
+                        if (Helper::inArrayWithoutCase($detail['type'], self::DISCOUNTABLE_DETAILS)) {
+                            if ((float) $this->discountValue($this->companyService) < 0) {
+                                $amount = $amount - $this->calculateDiscountValueForAmount($amount, abs($this->discountValue($this->companyService)), $this->discountType);
+                            } else {
+                                $amount = $amount + $this->calculateDiscountValueForAmount($amount, abs($this->discountValue($this->companyService)), $this->discountType);
+                            }
                         }
                     }
-                }
 
-                return [
-                    'type' => $detail['type'],
-                    'currency' => $detail['currency'],
-                    'amount' => round($amount, 2),
-                    'link' => $link
-                ];
-            });
+                    return [
+                        'type' => $detail['type'],
+                        'currency' => $detail['currency'],
+                        'amount' => round($amount, 2),
+                        'link' => $link
+                    ];
+                });
+        }
+
 
         $taxes = $this->addTaxes($allDetails, $fromCountry, $toCountry);
 
