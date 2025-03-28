@@ -75,13 +75,17 @@ class CategoryProduct extends Model implements HasMedia
         $categories = self::where('consommable', false)
             ->whereNull('parent_id')
             ->with('products', function ($q) {
-                $q->where('consommable', false);
-                $q->whereNotIn('id', auth()->user()->company->hiddenProducts->pluck('id'));
-                $q->where(function ($query) {
-                    $query->where('company_id', auth()->user()->company_id)
-                        ->orWhereNull('company_id');
-                });
-                $q->with('media', 'inventories');
+                $q->where('consommable', false)
+                ->whereNotIn('id', auth()->user()->company->hiddenProducts->pluck('id'))
+                ->where(function ($query) {
+                    $query->where(function ($query) {
+                        $query->whereDoesntHave('posCompanies')
+                            ->orWhereHas('posCompanies', function ($subQuery) {
+                                $subQuery->where('companies.id', auth()->user()->company_id);
+                            });
+                    });
+                })
+                ->with('media', 'inventories', 'posCompanies');
             })
             ->whereNotIn('id', auth()->user()->company->hiddenCategories->pluck('id'))
             ->where(function ($query) {
@@ -89,13 +93,15 @@ class CategoryProduct extends Model implements HasMedia
             })
             ->with([
                 'childrens.products' => function ($q) {
-                    $q->where('consommable', false);
-                    $q->whereNotIn('id', auth()->user()->company->hiddenProducts->pluck('id'));
-                    $q->where(function ($query) {
-                        $query->where('company_id', auth()->user()->company_id)
-                            ->orWhereNull('company_id');
-                    });
-                    $q->with('media', 'inventories');
+                    $q->where('consommable', false)
+                    ->whereNotIn('id', auth()->user()->company->hiddenProducts->pluck('id'))
+                    ->where(function ($query) {
+                        $query->whereDoesntHave('posCompanies')
+                        ->orWhereHas('posCompanies', function ($subQuery) {
+                            $subQuery->where('companies.id', auth()->user()->company_id);
+                        });
+                    })
+                    ->with('media', 'inventories', 'posCompanies');
                 }
             ])
             ->with('media')
