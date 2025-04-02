@@ -252,10 +252,10 @@
                                 </td>
                                 <td width="15%" style="text-align: center;">{{$detail->quantity}}</td>
                                 <td width="15%" style="text-align: right;">
-                                    {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->total_ht, env('WHITE_LABEL_CURRENCY', 'CAD'))}}
+                                    {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->total_ht/$detail->quantity, env('WHITE_LABEL_CURRENCY', 'CAD'))}}
                                 </td>
                                 <td width="15%" style="text-align: right;">
-                                    {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD'))}}
+                                    {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->total_taxes/$detail->quantity, env('WHITE_LABEL_CURRENCY', 'CAD'))}}
                                 </td>
                                 <td width="15%" style="text-align: right;">
                                     {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->total_ht + $detail->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD'))}}
