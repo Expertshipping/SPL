@@ -207,6 +207,7 @@ class Shipment extends Model
         'is_manual_shipment',
 
         'taxes',
+        'pos_freight_meta',
     ];
 
     protected $casts = [
@@ -241,6 +242,7 @@ class Shipment extends Model
         'tracking_numbers' => 'array',
         'is_manual_shipment' => 'boolean',
         'taxes' => 'array',
+        'pos_freight_meta' => 'array',
     ];
 
     public static function boot()
