@@ -585,8 +585,8 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function locationByIntegration(Integration $integration)
     {
-        if ($integration->location) {
-            return $integration->location;
+        if ($integration->primaryFulfillmentLocation) {
+            return $integration->primaryFulfillmentLocation;
         }
 
         return (object) [
