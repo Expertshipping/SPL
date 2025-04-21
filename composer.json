@@ -12,7 +12,7 @@
     }
   ],
   "require": {
-    "barryvdh/laravel-dompdf": "^2.0.1",
+    "barryvdh/laravel-dompdf": "^2.0|^3.0",
     "laravel/framework": "^9.46.0|^10.34.2|^11.29.0|^12.0",
     "openai-php/laravel": "^0.11.0",
     "php": "~8.0.0|~8.1.0|~8.2.0|~8.3.0",
