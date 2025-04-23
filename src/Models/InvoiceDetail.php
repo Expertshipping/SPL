@@ -301,6 +301,10 @@ class InvoiceDetail extends Model
 
     public function getHtDiscountAttribute()
     {
+        if(config('app.white_label.country', 'CA') === 'MA'){
+            return $this->ht - $this->discount_value - $this->total_taxes;
+        }
+
         return $this->ht - $this->discount_value;
     }
 
