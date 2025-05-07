@@ -19,6 +19,7 @@ class Product extends JsonResource
             'order' => $this->order,
             'name' => $this->name,
             'price' => $this->price,
+            'cost' => $this->cost,
             'category_product_id' => $this->category_product_id,
             'category' => new CategoryProduct($this->whenLoaded('category')),
             'taxable' => $this->taxable,
