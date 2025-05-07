@@ -1045,4 +1045,8 @@ class Company extends Model implements HasMedia
         return $this->getFirstMediaUrl('store-image');
     }
 
+    public function posProducts()
+    {
+        return $this->belongsToMany(Product::class, 'pos_company_products')->withTimestamps();
+    }
 }
