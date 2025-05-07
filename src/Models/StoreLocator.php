@@ -71,4 +71,9 @@ class StoreLocator extends Model
             ]
         ];
     }
+
+    public function getPageUrlAttribute()
+    {
+        return 'https://' . config('app.white_label.store_locator_domain') . '/' . $this->slug;
+    }
 }

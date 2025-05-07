@@ -18,8 +18,8 @@ class PayPeriodsService{
 
             if($start->year == $year || $end->year == $year || $end->year == $year - 1){
                 $periods[] = [
-                    'start' => $start->copy(),
-                    'end' => $end->copy(),
+                    'start' => $start->copy()->startOfDay(),
+                    'end' => $end->copy()->endOfDay(),
                     'value' => $index - 1,
                     'label' => $index . " : " . $start->copy()->format('d M Y') . ' - ' . $end->copy()->format('d M Y'),
                 ];
