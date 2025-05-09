@@ -39,12 +39,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable implements HasMedia, HasLocalePreference
 {
-
     const POS_START_VERIFICATION_DATE = '2023-08-16';
-
     const AVATAR_PATH = 'storage/avatars';
-
-    protected $connection = 'mysql';
 
     use HasRoles;
     use InteractsWithMedia;

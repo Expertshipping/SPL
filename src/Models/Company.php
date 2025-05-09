@@ -23,22 +23,19 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Company extends Model implements HasMedia
 {
+    use InteractsWithMedia;
     const ACCOUNT_TYPE_RETAIL = 'retail';
     const ACCOUNT_TYPE_BUSINESS = 'business';
     const ACCOUNT_TYPE_RETAIL_RESELLER = 'retail_reseller';
     const ACCOUNT_TYPE_CONSUMER = 'consumer';
     public static array $condition = [];
     public string $route = 'verification';
-
-    use InteractsWithMedia;
+    protected $morphClass = 'company';
 
     public function scopeByType($query, $type)
     {
         return $query->where('account_type', $type);
     }
-
-    protected $connection = 'mysql';
-    protected $morphClass = 'company';
 
     public function toSearchableArray()
     {
