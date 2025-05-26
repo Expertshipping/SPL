@@ -197,9 +197,9 @@
                     <tr>
                         <td style="border: 0;" width="40%">Description</td>
                         <td style="border: 0;text-align: center;" width="15%">Quantité</td>
-                        <td style="border: 0;text-align: right;" width="15%">Prix HT</td>
-                        <td style="border: 0;text-align: right;" width="15%">TVA</td>
-                        <td style="border: 0;text-align: right;" width="15%">Prix TTC</td>
+                        {{--                        <td style="border: 0;text-align: right;" width="15%">Prix HT</td>--}}
+                        {{--                        <td style="border: 0;text-align: right;" width="15%">TVA</td>--}}
+                        {{--                        <td style="border: 0;text-align: right;" width="15%">Prix TTC</td>--}}
                     </tr>
                 </table>
             </td>
@@ -249,17 +249,26 @@
                                     @if ($detail->invoiceable_type==="App\AdditionalService")
                                         {{ $detail->invoiceable->name }}
                                     @endif
+
+                                    @if ($detail->invoiceable_type==="App\ShipmentSurcharge")
+                                        Surcharge : {{ $detail->invoiceable->name }}
+                                        @if($detail->invoiceable->description)
+                                            - {{ $detail->invoiceable->description }}
+                                        @endif
+                                        <br>
+                                        Envoi {{  $detail->invoiceable->shipment->carrier->name }} : {{  $detail->invoiceable->shipment->tracking_number }} <br>
+                                    @endif
                                 </td>
                                 <td width="15%" style="text-align: center;">{{$detail->quantity}}</td>
-                                <td width="15%" style="text-align: right;">
-                                    {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->total_ht/$detail->quantity, env('WHITE_LABEL_CURRENCY', 'CAD'))}}
-                                </td>
-                                <td width="15%" style="text-align: right;">
-                                    {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->total_taxes/$detail->quantity, env('WHITE_LABEL_CURRENCY', 'CAD'))}}
-                                </td>
-                                <td width="15%" style="text-align: right;">
-                                    {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->total_ht + $detail->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD'))}}
-                                </td>
+                                {{--                                <td width="15%" style="text-align: right;">--}}
+                                {{--                                    {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->total_ht/$detail->quantity, env('WHITE_LABEL_CURRENCY', 'CAD'))}}--}}
+                                {{--                                </td>--}}
+                                {{--                                <td width="15%" style="text-align: right;">--}}
+                                {{--                                    {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->total_taxes/$detail->quantity, env('WHITE_LABEL_CURRENCY', 'CAD'))}}--}}
+                                {{--                                </td>--}}
+                                {{--                                <td width="15%" style="text-align: right;">--}}
+                                {{--                                    {{\ExpertShipping\Spl\Helpers\Helper::moneyFormat($detail->total_ht + $detail->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD'))}}--}}
+                                {{--                                </td>--}}
                             </tr>
                         </table>
                     </td>
@@ -299,26 +308,26 @@
                             </td>
                         </tr>
                     @else
-                        <tr>
-                            <td width="50%" style="text-align: left;">
-                                Total HT
-                            </td>
-                            <td width="50%" style="text-align: right;">
-                                <strong>
-                                    {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->total_ht, env('WHITE_LABEL_CURRENCY', 'CAD')) }}
-                                </strong>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td width="50%" style="text-align: left;">
-                                Total TVA
-                            </td>
-                            <td width="50%" style="text-align: right;">
-                                <strong>
-                                    {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD')) }}
-                                </strong>
-                            </td>
-                        </tr>
+                        {{--                        <tr>--}}
+                        {{--                            <td width="50%" style="text-align: left;">--}}
+                        {{--                                Total HT--}}
+                        {{--                            </td>--}}
+                        {{--                            <td width="50%" style="text-align: right;">--}}
+                        {{--                                <strong>--}}
+                        {{--                                    {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->total_ht, env('WHITE_LABEL_CURRENCY', 'CAD')) }}--}}
+                        {{--                                </strong>--}}
+                        {{--                            </td>--}}
+                        {{--                        </tr>--}}
+                        {{--                        <tr>--}}
+                        {{--                            <td width="50%" style="text-align: left;">--}}
+                        {{--                                Total TVA--}}
+                        {{--                            </td>--}}
+                        {{--                            <td width="50%" style="text-align: right;">--}}
+                        {{--                                <strong>--}}
+                        {{--                                    {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD')) }}--}}
+                        {{--                                </strong>--}}
+                        {{--                            </td>--}}
+                        {{--                        </tr>--}}
                         <tr>
                             <td width="50%" style="text-align: left;">
                                 Total TTC
@@ -326,6 +335,16 @@
                             <td width="50%" style="text-align: right;">
                                 <strong>
                                     {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->total_ht + $invoice->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD')) }}
+                                </strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" style="text-align: left;">
+                                dont TVA
+                            </td>
+                            <td width="50%" style="text-align: right;">
+                                <strong>
+                                    {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->total_taxes, env('WHITE_LABEL_CURRENCY', 'CAD')) }}
                                 </strong>
                             </td>
                         </tr>
@@ -340,9 +359,11 @@
     <br><br><br>
     <br><br><br>
 
-    <div class="footer-text">
-        R.C.: 540229 - I.C.E.: 00301617600008
-    </div>
+    @if(config('app.white_label.country') === 'MA')
+        <div class="footer-text">
+            R.C.: 540229 - I.C.E.: 003016176000083 - IF : 52418234 - CNSS : 4127948 - Patente : 36366227
+        </div>
+    @endif
 </div>
 </body>
 </html>
