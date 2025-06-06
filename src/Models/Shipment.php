@@ -711,4 +711,9 @@ class Shipment extends Model
         return 'N/A';
     }
 
+    public function activities()
+    {
+        return $this->hasMany(ShipmentActivity::class);
+    }
+
 }
