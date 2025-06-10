@@ -10,8 +10,4 @@ class RemoteArea extends Model
     use HasFactory;
 
     protected $guarded = [];
-
-    public function carrier() {
-        return $this->belongsTo(Carrier::class);
-    }
 }
