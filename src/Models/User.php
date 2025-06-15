@@ -1277,6 +1277,11 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         return $this->hasMany(AgentWarning::class);
     }
 
+        public function agentTips()
+    {
+        return $this->hasMany(AgentTip::class);
+    }
+
     public function agentWarningsByDates()
     {
         $from = today();
@@ -1390,5 +1395,26 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
                 ->where('created_at', '>=', $payPeriod['start'])
                 ->where('created_at', '<=', $payPeriod['end'])
                 ->count() > 0;
+    }
+
+
+    public function quotes()
+    {
+        return $this->hasMany(Quote::class);
+    }
+
+    public function carrierEvents()
+    {
+        return $this->hasMany(CarrierEvent::class);
+    }
+
+    public function clientExperienceDetail()
+    {
+        return $this->hasMany(ClientExperienceDetail::class);
+    }
+
+    public function shipmentSurcharges()
+    {
+        return $this->hasManyThrough(ShipmentSurcharge::class, Shipment::class, 'user_id', 'shipment_id', 'id', 'id');
     }
 }
