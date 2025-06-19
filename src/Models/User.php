@@ -757,7 +757,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function insurances()
     {
-        return $this->hasMany(Insurance::class);
+        return $this->hasMany(Insurance::class, 'user_id');
     }
 
     public function activeCarriers()
@@ -866,7 +866,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function timesheets()
     {
-        return $this->hasMany(Timesheet::class);
+        return $this->hasMany(Timesheet::class, 'user_id');
     }
 
     public function shipmentsWithoutInvoice()
@@ -979,7 +979,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function userInvoices()
     {
-        return $this->hasMany(AppLocalInvoice::class);
+        return $this->hasMany(AppLocalInvoice::class, 'user_id');
     }
 
     public function getHasInvoicesAttribute()
@@ -1183,6 +1183,11 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         return $this->hasMany(DropOff::class, 'consumer_id');
     }
 
+    public function dropoffs()
+    {
+        return $this->hasMany(DropOff::class, 'user_id');
+    }
+
     public function consumerFavoriteStores()
     {
         return $this->belongsToMany(Company::class, 'consumer_favorite_stores')
@@ -1274,12 +1279,12 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function agentWarnings()
     {
-        return $this->hasMany(AgentWarning::class);
+        return $this->hasMany(AgentWarning::class, 'user_id');
     }
 
         public function agentTips()
     {
-        return $this->hasMany(AgentTip::class);
+        return $this->hasMany(AgentTip::class, 'user_id');
     }
 
     public function agentWarningsByDates()
@@ -1400,21 +1405,47 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function quotes()
     {
-        return $this->hasMany(Quote::class);
+        return $this->hasMany(Quote::class, 'user_id');
     }
 
     public function carrierEvents()
     {
-        return $this->hasMany(CarrierEvent::class);
+        return $this->hasMany(CarrierEvent::class, 'user_id');
     }
 
     public function clientExperienceDetail()
     {
-        return $this->hasMany(ClientExperienceDetail::class);
+        return $this->hasMany(ClientExperienceDetail::class,'user_id');
     }
 
     public function shipmentSurcharges()
     {
         return $this->hasManyThrough(ShipmentSurcharge::class, Shipment::class, 'user_id', 'shipment_id', 'id', 'id');
     }
+
+    public function timesheetsTotalHours()
+    {
+        return $this->hasMany(Timesheet::class, 'user_id', 'id')
+            ->selectRaw('user_id, SUM(TIMESTAMPDIFF(HOUR, scheduled_start_date, scheduled_end_date)) as total_hours')
+            ->groupBy('user_id');
+    }
+
+    public function delayCheckins()
+    {
+        return $this->hasMany(Timesheet::class, 'user_id', 'id')
+            ->join('timesheet_logs', function ($join) {
+                $join->on('timesheets.user_id', '=', 'timesheet_logs.user_id')
+                    ->whereRaw('DATE(timesheets.scheduled_start_date) = DATE(timesheet_logs.check_in)');
+            })
+            ->whereColumn('timesheet_logs.check_in', '>', 'timesheets.scheduled_start_date')
+            ->whereRaw('timesheet_logs.check_in IN (
+                SELECT MIN(tl.check_in)
+                FROM timesheet_logs tl
+                WHERE tl.user_id = timesheets.user_id AND DATE(tl.created_at) = DATE(timesheet_logs.created_at)
+                GROUP BY DATE(tl.created_at)
+            )')
+            ->selectRaw('timesheets.user_id, SUM(TIMESTAMPDIFF(SECOND, timesheets.scheduled_start_date, timesheet_logs.check_in) / 3600) as total_delay_hours')
+            ->groupBy('timesheets.user_id');
+    }
+
 }

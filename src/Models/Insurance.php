@@ -153,4 +153,9 @@ class Insurance extends Model
     {
         return $this->belongsTo(Insurance::class, 'edit_insurance_id');
     }
+
+    public function dropOffs()
+    {
+        return $this->hasMany(dropOff::class);
+    }
 }
