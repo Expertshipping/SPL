@@ -3,6 +3,7 @@
 namespace ExpertShipping\Spl\Services;
 
 use ExpertShipping\Spl\Models\Company;
+use ExpertShipping\Spl\Models\Shipment;
 use ExpertShipping\Spl\Models\SoldeTransaction;
 use ExpertShipping\Spl\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -15,9 +16,11 @@ class ChargeUserAndAddDetailToInvoice
         $detail = $user->createInvoiceForUser($chargeable, $charge, $companyId);
 
         if(env('WHITE_LABEL_COUNTRY', 'CA') === 'MA'){
-            $chargeable->update([
-                'is_paid' => false,
-            ]);
+            if(get_class($chargeable) === 'App\Shipment' || get_class($chargeable) === Shipment::class){
+                $chargeable->update([
+                    'is_paid' => false,
+                ]);
+            }
         }
         else{
             try {
@@ -85,7 +88,7 @@ class ChargeUserAndAddDetailToInvoice
                     ]);
                 }
             } catch (\Exception $e) {
-                if(get_class($chargeable) === 'App\Shipment'){
+                if(get_class($chargeable) === 'App\Shipment' || get_class($chargeable) === Shipment::class){
                     $chargeable->update([
                         'is_paid' => false,
                     ]);

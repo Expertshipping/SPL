@@ -106,4 +106,9 @@ class Product extends Model implements HasMedia
     {
         return $query->where('hide_from_pos', 1);
     }
+
+    public function posCompanies()
+    {
+        return $this->belongsToMany(Company::class, 'pos_company_products')->withTimestamps();
+    }
 }

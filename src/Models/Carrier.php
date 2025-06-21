@@ -122,10 +122,22 @@ class Carrier extends Model implements HasMedia
     ];
 
     protected $appends = [
-        'image_url'
+        'image_url', 'api_slug',
     ];
 
     protected $morphClass = 'Carrier';
+
+    public const SLUGS = [
+        'aramex-artisanat' => 'aramex',
+        'ups-express-doc' => 'ups',
+        'ups-expedited' => 'ups',
+        'ups-express-saver' => 'ups',
+    ];
+
+    public function getApiSlugAttribute()
+    {
+        return self::SLUGS[$this->slug] ?? $this->slug;
+    }
 
     public function user()
     {

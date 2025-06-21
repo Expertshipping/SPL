@@ -131,6 +131,7 @@ class Shipment extends JsonResource
             'surcharges' => $this->whenLoaded('shipmentSurcharges'),
             'quote' => $this->whenLoaded('quote'),
             'is_manual_shipment' => $this->is_manual_shipment,
+            'carrier_account_name' => $this->carrier_account_name,
         ];
     }
 

@@ -116,6 +116,7 @@ class Shipment extends ComputedModel
         'tracking_numbers' => 'array',
         'is_manual_shipment' => 'boolean',
         'taxes' => 'array',
+        'pos_freight_meta' => 'array',
     ];
 
     public static function boot()
@@ -739,4 +740,35 @@ class Shipment extends ComputedModel
         }
 
     }
+    public function getCarrierAccountNameAttribute(){
+        if(in_array($this->accountable_type, ['App\AccountCarrier', AccountCarrier::class])){
+            if($this->company->account_type === 'business'){
+                return __('SPL Account');
+            }
+
+            elseif($this->company->is_retail_reseller){
+                return __('ES Account');
+            }
+
+            else{
+                return $this->accountable->display_name;
+            }
+        }
+
+        if(in_array($this->accountable_type, ['App\CompanyCarrier', CompanyCarrier::class])){
+            return __('My Account');
+        }
+
+        if(!$this->accountable && $this->freightcom_id){
+            return __('FC Account');
+        }
+
+        return 'N/A';
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(ShipmentActivity::class);
+    }
+
 }

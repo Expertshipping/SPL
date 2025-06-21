@@ -7,7 +7,7 @@ use ExpertShipping\Spl\Models\Notifications\EmailConfirmation;
 use ExpertShipping\Spl\Models\Notifications\PasswordReset;
 use ExpertShipping\Spl\Models\Retail\AgentCommission;
 use ExpertShipping\Spl\Models\Retail\AgentWarning;
-use ExpertShipping\Spl\Services\TaxService;
+use ExpertShipping\Spl\Services\PayPeriodsService;
 use ExpertShipping\Spl\Services\TimesheetService;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -39,12 +39,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable implements HasMedia, HasLocalePreference
 {
-
     const POS_START_VERIFICATION_DATE = '2023-08-16';
-
     const AVATAR_PATH = 'storage/avatars';
-
-    protected $connection = 'mysql';
 
     use HasRoles;
     use InteractsWithMedia;
@@ -54,40 +50,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
     use Billable;
 
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'company', 'first_name', 'last_name', 'tel', 'email', 'country', 'password', 'addr1',
-        'addr2', 'city', 'zip_code', 'province', 'instant_payment', 'phone', 'blocked_at',
-        'name', 'discount', 'email', 'uuid', 'signup_completed_at', 'first_name', 'last_name', 'account_type', 'custom_branding', 'company_id', 'activate_account_token', 'active', 'color', 'options',
-
-        'ip_address', 'montly_salary', 'hourly_salary', 'moneris_id', 'card_last_four', 'referral_code', 'referral_id', 'referral_percentage',
-
-        'availability', 'is_spark_user',
-        'hidden_at',
-
-        'firebase_token', 'firebase_uid',
-
-        'consumer_card_code', 'consumer_card', 'photo_url',
-
-        'mobile_platform',
-        'mobile_platform_version',
-
-        'dashboard_order',
-        'ip_restrictions',
-        'agent_type',
-        'api_token',
-
-        'has_right_to_commission',
-        'preferred_language',
-
-        'hide_from_timesheet',
-        'availability_notified_at',
-        'in_training'
-    ];
+    protected $guarded = [];
 
     protected $attributes = [
         'account_type' => 'business',
@@ -338,10 +301,6 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
                     $total = $relation->rate;
                 }
             }
-        }
-
-        if (in_array(get_class($relation), ['App\\Shipment', Shipment::class])) {
-            $taxes = app(TaxService::class)->getVAT($relation, env('WHITE_LABEL_COUNTRY', 'CA'));
         }
 
         // remove , and space from total
@@ -622,8 +581,8 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function locationByIntegration(Integration $integration)
     {
-        if ($integration->location) {
-            return $integration->location;
+        if ($integration->primaryFulfillmentLocation) {
+            return $integration->primaryFulfillmentLocation;
         }
 
         return (object) [
@@ -798,7 +757,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function insurances()
     {
-        return $this->hasMany(Insurance::class);
+        return $this->hasMany(Insurance::class, 'user_id');
     }
 
     public function activeCarriers()
@@ -907,7 +866,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function timesheets()
     {
-        return $this->hasMany(Timesheet::class);
+        return $this->hasMany(Timesheet::class, 'user_id');
     }
 
     public function shipmentsWithoutInvoice()
@@ -1020,7 +979,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function userInvoices()
     {
-        return $this->hasMany(AppLocalInvoice::class);
+        return $this->hasMany(AppLocalInvoice::class, 'user_id');
     }
 
     public function getHasInvoicesAttribute()
@@ -1057,7 +1016,13 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
             return true;
         }
 
-        if (env('WHITE_LABEL_COUNTRY', 'CA') === 'MA') {
+        if (config('app.white_label.country') === 'MA') {
+            return true;
+        }
+
+        if(
+            $this->company && $this->user_role==='manager'
+        ){
             return true;
         }
 
@@ -1068,6 +1033,14 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         }
 
         return false;
+    }
+
+    public function getIsAgentAttribute()
+    {
+        return $this->companies()
+            ->where('companies.id', $this->company_id)
+            ->wherePivot('is_agent', true)
+            ->exists();
     }
 
     public function getAvailabilitySortedAttribute()
@@ -1210,6 +1183,11 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
         return $this->hasMany(DropOff::class, 'consumer_id');
     }
 
+    public function dropoffs()
+    {
+        return $this->hasMany(DropOff::class, 'user_id');
+    }
+
     public function consumerFavoriteStores()
     {
         return $this->belongsToMany(Company::class, 'consumer_favorite_stores')
@@ -1301,7 +1279,12 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
     public function agentWarnings()
     {
-        return $this->hasMany(AgentWarning::class);
+        return $this->hasMany(AgentWarning::class, 'user_id');
+    }
+
+        public function agentTips()
+    {
+        return $this->hasMany(AgentTip::class, 'user_id');
     }
 
     public function agentWarningsByDates()
@@ -1408,4 +1391,61 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
         return $company->pivot->can_view_cost;
     }
+
+    public function getHasWarningAttribute()
+    {
+        $payPeriod = PayPeriodsService::getPayPeriodsByDate(now()->year, now());
+
+        return $this->agentWarnings()
+                ->where('created_at', '>=', $payPeriod['start'])
+                ->where('created_at', '<=', $payPeriod['end'])
+                ->count() > 0;
+    }
+
+
+    public function quotes()
+    {
+        return $this->hasMany(Quote::class, 'user_id');
+    }
+
+    public function carrierEvents()
+    {
+        return $this->hasMany(CarrierEvent::class, 'user_id');
+    }
+
+    public function clientExperienceDetail()
+    {
+        return $this->hasMany(ClientExperienceDetail::class,'user_id');
+    }
+
+    public function shipmentSurcharges()
+    {
+        return $this->hasManyThrough(ShipmentSurcharge::class, Shipment::class, 'user_id', 'shipment_id', 'id', 'id');
+    }
+
+    public function timesheetsTotalHours()
+    {
+        return $this->hasMany(Timesheet::class, 'user_id', 'id')
+            ->selectRaw('user_id, SUM(TIMESTAMPDIFF(HOUR, scheduled_start_date, scheduled_end_date)) as total_hours')
+            ->groupBy('user_id');
+    }
+
+    public function delayCheckins()
+    {
+        return $this->hasMany(Timesheet::class, 'user_id', 'id')
+            ->join('timesheet_logs', function ($join) {
+                $join->on('timesheets.user_id', '=', 'timesheet_logs.user_id')
+                    ->whereRaw('DATE(timesheets.scheduled_start_date) = DATE(timesheet_logs.check_in)');
+            })
+            ->whereColumn('timesheet_logs.check_in', '>', 'timesheets.scheduled_start_date')
+            ->whereRaw('timesheet_logs.check_in IN (
+                SELECT MIN(tl.check_in)
+                FROM timesheet_logs tl
+                WHERE tl.user_id = timesheets.user_id AND DATE(tl.created_at) = DATE(timesheet_logs.created_at)
+                GROUP BY DATE(tl.created_at)
+            )')
+            ->selectRaw('timesheets.user_id, SUM(TIMESTAMPDIFF(SECOND, timesheets.scheduled_start_date, timesheet_logs.check_in) / 3600) as total_delay_hours')
+            ->groupBy('timesheets.user_id');
+    }
+
 }

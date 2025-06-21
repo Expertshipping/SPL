@@ -19,26 +19,25 @@ use ExpertShipping\Spl\Models\LocalInvoice as ModelsLocalInvoice;
 use ExpertShipping\Spl\Models\Traits\HasComputedData;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Company extends ComputedModel
+class Company extends ComputedModel implements HasMedia
 {
     use HasComputedData;
-
+    use InteractsWithMedia;
     const ACCOUNT_TYPE_RETAIL = 'retail';
     const ACCOUNT_TYPE_BUSINESS = 'business';
     const ACCOUNT_TYPE_RETAIL_RESELLER = 'retail_reseller';
     const ACCOUNT_TYPE_CONSUMER = 'consumer';
-
     public static array $condition = [];
     public string $route = 'verification';
+    protected $morphClass = 'company';
 
     public function scopeByType($query, $type)
     {
         return $query->where('account_type', $type);
     }
-
-    protected $connection = 'mysql';
-    protected $morphClass = 'company';
 
     public function toSearchableArray()
     {
@@ -1342,6 +1341,19 @@ class Company extends ComputedModel
         if($relation === 'localInvoices'){
             $this->setComputedInvoicesSumTotal();
         }
+    }
 
+    public function getFullAddressAttribute() {
+        return $this->addr1 . ' ' . $this->addr2 . ', ' . $this->city . ', ' . $this->state . ' ' . $this->zip_code. ', ' . $this->country;
+    }
+
+    public function getStoreImageAttribute()
+    {
+        return $this->getFirstMediaUrl('store-image');
+    }
+
+    public function posProducts()
+    {
+        return $this->belongsToMany(Product::class, 'pos_company_products')->withTimestamps();
     }
 }

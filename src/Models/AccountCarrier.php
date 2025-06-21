@@ -19,7 +19,8 @@ class AccountCarrier extends Model
         'pickup',
         'name',
         'type',
-        'reseller_marge'
+        'reseller_marge',
+        'display_name',
     ];
 
     protected $casts = [
