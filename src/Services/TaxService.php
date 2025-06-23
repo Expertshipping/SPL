@@ -36,6 +36,11 @@ class TaxService
             if(env('WHITE_LABEL_COUNTRY')==='MA'){
                 $preTaxPrice = round($amount / (1 + (20 / 100)), 2);
             }
+
+            if(env('WHITE_LABEL_COUNTRY')==='US'){
+                $salesTaxRate = $this->getUsSalesTaxRate($state);
+                $preTaxPrice = round($amount / (1 + ($salesTaxRate / 100)), 2);
+            }
         }
 
         if($toCountry !== env('WHITE_LABEL_COUNTRY')){
@@ -69,6 +74,18 @@ class TaxService
         if(env('WHITE_LABEL_COUNTRY')==='MA'){
             $taxes = [];
             $taxes['TVA']= $preTaxPrice * 0.2;
+            return[
+                'taxes' => $taxes,
+                'preTax' => $preTaxPrice,
+            ];
+        }
+
+        if(env('WHITE_LABEL_COUNTRY')==='US'){
+            $taxes = [];
+            $salesTaxRate = $this->getUsSalesTaxRate($state);
+            if($salesTaxRate > 0){
+                $taxes['Sales Tax']= round($preTaxPrice * ($salesTaxRate / 100), 2);
+            }
             return[
                 'taxes' => $taxes,
                 'preTax' => $preTaxPrice,
@@ -158,11 +175,20 @@ class TaxService
      * @return float
      */
     public function calcTaxedSurcharge($surchargeAmount, $state): float {
-        return (float) $surchargeAmount + (
-                (float) $this->calcTps($state, $surchargeAmount)
-                +
-                (float) $this->calcTvp($state, $surchargeAmount)
-            );
+        if(env('WHITE_LABEL_COUNTRY')==='CA'){
+            return (float) $surchargeAmount + (
+                    (float) $this->calcTps($state, $surchargeAmount)
+                    +
+                    (float) $this->calcTvp($state, $surchargeAmount)
+                );
+        }
+
+        if(env('WHITE_LABEL_COUNTRY')==='US'){
+            return (float) $surchargeAmount + (float) $this->calcUsSalesTax($state, $surchargeAmount);
+        }
+
+        // Pour les autres pays ou si aucun pays n'est configuré
+        return (float) $surchargeAmount;
     }
 
     public static function calculateTaxForShipment($shipment)
@@ -179,5 +205,85 @@ class TaxService
 
         $taxService = app(self::class);
         return $taxService->getTaxes($amount, Str::upper($state), true, $country)['taxes'];
+    }
+
+    /**
+     * Get US sales tax rate for a given state
+     *
+     * @param string $state
+     * @return float
+     */
+    public function getUsSalesTaxRate($state): float
+    {
+        // Taux de taxe de vente par état américain (taux de base de l'état)
+        // Ces taux peuvent varier selon les municipalités locales
+        $usTaxRates = [
+            'AL' => 4.0,    // Alabama
+            'AK' => 0.0,    // Alaska (pas de taxe d'état)
+            'AZ' => 5.6,    // Arizona
+            'AR' => 6.5,    // Arkansas
+            'CA' => 7.25,   // Californie
+            'CO' => 2.9,    // Colorado
+            'CT' => 6.35,   // Connecticut
+            'DE' => 0.0,    // Delaware (pas de taxe de vente)
+            'FL' => 6.0,    // Floride
+            'GA' => 4.0,    // Géorgie
+            'HI' => 4.0,    // Hawaï
+            'ID' => 6.0,    // Idaho
+            'IL' => 6.25,   // Illinois
+            'IN' => 7.0,    // Indiana
+            'IA' => 6.0,    // Iowa
+            'KS' => 6.5,    // Kansas
+            'KY' => 6.0,    // Kentucky
+            'LA' => 4.45,   // Louisiane
+            'ME' => 5.5,    // Maine
+            'MD' => 6.0,    // Maryland
+            'MA' => 6.25,   // Massachusetts
+            'MI' => 6.0,    // Michigan
+            'MN' => 6.875,  // Minnesota
+            'MS' => 7.0,    // Mississippi
+            'MO' => 4.225,  // Missouri
+            'MT' => 0.0,    // Montana (pas de taxe d'état)
+            'NE' => 5.5,    // Nebraska
+            'NV' => 6.85,   // Nevada
+            'NH' => 0.0,    // New Hampshire (pas de taxe de vente)
+            'NJ' => 6.625,  // New Jersey
+            'NM' => 5.125,  // Nouveau-Mexique
+            'NY' => 4.0,    // New York
+            'NC' => 4.75,   // Caroline du Nord
+            'ND' => 5.0,    // Dakota du Nord
+            'OH' => 5.75,   // Ohio
+            'OK' => 4.5,    // Oklahoma
+            'OR' => 0.0,    // Oregon (pas de taxe d'état)
+            'PA' => 6.0,    // Pennsylvanie
+            'RI' => 7.0,    // Rhode Island
+            'SC' => 6.0,    // Caroline du Sud
+            'SD' => 4.5,    // Dakota du Sud
+            'TN' => 7.0,    // Tennessee
+            'TX' => 6.25,   // Texas
+            'UT' => 5.95,   // Utah
+            'VT' => 6.0,    // Vermont
+            'VA' => 5.3,    // Virginie
+            'WA' => 6.5,    // Washington
+            'WV' => 6.0,    // Virginie-Occidentale
+            'WI' => 5.0,    // Wisconsin
+            'WY' => 4.0,    // Wyoming
+            'DC' => 6.0,    // District de Columbia
+        ];
+
+        $state = strtoupper($state);
+        return $usTaxRates[$state] ?? 0.0;
+    }
+
+    /**
+     * @param $state
+     * @param  float  $preTaxPrice
+     *
+     * @return float
+     */
+    public function calcUsSalesTax($state, float $preTaxPrice): float
+    {
+        $preTaxPrice = str_replace(',','',$preTaxPrice);
+        return round(($this->getUsSalesTaxRate($state) * $preTaxPrice) / 100, 2);
     }
 }
