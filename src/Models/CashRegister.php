@@ -10,19 +10,7 @@ class CashRegister extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = [
-        'name',
-        'description',
-        'company_id',
-        'terminal_id',
-        'enable_tip',
-        'display_percentage_selection',
-        'display_amount_selection',
-        'predefined_percentage_1',
-        'predefined_percentage_2',
-        'predefined_percentage_3',
-        'tip_warning_threshold',
-    ];
+    protected $guarded = [];
 
     public function cashRegisterSessions()
     {
