@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Service extends Model
 {
-    protected $fillable = ['name', 'code', 'carrier_id', 'transport_type', 'active', 'insurance_active', 'use_for_aramex_bulk', 'premium_details', 'rate', 'freightcom_code',];
+    protected $guarded = [];
 
     protected $casts = [
         'use_for_aramex_bulk' => 'boolean',
