@@ -1018,15 +1018,15 @@ class Company extends Model implements HasMedia
                 }
 
                 if ($invoice->company->billing_period === 'weekly') {
-                    return $invoice->created_at->diffInDays(now()) >= 7;
+                    return (int) $invoice->created_at->diffInDays(now(), true) >= 7;
                 }
 
                 if ($invoice->company->billing_period === 'every_two_weeks') {
-                    return $invoice->created_at->diffInDays(now()) >= 14;
+                    return (int) $invoice->created_at->diffInDays(now(), true) >= 14;
                 }
 
                 if($invoice->company->billing_period === 'daily') {
-                    return $invoice->created_at->diffInDays(now()) >= 1;
+                    return (int) $invoice->created_at->diffInDays(now(), true) >= 1;
                 }
 
                 return false;

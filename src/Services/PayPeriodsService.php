@@ -34,7 +34,7 @@ class PayPeriodsService{
         $periods = self::getPayPeriods($year);
         foreach ($periods as $period) {
             // check if between start and end or equals to start or end
-            if($date->between($period['start'], $period['end']) || $date->diffInDays($period['start']) == 0 || $date->diffInDays($period['end']) == 0){
+            if($date->between($period['start'], $period['end']) || ((int) $date->diffInDays($period['start'], true)) == 0 || $date->diffInDays($period['end']) == 0){
                 return $period;
             }
         }

@@ -97,7 +97,7 @@ class RateResource extends JsonResource
     {
         try {
             $shipDate = new Carbon(request()->get('startDate'));
-            return $delivery->diffInDays($shipDate);
+            return (int) $delivery->diffInDays($shipDate, true);
         } catch (\Throwable $th) {
             return null;
         }
