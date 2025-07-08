@@ -408,7 +408,11 @@ class ManageRate
     private function addTaxes($details, $fromCountry, $toCountry)
     {
         $taxes = collect();
-        $totalCharges = $details->sum('amount');
+        $totalCharges = $details->sum(function ($detail) {
+            $amount = str_replace(' ', '', $detail['amount']);
+            $amount = str_replace(',', '', $amount);
+            return (float) $amount;
+        });
 
         if ($fromCountry === 'CA' && $toCountry === 'CA') {
             if (in_array($this->state, ['NB', 'NL', 'NS', 'ON', 'PE'])) {
@@ -639,7 +643,11 @@ class ManageRate
                 ->map($this->mapDetails())
                 ->toArray();
 
-            $totalDetails = collect($rate->rateDetails)->sum('amount');
+            $totalDetails = collect($rate->rateDetails)->sum(function ($rate) {
+                $amount = str_replace(' ', '', $rate['amount']);
+                $amount = str_replace(',', '', $amount);
+                return (float) $amount;
+            });
             $rate->carrier_price = $this->formatPrice($totalDetails);
             $rate->expert_shipping_price = $this->formatPrice($totalDetails);
 
