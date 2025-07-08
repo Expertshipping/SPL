@@ -2,7 +2,7 @@
 
 namespace ExpertShipping\Spl\Models;
 
-use App\Jobs\GetShipmentCostRate;
+use App\Services\CacheModelService;
 use ExpertShipping\Spl\Models\Mailbox\MailboxConversation;
 use ExpertShipping\Spl\Models\Mailbox\MailboxEmail;
 use ExpertShipping\Spl\Models\Mailbox\MailboxFolder;
@@ -12,17 +12,19 @@ use ExpertShipping\Spl\Services\GetCostService;
 use ExpertShipping\Spl\Services\GetMargeService;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Ramsey\Uuid\Uuid;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use ExpertShipping\Spl\Enum\CompanyStatusEnum;
 use ExpertShipping\Spl\Enum\PlanSubscriptionStatusEnum;
 use ExpertShipping\Spl\Models\LocalInvoice as ModelsLocalInvoice;
+use ExpertShipping\Spl\Models\Traits\HasComputedData;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Company extends Model implements HasMedia
+class Company extends ComputedModel implements HasMedia
 {
+    use HasComputedData;
     use InteractsWithMedia;
     const ACCOUNT_TYPE_RETAIL = 'retail';
     const ACCOUNT_TYPE_BUSINESS = 'business';
@@ -91,7 +93,6 @@ class Company extends Model implements HasMedia
         static::addGlobalScope('type', function ($query) {
             $query->where(static::$condition);
         });
-
         self::creating(function ($model) {
             $model->uuid = (string) Uuid::uuid4();
             $model->rate_visibility = [
@@ -582,6 +583,12 @@ class Company extends Model implements HasMedia
             ?->loadMissing(['plan_package', 'plan_package.plan']);
     }
 
+    public function validSubscriptionRelation()
+    {
+        return $this->hasOne(PlanSubscription::class, 'company_id')
+            ->where("status", PlanSubscriptionStatusEnum::IN_USE)->with(['plan_package', 'plan_package.plan']);
+    }
+
     public function getTrialSubscriptionAttribute()
     {
         return count($this->planSubscriptions()->get()) == 0;
@@ -700,7 +707,7 @@ class Company extends Model implements HasMedia
         return $this->referrals->map(function ($company) {
             $rates = $company->shipments
                 ->whereNull('referral_payout_id')
-                ->whereNotIn('type', ['cancelled', 'draft'])
+                ->excludeTypes(['cancelled', 'draft'])
                 ->sum(function ($shipment) {
                     return $shipment->rate - $shipment->cost_rate;
                 });
@@ -713,7 +720,7 @@ class Company extends Model implements HasMedia
 
             $ratesPayable = $company->shipments()
                 ->whereNull('referral_payout_id')
-                ->whereNotIn('type', ['cancelled', 'draft'])
+                ->excludeTypes(['cancelled', 'draft'])
                 ->whereHas('carrierInvoices', function ($q) {
                     $q->where('carrier_invoices.status', 'verified');
                 })
@@ -730,7 +737,7 @@ class Company extends Model implements HasMedia
                 'company' => $company->name ?? null,
                 'signup_date' => $company->created_at->format('d/m/Y'),
                 'active_account' => $company->user->active,
-                'count_shipments' => $company->shipments->whereNotIn('type', ['cancelled', 'draft'])->count(),
+                'count_shipments' => $company->shipments->excludeTypes(['cancelled', 'draft'])->count(),
                 'earning' => round($earning, 2),
                 'payable' => round($earningPayable, 2),
             ];
@@ -891,7 +898,7 @@ class Company extends Model implements HasMedia
     {
         $query->when($number, function ($query) use ($number) {
             $query->whereHas('shipments', function ($query) use ($number) {
-                $query->whereNotIn('type', ['draft', 'cancelled'])->where('created_at', '>=', now()->subDays($number));
+                $query->excludeTypes(['draft', 'cancelled'])->where('created_at', '>=', now()->subDays($number));
             });
         });
     }
@@ -1031,6 +1038,309 @@ class Company extends Model implements HasMedia
 
                 return false;
             });
+    }
+
+    public function getInvoicesMaxPaidAtAttribute()
+    {
+        return DB::table('invoices')->where('company_id', $this->id)->max('paid_at');
+    }
+
+    public function getInvoicesUnpaidAttribute()
+    {
+        return DB::table('invoices')
+            ->where('company_id', $this->id)
+            ->whereNull('paid_at')
+            ->whereNull('bulk_id')
+            ->sum('total');
+    }
+    // hs: Computed Attributes (json field contains data that can be calculated from other fields)
+    public function getChargeAttribute()
+    {
+        if ($this->hasComputedData('charge')) {
+            return $this->getComputedData('charge');
+        }
+        return $this->setComputedCharge();
+    }
+
+    public function getinvoicesTotal($pos)
+    {
+        $shipmentWithoutInvoiceIds = $this->shipments()
+            ->excludeTypes(['draft', 'cancelled'])
+            ->whereDoesntHave('invoice')
+            ->pluck('id')
+            ->toArray();
+
+        $shipmentWithInvoiceIds = $this->shipments()
+            ->excludeTypes(['draft', 'cancelled'])
+            ->whereHas('invoice')
+            ->pluck('id')
+            ->toArray();
+
+        $invoicesTotal = DB::table('invoices')->whereNull("deleted_at")->whereIn('shipment_id', $shipmentWithInvoiceIds)->sum('total');
+        $invoicesDetailTotal = DB::table('invoice_details')
+            ->where('pos', $pos)
+            ->whereIn('invoiceable_id', $shipmentWithoutInvoiceIds)
+            ->where('invoiceable_type', 'App\\Shipment')
+            ->selectRaw('SUM(total_ht + total_taxes) as total')
+            ->value('total');
+        return $invoicesDetailTotal + $invoicesTotal;
+    }
+
+    public function setComputedCharge()
+    {
+        $shipmentIds = $this->shipments()->pluck('id')->toArray();
+        $pos = true;
+        if(
+            $this->account_type === 'business' || $this->is_retail_reseller
+        ){
+            $pos = false;
+        }
+        $totalSales = $this->getinvoicesTotal($pos);
+
+        $totalSalesPrice = DB::table('invoice_details')
+                    ->where('pos', $pos)
+                    ->whereIn('invoiceable_id', $shipmentIds)
+                    ->where('invoiceable_type', 'App\\Shipment')
+                    ->selectRaw('SUM(total_ht) as total')
+                    ->value('total');
+
+        $shipmentWithoutSales = DB::table('shipments')
+                    ->whereIn('shipments.id', $shipmentIds)
+                    ->leftJoin('invoices', 'shipments.id', '=', 'invoices.shipment_id')
+                    ->whereNotExists(function ($query) {
+                        $query->select(DB::raw(1))
+                            ->from('invoice_details')
+                            ->whereColumn('invoice_details.invoiceable_id', 'shipments.id')
+                            ->where('invoice_details.invoiceable_type', Shipment::class);
+                    })
+                    ->sum('invoices.total');
+
+        $totalSalesPriceEdited = DB::table('invoice_details')
+                    ->join('shipments', 'invoice_details.invoiceable_id', '=', 'shipments.id')
+                    ->where('invoice_details.pos', $pos)
+                    ->where('invoice_details.invoiceable_type', Shipment::class)
+                    ->orWhereIn('invoice_details.invoiceable_id', function ($query) use ($shipmentIds) {
+                        $query->select('edit_shipment_id')
+                              ->from('shipments')
+                              ->whereIn('id', $shipmentIds)
+                              ->whereNotNull('edit_shipment_id');
+                    })
+                    ->sum('invoice_details.total_ht');
+
+
+        $salesPrice = $totalSalesPrice + $totalSalesPriceEdited + $shipmentWithoutSales;
+        $carrierChargedPrice = DB::table('carrier_invoice_shipments')
+                ->whereIn('shipment_id',  $shipmentIds)
+                ->selectRaw("
+                SUM(
+                    JSON_UNQUOTE(JSON_EXTRACT(taxes, '$.gst')) +
+                    JSON_UNQUOTE(JSON_EXTRACT(taxes, '$.hst')) +
+                    JSON_UNQUOTE(JSON_EXTRACT(taxes, '$.pst')) +
+                    JSON_UNQUOTE(JSON_EXTRACT(taxes, '$.qst')) +
+                    net_charge +
+                    net_surcharge
+                ) AS total
+                ")
+                ->value('total');
+
+        $refundPrice = $this->setCompanyRefundPrice($shipmentIds);
+        $marge = $salesPrice - ($carrierChargedPrice + $refundPrice);
+        $sum = $totalSales - $marge;
+        $this->setComputedData('charge', $sum);
+        return $sum;
+    }
+
+    public function setCompanyRefundPrice($shipmentIds)
+    {
+        if($this->account_type === 'business')
+        {
+            return 0;
+        }
+        $cacheKey = "refund_prices";
+        $refundCache = Cache::remember($cacheKey, now()->addMinutes(30), function () {
+            return Refund::query()
+                ->select('details')
+                ->whereRaw('JSON_CONTAINS(details, ?)', ['{"invoiceable_type": "App\\\\Shipment"}'])
+                ->get();
+        });
+        $refundValue = $refundCache
+            ->sum(function ($refund) use ($shipmentIds) {
+                if(isset($refund->details)){
+                    $price = 0;
+                    foreach ($refund->details as $refundDetail) {
+                        if(in_array($refundDetail['invoiceable_id'], $shipmentIds)){
+                            $price += $refundDetail['price'];
+                        }
+                    }
+                    return $price;
+                }
+            });
+
+        $this->setComputedData('refund_price', $refundValue);
+        return $refundValue;
+    }
+
+    public function getComputedDiscountPackageNameAttribute()
+    {
+        if ($this->hasComputedData('discount_package_name') !== null) {
+            return $this->getComputedData('discount_package_name');
+        }
+        return $this->setComputedDiscountPackageName();
+    }
+    public function setComputedDiscountPackageName()
+    {
+        $data = $this->discountPackage?->name;
+        $this->setComputedData('discount_package_name', $data);
+        return $data;
+    }
+
+    public function getComputedActiveCarriersAttribute()
+    {
+        if ($this->hasComputedData('computed_active_carriers') !== null) {
+            return $this->getComputedData('computed_active_carriers');
+        }
+        return $this->setComputedActiveCarriers();
+    }
+    public function setComputedActiveCarriers()
+    {
+        $data = $this->activeCarriers;
+        $this->setComputedData('computed_active_carriers', $data);
+        return $data;
+    }
+
+    public function getComputedSubscriptionPlanAttribute()
+    {
+        if ($this->hasComputedData('subscription_plan') !== null) {
+            return $this->getComputedData('subscription_plan');
+        }
+        return $this->setComputedSubscriptionPlan();
+    }
+    public function setComputedSubscriptionPlan()
+    {
+        $data = $this->validSubscriptionRelation?->plan_package?->plan?->slug ?? "N/A";
+        $this->setComputedData('subscription_plan', $data);
+        return $data;
+    }
+
+    public function getComputedPlatformsAttribute()
+    {
+        if ($this->getComputedData('computed_platforms') !== null) {
+            return $this->getComputedData('computed_platforms');
+        }
+        return $this->setComputedPlatforms();
+    }
+    public function setComputedPlatforms()
+    {
+        $data = DB::table('platforms')
+        ->join('integrations', 'platforms.id', '=', 'integrations.platform_id')
+        ->whereIn('platforms.id', $this->integrations->pluck('platform_id')->toArray())
+        ->select('platforms.name', 'platforms.logo')
+        ->distinct()
+        ->get()
+        ->map(fn($platform) => [
+            'name' => $platform->name,
+            'value' => "",
+            'logo' => asset($platform->logo),
+        ]);
+        $this->setComputedData('computed_platforms', $data);
+        return $data;
+    }
+
+    public function getComputedShipmentsCountAttribute()
+    {
+        if ($this->getComputedData('shipments_count') !== null) {
+            return $this->getComputedData('shipments_count');
+        }
+        return $this->setComputedShipmentsCount();
+    }
+    public function setComputedShipmentsCount()
+    {
+        $data = DB::table('shipments')
+        ->excludeTypes(['draft', 'cancelled'])
+        ->where('company_id', $this->id)->count();
+        $this->setComputedData('shipments_count', $data);
+        return $data;
+    }
+
+    public function getComputedInvoicesSumTotalAttribute()
+    {
+        if ($this->getComputedData('invoices_sum_total') !== null) {
+            return $this->getComputedData('invoices_sum_total');
+        }
+        return $this->setComputedInvoicesSumTotal();
+    }
+    public function setComputedInvoicesSumTotal()
+    {
+        $data = DB::table('invoices')->where('company_id', $this->id)->sum('total');
+        $this->setComputedData('invoices_sum_total', $data);
+        return $data;
+    }
+    // end Computed Attributes
+
+    /**
+     * Update computed data on company save
+     * hs: get key to check if dirty and call calbcak methods to update
+     *
+     * @param Company $model
+     * @return void
+     */
+    public static function afterModelSaved($model) {
+        $model->setComputedDataForKeys([
+            'discount_package_id' => 'setComputedDiscountPackageName',
+            'status' => 'refreshCompanyStatusCache'
+        ]);
+    }
+
+
+    public static function afterModelDeleted($model) {
+        $model->refreshCompanyStatusCache();
+    }
+
+    /**
+     * Define the pivot relations which are tracked and require a refresh of the status cache
+     * when changed. This is used by the company model to know when to refresh the status cache
+     *
+     * @return array
+     */
+
+
+    public function refreshCompanyStatusCache() {
+        app(CacheModelService::class)->refreshCompanyStatusCache();
+    }
+
+    protected static function getPivotTrackedRelations(): array
+    {
+        return ['activeCarriers'];
+    }
+
+    protected static function getRelationTrackedRelations(): array
+    {
+        return ['planSubscriptions', 'integrations', 'shipments', 'localInvoices'];
+    }
+
+
+    public function onPivotChanged(string $relation, string $event)
+    {
+        if ($relation === 'activeCarriers') {
+            $this->setComputedActiveCarriers();
+        }
+
+        if($relation === 'planSubscriptions'){
+            $this->setComputedSubscriptionPlan();
+        }
+
+        if($relation === 'integrations'){
+            $this->setComputedPlatforms();
+        }
+
+        if($relation === 'shipments'){
+            $this->setComputedShipmentsCount();
+            $this->setComputedCharge();
+        }
+
+        if($relation === 'localInvoices'){
+            $this->setComputedInvoicesSumTotal();
+        }
     }
 
     public function getFullAddressAttribute() {

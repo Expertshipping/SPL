@@ -6,14 +6,18 @@ use ExpertShipping\Spl\Helpers\Helper;
 use ExpertShipping\Spl\Jobs\CalculateDistanceBetweenStoreAndClientForRetailShipments;
 use ExpertShipping\Spl\Models\Models\ReferralPayout;
 use ExpertShipping\Spl\Models\Retail\InsuranceSuggestion;
-use Illuminate\Database\Eloquent\Model;
+use ExpertShipping\Spl\Models\Traits\HasComputedData;
 use Illuminate\Support\Facades\Cache;
 use ExpertShipping\Spl\Models\Traits\HasTrackingLink;
 use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
-class Shipment extends Model
+class Shipment extends ComputedModel
 {
     use HasTrackingLink;
+    use HasComputedData;
+
     const DRAFT = 'draft';
     const CANCELLED = 'cancelled';
     const BASE_PRICE_TYPES = [
@@ -237,6 +241,11 @@ class Shipment extends Model
                 ->take(1)
 
         ])->with('service');
+    }
+
+    public function scopeExcludeTypes($query, $types)
+    {
+        return $query->whereNotIn('type',  (array) $types);
     }
 
     public function scopeFilterBySearchTerm($query, $term)
@@ -555,6 +564,182 @@ class Shipment extends Model
         return $this->belongsTo(SentCoupon::class, 'coupon_id');
     }
 
+    public function getSalePriceAttribute()
+    {
+        if(
+            $this->company &&
+            ($this->company->account_type === 'business' || $this->company->is_retail_reseller)
+        ){
+            $relation = 'saleDetail';
+        }else{
+            $relation = 'receiptDetail';
+        }
+
+        if($this->{$relation} && $this->editedShipment){
+            return $this->{$relation}->total_ht + ($this->editedShipment->{$relation}->total_ht ?? 0);
+        }
+
+        if($this->{$relation}){
+            return $this->{$relation}->total_ht;
+        }
+
+        return null;
+    }
+
+    public function getRefundPriceAttribute()
+    {
+        if (isset($this->computed_data['refund_price'])) {
+            return $this->computed_data['refund_price'];
+        }
+        return $this->setRefundPrice();
+    }
+
+    public function setRefundPrice()
+    {
+        if($this->company?->account_type === 'business')
+        {
+            $this->setComputedData('refund_price', 0);
+            return 0;
+        }
+        $cacheKey = "refund_prices";
+        $refundCache = Cache::remember($cacheKey, now()->addMinutes(30), function () {
+            return Refund::query()
+                ->select('details')
+                ->whereRaw('JSON_CONTAINS(details, ?)', ['{"invoiceable_type": "App\\\\Shipment"}'])
+                ->get();
+        });
+        $refundValue = $refundCache
+            ->sum(function ($refund) {
+                if(isset($refund->details)){
+                    $price = 0;
+                    foreach ($refund->details as $refundDetail) {
+                        if($refundDetail['invoiceable_id'] === $this->id){
+                            $price += $refundDetail['price'];
+                        }
+                    }
+                    return $price;
+                }
+            });
+
+        $this->setComputedData('refund_price', $refundValue);
+        return $refundValue;
+    }
+
+    public function getSalePriceWithTaxesAttribute()
+    {
+        if (isset($this->computed_data['sale_price_with_taxes'])) {
+            return $this->computed_data['sale_price_with_taxes'];
+        }
+        return $this->setSalePriceWithTaxes();
+    }
+
+    public function setSalePriceWithTaxes()
+    {
+        $total = 0;
+        if($this->invoice){
+            $total = $this->invoice->total;
+        } else {
+            $pos = 1;
+            if(
+                $this->company?->account_type === 'business' || $this->company?->is_retail_reseller
+            ){
+                $pos = 0;
+            }
+
+            $total = DB::table('invoice_details')
+                ->where('pos', $pos)
+                ->where('invoiceable_id', $this->id)
+                ->where('invoiceable_type', 'App\\Shipment')
+                ->selectRaw('SUM(total_ht + total_taxes) as total')
+                ->value('total');
+        }
+        $this->setComputedData('sale_price_with_taxes', $total);
+        return $total;
+    }
+
+
+    public function getMargeAttribute()
+    {
+        if ($this->getComputedData('marge') !== null) {
+            return $this->getComputedData('marge');
+        }
+        return $this->setMarge();
+    }
+
+    public function setMarge()
+    {
+        $price = 0;
+
+        if($this->sale_price != null){
+            $price = $this->sale_price;
+        } else {
+            if($this->invoice){
+                $price = $this->invoice->total;
+            }
+        }
+        $marge = round(($price ?? 0) - ($this->carrier_charged_price + ($this->refund_price ?? 0)), 2);
+
+        $this->setComputedData('marge', $marge);
+
+        return $marge;
+    }
+
+    public function getCarrierChargedPriceAttribute(){
+        if ($this->hasComputedData('carrier_charged_price')) {
+            return $this->getComputedData('carrier_charged_price');
+        }
+        return $this->setCarrierChargedPrice();
+    }
+
+    public function setCarrierChargedPrice(){
+        $total = DB::table('carrier_invoice_shipments')
+        ->where('shipment_id', $this->id)
+        ->selectRaw("
+        SUM(
+            JSON_UNQUOTE(JSON_EXTRACT(taxes, '$.gst')) +
+            JSON_UNQUOTE(JSON_EXTRACT(taxes, '$.hst')) +
+            JSON_UNQUOTE(JSON_EXTRACT(taxes, '$.pst')) +
+            JSON_UNQUOTE(JSON_EXTRACT(taxes, '$.qst')) +
+            net_charge +
+            net_surcharge
+        ) AS total
+        ")
+        ->value('total');
+
+        $this->setComputedData('carrier_charged_price', $total ?? 0);
+
+        return $total ?? 0;
+    }
+
+    public static function afterModelSaved($model) {
+        Log::info('Shipment saved: ' . $model->id);
+    }
+    public static function afterModelDeleted($model) {
+        Log::info('Shipment deleted: ' . $model->id);
+    }
+
+    protected static function getPivotTrackedRelations(): array
+    {
+        return [ 'carrierInvoices' ];
+    }
+
+    protected static function getRelationTrackedRelations(): array
+    {
+        return [ 'invoiceDetail', 'invoice' ];
+    }
+
+    public function onPivotChanged(string $relation, string $event)
+    {
+        if ($relation === 'carrierInvoices') {
+            $this->setCarrierChargedPrice();
+        }
+
+        if(in_array($relation, ['invoiceDetail', 'invoice'])){
+            $this->setSalePriceWithTaxes();
+            $this->setMarge();
+        }
+
+    }
     public function getCarrierAccountNameAttribute(){
         if(in_array($this->accountable_type, ['App\AccountCarrier', AccountCarrier::class])){
             if($this->company->account_type === 'business'){
