@@ -1448,4 +1448,8 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
             ->groupBy('timesheets.user_id');
     }
 
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'user_id');
+    }
 }
