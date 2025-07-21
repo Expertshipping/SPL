@@ -103,34 +103,6 @@
 
     <hr>
 
-    {{--    <table width="100%">--}}
-    {{--        <tr>--}}
-    {{--            <td width="130px">--}}
-    {{--                <div class="billing-information-title">--}}
-    {{--                    {{ __('Credit Card *****1234') }} :--}}
-    {{--                </div>--}}
-    {{--            </td>--}}
-    {{--            <td>--}}
-    {{--                <div class="billing-information-title">--}}
-    {{--                    <strong>12.0$ USD</strong>--}}
-    {{--                </div>--}}
-    {{--            </td>--}}
-    {{--        </tr>--}}
-    {{--        <tr>--}}
-    {{--            <td width="130px">--}}
-    {{--                <div class="billing-information-title">--}}
-    {{--                    {{ __('Solde') }} :--}}
-    {{--                </div>--}}
-    {{--            </td>--}}
-    {{--            <td>--}}
-    {{--                <div class="billing-information-title">--}}
-    {{--                    <strong>100.0$ USD</strong>--}}
-    {{--                </div>--}}
-    {{--            </td>--}}
-    {{--        </tr>--}}
-    {{--    </table>--}}
-    {{--    <br>--}}
-
     <table width="100%" class="table-1">
         <tr>
             <th><div class="text-white">{{ __('# of Shipments') }}</div></th>
@@ -193,6 +165,7 @@
                         </td>
                     </tr>
 
+                    @if(request()->platformCountry->code === 'CA')
                     <tr>
                         <td width="100px">
                             <div class="billing-information-title">
@@ -244,6 +217,7 @@
                             </div>
                         </td>
                     </tr>
+                    @endif
 
                     <tr>
                         <td width="100px">
@@ -295,6 +269,7 @@
 
         <hr>
 
+        @if(request()->platformCountry->code === 'CA')
         <table width="100%">
             <tr>
                 <td>
@@ -311,6 +286,7 @@
         </table>
 
         <hr>
+        @endif
 
         <div class="terms">
             <strong>{{ __('Terms & Conditions') }}</strong> <br>

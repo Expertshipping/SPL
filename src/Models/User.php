@@ -784,6 +784,11 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
 
             $carriersWithCompanyAccount = $this->company
                 ->carriers()
+                ->whereHas('carrier', function($q){
+                    $q->whereHas('platformCountries', function($q){
+                        $q->where('platform_country_id', request()->platformCountry?->id);
+                    });
+                })
                 ->with('carrier')
                 ->get()
                 ->pluck('carrier.slug')
@@ -1016,13 +1021,13 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
             return true;
         }
 
-        if (config('app.white_label.country') === 'MA') {
-            return true;
-        }
-
         if(
             $this->company && $this->user_role==='manager'
         ){
+            return true;
+        }
+
+        if ((request()->platformCountry?->code ?? 'CA') === 'MA') {
             return true;
         }
 
@@ -1451,5 +1456,10 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
     public function comments()
     {
         return $this->hasMany(Comment::class, 'user_id');
+    }
+
+    public function platformCountry()
+    {
+        return $this->belongsTo(PlatformCountry::class);
     }
 }

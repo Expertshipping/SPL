@@ -21,6 +21,7 @@ class AccountCarrier extends Model
         'type',
         'reseller_marge',
         'display_name',
+        'platform_country_id',
     ];
 
     protected $casts = [
@@ -45,5 +46,10 @@ class AccountCarrier extends Model
     public function carrierAccountUsers()
     {
         return $this->morphMany(CarrierAccountUsers::class, 'userable');
+    }
+
+    public function platformCountry()
+    {
+        return $this->belongsTo(PlatformCountry::class);
     }
 }

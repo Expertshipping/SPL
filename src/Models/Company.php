@@ -1046,4 +1046,9 @@ class Company extends Model implements HasMedia
     {
         return $this->belongsToMany(Product::class, 'pos_company_products')->withTimestamps();
     }
+
+    public function platformCountry()
+    {
+        return $this->belongsTo(PlatformCountry::class);
+    }
 }
