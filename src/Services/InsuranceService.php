@@ -11,7 +11,6 @@ use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 
 class InsuranceService
 {
@@ -151,6 +150,72 @@ class InsuranceService
         'PPX' => 'PPE',
     ];
 
+    private static $serviceLimit = [
+        '03' => 1000,
+        '14' => 5000,
+        '65' => 2500,
+        '59' => 5000,
+        '12' => 1000,
+        '54' => 5000,
+        '01' => 1000,
+        '02' => 5000,
+        '11' => 2500,
+        '08' => 2500,
+        '07' => 5000,
+        '13' => 1000,
+        'FEDEX_2_DAY' => 5000,
+        'FEDEX_EXPRESS_SAVER' => 1000,
+        'FEDEX_GROUND' => 1000,
+        'INTERNATIONAL_ECONOMY' => 2500,
+        'INTERNATIONAL_PRIORITY' => 5000,
+        'STANDARD_OVERNIGHT' => 5000,
+        'FEDEX_2_DAY_AM' => 5000,
+        'FIRST_OVERNIGHT' => 5000,
+        'GROUND_HOME_DELIVERY' => 1000,
+        'INTERNATIONAL_FIRST' => 5000,
+        'PRIORITY_OVERNIGHT' => 5000,
+        'L' => 5000,
+        'T' => 5000,
+        'K' => 5000,
+        'X' => 1000,
+        'U' => 5000,
+        'P' => 5000,
+        'M' => 5000,
+        'Y' => 5000,
+        'D' => 5000,
+        'canada-post_expedited_parcel' => 1000,
+        'canada-post_regular_parcel' => 500,
+        'canada-post_priority' => 5000,
+        'canada-post_xpresspost' => 2500,
+        'PurolatorExpress' => 5000,
+        'PurolatorExpress12PM' => 5000,
+        'PurolatorExpressBox9AM' => 5000,
+        'PurolatorExpressEnvelope10:30AM' => 1000,
+        'PurolatorExpressEnvelope9AM' => 1000,
+        'PurolatorExpressPack' => 5000,
+        'PurolatorExpressPack12PM' => 5000,
+        'PurolatorGround10:30AM' => 1000,
+        'PurolatorExpress10:30AM' => 5000,
+        'PurolatorExpress9AM' => 5000,
+        'PurolatorExpressBox10:30AM' => 5000,
+        'PurolatorExpressEnvelope' => 1000,
+        'PurolatorExpressEnvelope12PM' => 1000,
+        'PurolatorExpressPack10:30AM' => 5000,
+        'PurolatorExpressPack9AM' => 5000,
+        'PurolatorGround' => 1000,
+        'PurolatorGround9AM' => 1000,
+        'canpar_ground' => 1000,
+        'canpar_overnight' => 5000,
+        'canpar_select_pak' => 5000,
+        'canpar_select_letter' => 5000,
+        'canpar_select_usa' => 2500,
+        'canpar_usa_pack' => 2500,
+        'canpar_international' => 1000,
+        'canpar_overnight_letter' => 5000,
+        'canpar_select' => 2500,
+        'canpar_usa' => 2500,
+        'PPX' => 5000,
+    ];
     private static $countries = [
         [
             'code' => 'CA',
@@ -1420,7 +1485,7 @@ class InsuranceService
         }
     }
 
-    public function createTransactionForInsurance(\App\Insurance $insurance, $user = null)
+    public function createTransactionForInsurance(Insurance $insurance, $user = null)
     {
         if(!$user){
             $this->user = auth()->user();
