@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class EmailPreference extends Model
 {
     use HasFactory;
+
+    protected $guarded = [];
 }
