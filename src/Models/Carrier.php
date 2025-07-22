@@ -232,7 +232,7 @@ class Carrier extends Model implements HasMedia
     public function getActivePlatformCountryAttribute()
     {
         return $this->platformCountries()
-            ->wherePivot('platform_country_id', request()->platformCountry->id)
+            ->wherePivot('platform_country_id', auth()?->user()?->company?->platform_country_id)
             ->first();
     }
 }

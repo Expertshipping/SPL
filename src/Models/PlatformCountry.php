@@ -11,6 +11,6 @@ class PlatformCountry extends Model
 
     public function domains()
     {
-        return $this->hasMany(PlatformDomain::class);
+        return $this->belongsToMany(PlatformDomain::class, 'platform_country_domain', 'platform_country_id', 'platform_domain_id');
     }
 }

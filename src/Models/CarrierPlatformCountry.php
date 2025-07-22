@@ -25,4 +25,14 @@ class CarrierPlatformCountry extends Pivot
     {
         return $query->where('active_for_inventory', true);
     }
+
+    public function carrier()
+    {
+        return $this->belongsTo(Carrier::class, 'carrier_id');
+    }
+
+    public function platformCountry()
+    {
+        return $this->belongsTo(PlatformCountry::class, 'platform_country_id');
+    }
 }
