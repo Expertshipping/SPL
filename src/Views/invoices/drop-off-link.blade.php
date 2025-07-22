@@ -151,7 +151,7 @@
                     @endif
                     {{ $dropOff->store->city }}, {{ $dropOff->store->state }} {{ $dropOff->store->zip_code }} <br>
                     @if (!$dropOff->store->is_retail_reseller)
-                        {{ env('WHITE_LABEL_WEBSITE', 'www.expertshipping.ca') }}
+                        {{ (request()->platformDomain?->domain ?? 'www.expertshipping.ca') }}
                         @if ($dropOff->store->email)
                             <br> {{ $dropOff->store->email }}
                         @endif

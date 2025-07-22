@@ -34,4 +34,9 @@ class DiscountPackage extends Model
     {
         return $this->hasMany(Company::class);
     }
+
+    public function platformCountry()
+    {
+        return $this->belongsTo(PlatformCountry::class);
+    }
 }

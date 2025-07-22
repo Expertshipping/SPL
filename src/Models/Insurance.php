@@ -35,16 +35,11 @@ class Insurance extends Model
         'edit_insurance_id',
         'reseller_charged',
         'charge',
-        'from',
-        'to',
     ];
 
     protected $casts = [
         'ship_date' => 'datetime',
-        'from' => 'array',
-        'to' => 'array',
     ];
-
     protected $appends = ['link_token'];
 
     protected $with = ['shipment'];
