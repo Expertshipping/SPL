@@ -32,11 +32,15 @@ class GenerateStoreLocatorJob implements ShouldQueue
     public function handle(): void
     {
         $keyWord = $this->business->seo_title;
-        $meta['faq']['fr'] = OpenAIText::generateCompanyFAQs($keyWord, 'fr');
-        $meta['faq']['en'] = OpenAIText::generateCompanyFAQs($keyWord);
-
-        $meta['content']['fr'] = OpenAIText::generateCarrierService($keyWord, 'fr');
-        $meta['content']['en'] = OpenAIText::generateCarrierService($keyWord, 'en');
+        $languages = env('APP_LANGUAGES', 'fr,en');
+        $languages = explode(',', $languages);
+        $meta = [];
+        $meta['faq'] = [];
+        $meta['content'] = [];
+        foreach ($languages as $lang) {
+            $meta['faq'][$lang] = OpenAIText::generateCompanyFAQs($keyWord, $lang);
+            $meta['content'][$lang] = OpenAIText::generateCarrierService($keyWord, $lang);
+        }
 
         StoreLocator::query()->updateOrCreate(
             [
