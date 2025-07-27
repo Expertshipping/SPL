@@ -13,4 +13,9 @@ class PlatformCountry extends Model
     {
         return $this->belongsToMany(PlatformDomain::class, 'platform_country_domain', 'platform_country_id', 'platform_domain_id');
     }
+
+    public function getWeightUnitAttribute()
+    {
+        return $this->mesurement_system === 'imperial' ? 'lb' : 'kg';
+    }
 }
