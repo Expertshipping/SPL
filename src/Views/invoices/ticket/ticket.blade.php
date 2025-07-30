@@ -100,7 +100,7 @@
 
                 @if ($detail->invoiceable_type==="App\Insurance")
                     {{ __("Insurance Number : ") }} {{ $detail->invoiceable->transaction_number }} <br>
-                    {{ __("Insured Value : ") }} {{ request()->platformCountry?->currency }} {{ $detail->invoiceable->declared_value }}
+                    {{ __("Insured Value : ") }} {{ auth()?->user()?->company?->platformCountry?->currency }} {{ $detail->invoiceable->declared_value }}
                 @endif
             </td>
 
@@ -127,7 +127,7 @@
                 {{__("Tip")}}
             </td>
             <td align="right" class="no-border">
-                {{ Helper::moneyFormat($invoice->agentTip->tip_amount, request()->platformCountry?->currency) }}
+                {{ Helper::moneyFormat($invoice->agentTip->tip_amount, auth()?->user()?->company?->platformCountry?->currency) }}
             </td>
         </tr>
     @endif
@@ -136,7 +136,7 @@
             {{__("Total Discount")}}
         </td>
         <td align="right" class="no-border">
-            {{ Helper::moneyFormat($invoice->discount, request()->platformCountry?->currency) }}
+            {{ Helper::moneyFormat($invoice->discount, auth()?->user()?->company?->platformCountry?->currency) }}
         </td>
     </tr>
 
@@ -145,7 +145,7 @@
             {{__("Sub total")}}
         </td>
         <td align="right" class="no-border">
-            {{ Helper::moneyFormat($invoice->total - $invoice->sum_tax, request()->platformCountry?->currency) }}
+            {{ Helper::moneyFormat($invoice->total - $invoice->sum_tax, auth()?->user()?->company?->platformCountry?->currency) }}
         </td>
     </tr>
     @foreach ($invoice->taxes_without_shipment['taxes'] as $key=>$value)
@@ -162,7 +162,7 @@
                 {{$invoice->company->getTaxNumber($key) }}
             </td>
             <td align="right" class="no-border">
-                {{ Helper::moneyFormat($value, request()->platformCountry?->currency) }} <br>
+                {{ Helper::moneyFormat($value, auth()?->user()?->company?->platformCountry?->currency) }} <br>
             </td>
         </tr>
     @endforeach
@@ -173,7 +173,7 @@
         </td>
         <td align="right" class="no-border">
             <div class="total-price">
-                {{ Helper::moneyFormat(round($invoice->total+($invoice->agentTip->tip_amount ?? 0), 2), request()->platformCountry?->currency) }}
+                {{ Helper::moneyFormat(round($invoice->total+($invoice->agentTip->tip_amount ?? 0), 2), auth()?->user()?->company?->platformCountry?->currency) }}
             </div>
         </td>
     </tr>
@@ -204,9 +204,9 @@
         <td align="right">
             <strong>{{__("AMOUNT")}}</strong> <br>
             @foreach ($invoice->metadata['payment_details'] as $detail)
-                {{ Helper::moneyFormat($detail['amount'], request()->platformCountry?->currency) }} <br>
+                {{ Helper::moneyFormat($detail['amount'], auth()?->user()?->company?->platformCountry?->currency) }} <br>
             @endforeach
-            {{Helper::moneyFormat($invoice->change_due, request()->platformCountry?->currency)}}
+            {{Helper::moneyFormat($invoice->change_due, auth()?->user()?->company?->platformCountry?->currency)}}
         </td>
     </tr>
 </table>

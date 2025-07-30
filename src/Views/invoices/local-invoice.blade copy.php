@@ -163,7 +163,7 @@
             @endif
         </p>
         <div style="text-align: right;margin-right:5px;position: absolute;right: 0;top: 90px;">
-            <span style="font-size:6x;">{{__('Amounts expressed in')}} {{request()->platformCountry?->currency}}</span>
+            <span style="font-size:6x;">{{__('Amounts expressed in')}} {{auth()?->user()?->company?->platformCountry?->currency}}</span>
         </div>
 
         <div style="width: 200px;display: block;position: absolute;background: #dddddd82;top: 20px;right: 0px;padding: 24px;font-size: 17px;margin: 0;font-weight:bold;text-transform: uppercase;box-shadow: -3px 3px 3px -1px #00000042;">
@@ -334,7 +334,7 @@
                     </h3>
                     <p style="font-size:8px;">
                         {{
-                            (request()->platformCountry?->code ?? 'CA')==="CA" ? 'accounting@expertshipping.ca':'contact@awsel.ma'
+                            (auth()?->user()?->company?->platformCountry?->code ?? 'CA')==="CA" ? 'accounting@expertshipping.ca':'contact@awsel.ma'
                         }}
                     </p>
                 </td>
@@ -392,7 +392,7 @@
             </tr>
         </table>
 
-        @if((request()->platformCountry?->code ?? 'CA') === 'MA')
+        @if((auth()?->user()?->company?->platformCountry?->code ?? 'CA') === 'MA')
         <table width="100%" style="margin: 0 auto;" class="table" border="0">
             <tr>
                 <td style="text-align: center">

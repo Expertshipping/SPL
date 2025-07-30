@@ -165,7 +165,7 @@
                         </td>
                     </tr>
 
-                    @if(request()->platformCountry->code === 'CA')
+                    @if(auth()?->user()?->company?->platformCountry?->code === 'CA')
                     <tr>
                         <td width="100px">
                             <div class="billing-information-title">
@@ -269,7 +269,7 @@
 
         <hr>
 
-        @if(request()->platformCountry->code === 'CA')
+        @if(auth()?->user()?->company?->platformCountry?->code === 'CA')
         <table width="100%">
             <tr>
                 <td>

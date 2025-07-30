@@ -178,7 +178,7 @@ class ManageRate
             }
             $this->zone = $zone;
 
-            if ($weightUnit !== (request()->platformCountry?->weight_unit ?? 'LB')) {
+            if ($weightUnit !== (auth()?->user()?->company?->platformCountry?->weight_unit ?? 'LB')) {
                 if ($weightUnit === 'LB') {
                     $totalWeight = $totalWeight * 0.453592;
                 }

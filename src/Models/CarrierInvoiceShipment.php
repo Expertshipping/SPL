@@ -11,9 +11,13 @@ class CarrierInvoiceShipment extends Pivot
     use HasFactory;
     protected $table = "carrier_invoice_shipments";
 
+    protected $guarded = [];
+
     protected $casts = [
         'surcharges' => 'array',
         'audited_dimensions' => 'array',
+        'taxes' => 'array',
+        'rate_details' => 'array',
     ];
 
     public function carrierInvoice()

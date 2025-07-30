@@ -786,7 +786,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
                 ->carriers()
                 ->whereHas('carrier', function($q){
                     $q->whereHas('platformCountries', function($q){
-                        $q->where('platform_country_id', request()->platformCountry?->id);
+                        $q->where('platform_country_id', auth()?->user()?->company?->platformCountry?->id);
                     });
                 })
                 ->with('carrier')
@@ -1027,7 +1027,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
             return true;
         }
 
-        if ((request()->platformCountry?->code ?? 'CA') === 'MA') {
+        if ((auth()?->user()?->company?->platformCountry?->code ?? 'CA') === 'MA') {
             return true;
         }
 

@@ -21,7 +21,7 @@ class Money
     public static function format($amount, $currency= null)
     {
         if(!$currency){
-            $currency = request()->platformCountry->currency ?? 'CAD';
+            $currency = auth()?->user()?->company?->platformCountry?->currency ?? 'CAD';
         }
 
         $amount = number_format(round($amount, 2), 2);
