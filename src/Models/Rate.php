@@ -247,21 +247,20 @@ class Rate
         if (!isset($rate['rate_detail']) || !is_array($rate['rate_detail'])) {
             $rate['rate_detail'] = [];
         }
-        $rate['rate_detail'][] = [
+
+        $detail = [
             "amount" => round($insuranceRate, 2),
-            "currency" => "CAD",
+            "currency" => auth()->user()->company->platformCountry->currency,
             "type" => __("INSURANCE CHARGES")
         ];
+
+        $rate['rate_detail'][] = $detail;
 
         if (!isset($rate['rateDetails']) || !is_array($rate['rateDetails'])) {
             $rate['rateDetails'] = [];
         }
 
-        $rate['rateDetails'][] = [
-            "amount" => round($insuranceRate, 2),
-            "currency" => "CAD",
-            "type" => __("INSURANCE CHARGES")
-        ];
+        $rate['rateDetails'][] = $detail;
 
         $rate['rate'] = Helper::formatNumber($rate['rate']) + $insuranceRate;
         if (isset($rate['negotiated_rate'])) {
@@ -271,6 +270,11 @@ class Rate
         if (isset($rate['expert_shipping_price'])) {
             $rate['expert_shipping_price'] = Helper::formatNumber($rate['expert_shipping_price']) + $insuranceRate;
         }
+
+        if (isset($rate['carrier_price'])) {
+            $rate['carrier_price'] = Helper::formatNumber($rate['carrier_price']) + $insuranceRate;
+        }
+
         return $rate;
     }
 
