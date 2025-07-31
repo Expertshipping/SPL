@@ -1313,9 +1313,11 @@ class InsuranceService
     public function getRate($insuredValue, $shipFromCountry, $shipToCountry, $carrier, $serviceCode, $cost = false)
     {
         $service = \App\Service::where('code', $serviceCode)->first();
-        $insuredValueInUSD = round(($insuredValue / self::CHANGE_RATE), 0);
+        $currency = auth()->user()?->company?->platformCountry?->currency ?? 'CAD';
+        // TODO: Make sure to use the correct exchange rate
+        $insuredValueInUSD =  (int) ($currency === 'CAD' ? round(($insuredValue / self::CHANGE_RATE), 0) : $insuredValue);
         $availableDestination = collect(static::$countries)->where('code', $shipToCountry)->first();
-        if(!array_key_exists($serviceCode, static::$services)){
+        if(!$service->insurance_active){
             return [
                 'message' => $service->name .' '. __('is not supported'),
                 'rate'  => false
@@ -1336,7 +1338,7 @@ class InsuranceService
             ];
         }
 
-        if($service->ecabrella_limit <= $insuredValueInUSD){
+        if($service->ecabrella_limit < $insuredValueInUSD){
             return [
                 'message' => __('The max supported value for this service is : ') . ($this->convertToCanadianDollar($service->ecabrella_limit) - 1) . __(" american dollars"),
                 'rate'  => false
