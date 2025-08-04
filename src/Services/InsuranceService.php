@@ -74,6 +74,7 @@ class InsuranceService
         'INTERNATIONAL_PRIORITY_FREIGHT' => 'INTERNATIONAL_PRIORITY_FREIGHT',
         'INTERNATIONAL_ECONOMY_FREIGHT' => 'INTERNATIONAL_ECONOMY_FREIGHT',
         'FEDEX_INTERNATIONAL_CONNECT_PLUS' => 'FEDEX_INTERNATIONAL_CONNECT_PLUS',
+        'FEDEX_INTERNATIONAL_PRIORITY' => 'FEDEX_INTERNATIONAL_PRIORITY',
         // 'USPS' => 'PMES',
         // 'USPS' => 'PMS',
         // 'USPS' => 'FCMS',
@@ -1432,7 +1433,7 @@ class InsuranceService
 
         $params = [
             "Carrier" => (string) static::$carriers[$insurance->carrier->slug],
-            "Service" => static::$services[$insurance->service->code],
+            "Service" => static::$services[$insurance->service->code] ?? $insurance->service->code,
             "DeclaredValue" => round(($insurance->declared_value / self::CHANGE_RATE), 0),
             "FromCountryCode" => $insurance->ship_from,
             "ToCountryCode" => $insurance->ship_to,
