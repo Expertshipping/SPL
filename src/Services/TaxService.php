@@ -24,33 +24,32 @@ class TaxService
 
     public function getTaxes($amount, $state, $isPreTaxed=false, $toCountry='CA')
     {
-        $amount = str_replace(',','',$amount);
+        $amount = str_replace(',','', $amount);
         $preTaxPrice = 0;
         if($isPreTaxed){
             $preTaxPrice = $amount;
         }else{
-            if((auth()?->user()?->company?->platformCountry?->code ?? 'CA')==='CA'){
+            if((auth()?->user()?->company?->platformCountry?->code ?? config('app.white_label.country')) === 'CA'){
                 $preTaxPrice = round($amount / (1 + ($this->tps($state) / 100) + ($this->tvp($state) / 100)), 2);
             }
-
-            if((auth()?->user()?->company?->platformCountry?->code ?? 'CA')==='MA'){
+            if((auth()?->user()?->company?->platformCountry?->code ?? config('app.white_label.country')) === 'MA'){
                 $preTaxPrice = round($amount / (1 + (20 / 100)), 2);
             }
 
-            if(env('WHITE_LABEL_COUNTRY')==='US'){
+            if(env('WHITE_LABEL_COUNTRY') === 'US'){
                 $salesTaxRate = $this->getUsSalesTaxRate($state);
                 $preTaxPrice = round($amount / (1 + ($salesTaxRate / 100)), 2);
             }
         }
 
-        if($toCountry !== (auth()?->user()?->company?->platformCountry?->code ?? 'CA')){
+        if($toCountry !== (auth()?->user()?->company?->platformCountry?->code ?? config('app.white_label.country'))){
             return [
                 'taxes' => [],
                 'preTax' => $preTaxPrice,
             ];
         }
 
-        if((auth()?->user()?->company?->platformCountry?->code ?? 'CA')==='CA'){
+        if((auth()?->user()?->company?->platformCountry?->code  ?? config('app.white_label.country'))==='CA'){
             $tpsAmount = $this->calcTps($state, $preTaxPrice);
             $tvpAmount = $this->calcTvp($state, $preTaxPrice);
 
@@ -71,7 +70,7 @@ class TaxService
             ];
         }
 
-        if((auth()?->user()?->company?->platformCountry?->code ?? 'CA')==='MA'){
+        if((auth()?->user()?->company?->platformCountry?->code  ?? config('app.white_label.country'))==='MA'){
             $taxes = [];
             $taxes['TVA']= $preTaxPrice * 0.2;
             return[
@@ -80,7 +79,7 @@ class TaxService
             ];
         }
 
-        if(env('WHITE_LABEL_COUNTRY')==='US'){
+        if(config('app.white_label.country') === 'US'){
             $taxes = [];
             $salesTaxRate = $this->getUsSalesTaxRate($state);
             if($salesTaxRate > 0){
