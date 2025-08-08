@@ -235,4 +235,15 @@ class Carrier extends Model implements HasMedia
             ->wherePivot('platform_country_id', auth()?->user()?->company?->platform_country_id)
             ->first();
     }
+
+    public function activePlatformCountry($user = null)
+    {
+        if(!$user) {
+            $user = auth()?->user();
+        }
+
+        return $this->platformCountries()
+            ->wherePivot('platform_country_id', $user->company?->platform_country_id)
+            ->first();
+    }
 }
