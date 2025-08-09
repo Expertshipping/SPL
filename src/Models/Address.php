@@ -26,7 +26,7 @@ class Address extends Model
     protected $fillable = [
         'full_name', 'addr1', 'addr2', 'addr3', 'city', 'code',
         'state', 'country', 'discretionary_notes', 'user_id',
-        'phone', 'company', 'email', 'uuid'
+        'phone', 'company', 'email', 'uuid', 'company_id'
     ];
     public static function boot()
     {
