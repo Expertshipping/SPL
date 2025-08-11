@@ -142,7 +142,7 @@
                 <table>
                     <tr>
                         <td class="title">
-                            <img src="{{asset('domains/'. parse_url(env('APP_URL'))['host'] .'/logo-color.png')}}" style="width: 100%; max-width: 160px" />
+                            <img src="https://app.awsel.ma/domains/app.awsel.ma/logo-color.png" style="width: 100%; max-width: 160px" />
                         </td>
 
                         <td>

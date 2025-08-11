@@ -57,6 +57,8 @@ class InvoicePdfMaker
             ]
         ]);
 
+        $pdf->setOption(['isRemoteEnabled' => true]);
+
         $pdf->setHttpContext($context);
 
         return $pdf->download();
