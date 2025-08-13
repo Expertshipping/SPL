@@ -32,6 +32,8 @@ class CustomsInvoiceController extends Controller
 
         $pdf->setHttpContext($context);
 
+        $pdf->setOption(['isRemoteEnabled' => true]);
+
         return $pdf->download('invoice.pdf');
     }
 }
