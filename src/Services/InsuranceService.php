@@ -1431,10 +1431,15 @@ class InsuranceService
             $this->user = $user;
         }
 
+        $declaredValue = round($insurance->declared_value, 2);
+        if($user->company->platformCountry->currency !== 'USD'){
+            $declaredValue = round(($declaredValue / self::CHANGE_RATE), 0);
+        }
+
         $params = [
             "Carrier" => (string) static::$carriers[$insurance->carrier->slug],
             "Service" => static::$services[$insurance->service->code] ?? $insurance->service->code,
-            "DeclaredValue" => round(($insurance->declared_value / self::CHANGE_RATE), 0),
+            "DeclaredValue" => $declaredValue,
             "FromCountryCode" => $insurance->ship_from,
             "ToCountryCode" => $insurance->ship_to,
             "TrackingNum" => $insurance->tracking_number,
