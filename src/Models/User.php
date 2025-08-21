@@ -738,7 +738,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
             $query->where('instant_payment', 1);
         })
             ->whereHas('shipments', function ($query) {
-                $query->whereNotIn('type', ['draft', 'cancelled', 'returned', 'in_progress', 'delivered']);
+                $query->excludeTypes(['draft', 'cancelled', 'returned', 'in_progress', 'delivered']);
             })->with(['localInvoices' => function ($query) {
                 $query->whereNull('provider_id')
                     ->whereNull('paid_at')
@@ -884,7 +884,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference
             ->where(function ($query) {
                 $query->where(function ($q) {
                     $q->whereDate('created_at', '>=', self::POS_START_VERIFICATION_DATE)
-                        ->whereNotIn('type', ['cancelled']);
+                        ->excludeTypes(['cancelled']);
                 })
                     ->orWhere(function ($q) {
                         $q->where('type', 'in_progress');
