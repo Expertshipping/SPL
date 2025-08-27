@@ -5,6 +5,7 @@ namespace ExpertShipping\Spl\Services;
 use App\Jobs\CancelShipment;
 use App\Notifications\CreateInsuranceTransactionFailed;
 use App\Notifications\ShipmentInsured;
+use Illuminate\Validation\ValidationException;
 use ExpertShipping\Spl\Models\Insurance;
 use ExpertShipping\Spl\Models\Shipment;
 use Illuminate\Notifications\AnonymousNotifiable;
