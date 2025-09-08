@@ -108,17 +108,17 @@ class LocalInvoice extends Model
     private function isPaid()
     {
         return (
-            !is_null($this->paid_at)
-            && is_null($this->refunded_at)
-            && is_null($this->canceled_at)
-        ) || $this->unpaidDetails()->count() === 0;
+                !is_null($this->paid_at)
+                && is_null($this->refunded_at)
+                && is_null($this->canceled_at)
+            ) || $this->unpaidDetails()->count() === 0;
     }
 
     private function unpaidDetails(){
         return $this->chargeable_details
-                ->where(function($detail){
-                    return !isset($detail->meta_data['payment_date']);
-                });
+            ->where(function($detail){
+                return !isset($detail->meta_data['payment_date']);
+            });
     }
 
     private function isPartiallyPaid()
@@ -610,6 +610,7 @@ class LocalInvoice extends Model
     public function updateTotal($pos)
     {
         $details = $this->details()
+            ->withTrashed()
             ->where('pos', $pos)
             ->whereNull('canceled_at')
             ->get();
