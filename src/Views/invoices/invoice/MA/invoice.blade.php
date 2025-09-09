@@ -18,7 +18,7 @@
         .invoice-box {
             max-width: 900px;
             margin: auto;
-            padding: 0px;
+            padding: 40px;
             /* border: 1px solid #eee; */
             /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); */
             font-size: 14px;
@@ -142,7 +142,7 @@
                 <table>
                     <tr>
                         <td class="title">
-                            <img src="https://app.awsel.ma/domains/app.awsel.ma/logo-color.png" style="width: 100%; max-width: 160px" />
+                            <img src="{{asset('domains/app.awsel.ma/logo-color.png')}}" style="width: 100%; max-width: 160px" />
                         </td>
 
                         <td>
@@ -354,6 +354,68 @@
         </tr>
     </table>
 
+    {{-- Payment Details Section --}}
+    @if(isset($invoice->metadata['payment_details']) && count($invoice->metadata['payment_details']) > 0)
+        <br><br><br><br>
+        <table cellpadding="0" cellspacing="0" class="padding" style="margin-top: 30px;">
+            <tr>
+                <td colspan="2">
+                    <h3 style="margin: 0; padding: 10px 0; font-size: 16px;">Détails des Paiements</h3>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <table class="padding" style="border: 1px solid #ddd;">
+                        <tr style="background: #f5f5f5;">
+                            <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #ddd;">Date</td>
+                            <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #ddd;">Méthode</td>
+                            <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #ddd;">N° Transaction</td>
+                            <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #ddd; text-align: right;">Montant</td>
+                        </tr>
+                        @foreach($invoice->metadata['payment_details'] as $payment)
+                            <tr>
+                                <td style="padding: 8px; border-bottom: 1px solid #eee;">
+                                    {{ \Carbon\Carbon::parse($payment['date'])->format('d/m/Y H:i') }}
+                                </td>
+                                <td style="padding: 8px; border-bottom: 1px solid #eee;">
+                                    @php
+                                        $methodTranslations = [
+                                            'Cash' => 'Espèces',
+                                            'Card' => 'Carte',
+                                            'Wire Transfer' => 'Virement',
+                                            'Interac' => 'Interac',
+                                            'Unknown' => 'Non spécifié'
+                                        ];
+                                    @endphp
+                                    {{ $methodTranslations[$payment['method']] ?? $payment['method'] }}
+                                </td>
+                                <td style="padding: 8px; border-bottom: 1px solid #eee;">
+                                    {{ $payment['transaction_number'] ?? '-' }}
+                                </td>
+                                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">
+                                    {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($payment['amount'], env('WHITE_LABEL_CURRENCY', 'CAD')) }}
+                                </td>
+                            </tr>
+                        @endforeach
+                        <tr style="background: #f5f5f5;">
+                            <td colspan="3" style="padding: 8px; font-weight: bold; text-align: right;">Total Payé:</td>
+                            <td style="padding: 8px; font-weight: bold; text-align: right;">
+                                {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->paid_amount, env('WHITE_LABEL_CURRENCY', 'CAD')) }}
+                            </td>
+                        </tr>
+                        @if($invoice->paid_amount < $invoice->total)
+                            <tr>
+                                <td colspan="3" style="padding: 8px; font-weight: bold; text-align: right; color: #FF5252;">Reste à Payer:</td>
+                                <td style="padding: 8px; font-weight: bold; text-align: right; color: #FF5252;">
+                                    {{ \ExpertShipping\Spl\Helpers\Helper::moneyFormat($invoice->total - $invoice->paid_amount, env('WHITE_LABEL_CURRENCY', 'CAD')) }}
+                                </td>
+                            </tr>
+                        @endif
+                    </table>
+                </td>
+            </tr>
+        </table>
+    @endif
 
     <br><br><br>
     <br><br><br>
