@@ -82,6 +82,7 @@ class Company extends Model implements HasMedia
         'carrier_events_prices'         =>  'array',
         'reseller_insurance_shipment_marge' => 'array',
         'discount_parameter'            => 'array',
+        'mailbox_info'                  => 'array',
     ];
 
     public static function boot()
