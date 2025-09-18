@@ -248,6 +248,9 @@
 
                                     @if ($detail->invoiceable_type==="App\AdditionalService")
                                         {{ $detail->invoiceable->name }}
+                                        @if(isset($detail->meta_data['description']) && !empty($detail->meta_data['description']))
+                                            : {{ $detail->meta_data['description'] }}
+                                        @endif
                                     @endif
 
                                     @if ($detail->invoiceable_type==="App\ShipmentSurcharge")

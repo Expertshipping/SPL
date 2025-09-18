@@ -33,6 +33,23 @@
                     <td>Surcharge : {{ $detail->invoiceable->name }} : {{ $detail->invoiceable->description }}</td>
                 </tr>
             @endif
+
+            @if($detail->invoiceable_type === 'App\AdditionalService')
+                <tr>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>{{ $detail->created_at->format('Y-m-d') }}</td>
+                    <td>{{ SplMoney::format($detail->total) }}</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>
+                        {{ $detail->invoiceable->name }}
+                        @if(isset($detail->meta_data['description']) && !empty($detail->meta_data['description']))
+                            : {{ $detail->meta_data['description'] }}
+                        @endif
+                    </td>
+                </tr>
+            @endif
         @endforeach
 
         <tr>
