@@ -10,13 +10,17 @@ class SmsService
 {
     private $client, $accountSID, $authToken, $twilioNumber;
 
-    public function __construct()
+    public function __construct($company = null)
     {
         $this->accountSID = config("twilio.sid");
         $this->authToken = config("twilio.auth_token");
         $this->twilioNumber = config("twilio.number");
-        if(request()->user()) {
-            $credentials = request()->user()->company->sms_credential ?? [];
+        if(!$company) {
+            $company = request()->user()?->company ?? null;
+        }
+
+        if($company) {
+            $credentials = $company->sms_credential ?? [];
             if(
                 !empty($credentials['twilio_sid']) &&
                 !empty($credentials['twilio_number']) &&
