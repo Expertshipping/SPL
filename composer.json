@@ -22,7 +22,7 @@
     "spatie/laravel-translatable": "^6.5",
     "laravel/cashier": "^14|^15.0",
     "spatie/browsershot": "^5.0.5.0",
-    "twilio/sdk": "dev-main"
+    "twilio/sdk": "^8.7"
   },
   "require-dev": {
     "orchestra/testbench": "^7.0|^8.0"
